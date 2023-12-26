@@ -12,3 +12,4 @@ scripts.yaml
 secrets.yaml
 /custom_components/hello_state
 /custom_components/github_custom
+__pycache__
