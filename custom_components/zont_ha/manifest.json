@@ -1,0 +1,10 @@
+{
+  "domain": "zont_ha",
+  "name": "ZONT",
+  "codeowners": ["@mihvs"],
+  "config_flow": true,
+  "integration_type": "hub",
+  "dependencies": ["http"],
+  "requirements": [],
+  "version": "0.0.1"
+}
