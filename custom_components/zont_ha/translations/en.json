@@ -1,0 +1,15 @@
+{
+  "title": "MicroLine",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Конфигурация для контроллера zont",
+        "data": {
+          "mail": "email",
+          "token": "токен аккаунта"
+        }
+      }
+    }
+  }
+
+}
