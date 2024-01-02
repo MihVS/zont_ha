@@ -78,8 +78,16 @@ class Device(BaseEntityZONT):
     scenarios: list[Scenario] | None
 
 
-class Zont(BaseModel):
+class AccountZont(BaseModel):
     """Общий класс всех устройств"""
 
     devices: list[Device]
     ok: bool
+
+
+class ErrorZont(BaseModel):
+    """Клас ответа об ошибке"""
+
+    ok: bool
+    error: str
+    error_ui: str
