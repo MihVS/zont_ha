@@ -11,3 +11,4 @@ URL_ACTIVATE_HEATING_MODE = (
 URL_TRIGGER_CUSTOM_BUTTON = (
     'https://lk.zont-online.ru/api/widget/v2/trigger_custom_button'
 )
+URL_GET_TOKEN = 'https://lk.zont-online.ru/api/authtoken/get'
