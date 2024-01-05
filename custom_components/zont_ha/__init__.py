@@ -18,7 +18,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
     _LOGGER.warning(hass.data[DOMAIN])
 
+    account_id = len(hass.data[DOMAIN])
+    hass.data[DOMAIN].setdefault(account_id, {})
+    _LOGGER.debug(f'Create account ID: {account_id}')
+
     for device in zont.data.devices:
-        hass.data[DOMAIN][f'{device.model}_{device.id}'] = device
-    _LOGGER.debug(hass.data[DOMAIN])
+        hass.data[DOMAIN][account_id][f'{device.id}'] = device
+    _LOGGER.debug(f'Number of device: {len(hass.data[DOMAIN][account_id])}')
+    await hass.config_entries.async_forward_entry_setups(entry, ['sensor'])
     return True

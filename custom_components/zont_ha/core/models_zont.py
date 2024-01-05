@@ -13,7 +13,7 @@ class ControlEntityZONT(BaseEntityZONT):
     pass
 
 
-class HeatingCircuit(ControlEntityZONT):
+class HeatingCircuitZONT(ControlEntityZONT):
     """Контур отопления"""
 
     status: str
@@ -27,14 +27,14 @@ class HeatingCircuit(ControlEntityZONT):
     target_max: float | None
 
 
-class HeatingMode(ControlEntityZONT):
+class HeatingModeZONT(ControlEntityZONT):
     """Отопительные режимы"""
 
     can_be_applied: bool
     color: str | None
 
 
-class Sensor(BaseEntityZONT):
+class SensorZONT(BaseEntityZONT):
     """Сенсоры"""
 
     type: str
@@ -43,14 +43,14 @@ class Sensor(BaseEntityZONT):
     unit: str
 
 
-class GuardZone(ControlEntityZONT):
+class GuardZoneZONT(ControlEntityZONT):
     """Охранная зона"""
 
     state: str
     alarm: bool
 
 
-class CustomControl(ControlEntityZONT):
+class CustomControlZONT(ControlEntityZONT):
     """Пользовательский элемент управления"""
 
     name: dict | str
@@ -58,30 +58,30 @@ class CustomControl(ControlEntityZONT):
     status: bool | None = None
 
 
-class Scenario(ControlEntityZONT):
+class ScenarioZONT(ControlEntityZONT):
     """Сценарий"""
 
     pass
 
 
-class Device(BaseEntityZONT):
+class DeviceZONT(BaseEntityZONT):
     """Модель контроллера"""
 
     model: str
     online: bool
     widget_type: str
-    heating_circuits: list[HeatingCircuit]
-    heating_modes: list[HeatingMode]
-    sensors: list[Sensor]
-    guard_zones: list[GuardZone] | None
-    custom_controls: list[CustomControl] | None
-    scenarios: list[Scenario] | None
+    heating_circuits: list[HeatingCircuitZONT]
+    heating_modes: list[HeatingModeZONT]
+    sensors: list[SensorZONT]
+    guard_zones: list[GuardZoneZONT] | None
+    custom_controls: list[CustomControlZONT] | None
+    scenarios: list[ScenarioZONT] | None
 
 
 class AccountZont(BaseModel):
     """Общий класс всех устройств"""
 
-    devices: list[Device]
+    devices: list[DeviceZONT]
     ok: bool
 
 
