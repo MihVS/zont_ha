@@ -1,4 +1,5 @@
-DOMAIN = "zont_ha"
+DOMAIN = 'zont_ha'
+MANUFACTURER = 'MicroLine'
 
 ZONT_API_URL = "https://lk.zont-online.ru/api/widget/v2/"
 

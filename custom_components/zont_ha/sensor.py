@@ -5,8 +5,9 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import DiscoveryInfoType
-from .const import DOMAIN
-from .core.models_zont import SensorZONT
+from .const import DOMAIN, MANUFACTURER
+from .core.models_zont import SensorZONT, DeviceZONT
+from datetime import timedelta
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -17,41 +18,35 @@ async def async_setup_entry(
         async_add_entities: AddEntitiesCallback,
         discovery_info: DiscoveryInfoType | None = None
 ):
-    _LOGGER.error(
-        f'Уже добавленные сенсоры: '
-        f'{hass.config_entries}'
-    )
-    accounts = hass.data[DOMAIN]
-    account_id = len(accounts) - 1
-    devices = accounts[account_id]
+    entry_id = config_entry.entry_id
+    _LOGGER.debug(f'from sensor entry_id: {entry_id}')
+    _LOGGER.debug(hass.data[DOMAIN][entry_id])
 
-    for device_id, device in devices.items():
+    devices = hass.data[DOMAIN][entry_id]
+
+    for device in devices:
         sens = []
         sensors = device.sensors
-        name_device = device.name
         for sensor in sensors:
-            unique_id = f'{account_id}{device_id}{sensor.id}'
-            sens.append(ZontSensor(name_device, sensor, unique_id))
+            unique_id = f'{entry_id}{device.id}{sensor.id}'
+            sens.append(ZontSensor(device, sensor, unique_id))
         async_add_entities(sens)
-        # _LOGGER.debug(
-        #     f'Уже добавленные сенсоры: '
-        #     f'{hass.data[DOMAIN][config_entry.unique_id]}'
-        # )
-
+        _LOGGER.debug(f'Добавлены сенсоры: {sens}')
 
 
 class ZontSensor(Entity):
 
     def __init__(
-            self, _name_device: str, sensor: SensorZONT, unique_id: str
+            self, device: DeviceZONT,
+            sensor: SensorZONT, unique_id: str
     ) -> None:
+        self._device = device
         self._sensor = sensor
         self._unique_id = unique_id
-        self._name_device = _name_device
 
     @property
     def name(self) -> str:
-        name = f'{self._name_device}_{self._sensor.name}'
+        name = f'{self._device.name}_{self._sensor.name}'
         return name
 
     @property
@@ -66,3 +61,16 @@ class ZontSensor(Entity):
     def unique_id(self) -> str:
         return self._unique_id
 
+    @property
+    def device_class(self) -> str | None:
+        return self._sensor.type
+
+    @property
+    def device_info(self):
+        return {
+            "identifiers": {(DOMAIN, self._device.id)},
+            "name": self._device.name,
+            "sw_version": None,
+            "model": self._device.model,
+            "manufacturer": MANUFACTURER,
+        }
