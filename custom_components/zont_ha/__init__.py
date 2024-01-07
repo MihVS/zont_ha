@@ -1,8 +1,13 @@
 import logging
+from datetime import timedelta
+
+import async_timeout
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from .const import DOMAIN, ZONT
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, \
+    UpdateFailed
+from .const import DOMAIN
 from .core.zont import Zont
 
 _LOGGER = logging.getLogger(__name__)
@@ -24,3 +29,26 @@ async def async_setup_entry(
         config_entry, ['sensor']
     )
     return True
+
+
+class ZontCoordinator(DataUpdateCoordinator):
+    """Координатор для общего обновления данных"""
+
+    def __init__(self, hass, zont):
+        super().__init__(
+            hass,
+            _LOGGER,
+            name="ZONT",
+            update_interval=timedelta(seconds=60),
+        )
+        self.zont = zont
+
+    async def _async_update_data(self):
+        """Обновление данных API zont"""
+        try:
+            async with async_timeout.timeout(10):
+                await self.zont.get_update()
+                return self.zont
+
+        except Exception as err:
+            raise UpdateFailed(f"Ошибка соединения с API zont: {err}")

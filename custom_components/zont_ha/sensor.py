@@ -1,10 +1,10 @@
 import logging
+from datetime import timedelta
 
 import async_timeout
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import DiscoveryInfoType
@@ -13,11 +13,11 @@ from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
     UpdateFailed,
 )
-from .const import DOMAIN, MANUFACTURER, ZONT
+from .const import DOMAIN, MANUFACTURER
 from .core.models_zont import SensorZONT, DeviceZONT
-from datetime import timedelta
+from . import ZontCoordinator
 
-SCAN_INTERVAL = timedelta(seconds=30)
+# SCAN_INTERVAL = timedelta(seconds=30)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -27,9 +27,8 @@ async def async_setup_entry(
         config_entry: ConfigEntry,
         async_add_entities: AddEntitiesCallback,
         discovery_info: DiscoveryInfoType | None = None
-):
+) -> None:
     entry_id = config_entry.entry_id
-    _LOGGER.debug(f'from sensor entry_id: {entry_id}')
     _LOGGER.debug(hass.data[DOMAIN][entry_id])
 
     zont = hass.data[DOMAIN][entry_id]
@@ -47,33 +46,10 @@ async def async_setup_entry(
         _LOGGER.debug(f'Добавлены сенсоры: {sens}')
 
 
-class ZontCoordinator(DataUpdateCoordinator):
-    """Координатор для общего обновления данных"""
-
-    def __init__(self, hass, zont):
-        super().__init__(
-            hass,
-            _LOGGER,
-            name="ZONT",
-            update_interval=timedelta(seconds=60),
-        )
-        self.zont = zont
-
-    async def _async_update_data(self):
-        """Обновление данных API zont"""
-        try:
-            async with async_timeout.timeout(10):
-                await self.zont.get_update()
-                return self.zont
-
-        except Exception as err:
-            raise UpdateFailed(f"Ошибка соединения с API zont: {err}")
-
-
 class ZontSensor(CoordinatorEntity, Entity):
 
     def __init__(
-            self, coordinator, device: DeviceZONT,
+            self, coordinator: ZontCoordinator, device: DeviceZONT,
             sensor: SensorZONT, unique_id: str
     ) -> None:
         super().__init__(coordinator)
@@ -126,5 +102,3 @@ class ZontSensor(CoordinatorEntity, Entity):
                 f'с {self._sensor.value} на {sensor.value}')
         self._sensor.value = sensor.value
         self.async_write_ha_state()
-
-
