@@ -6,8 +6,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.typing import HomeAssistantType
 
 from ..const import URL_GET_DEVICES
-from .models_zont import AccountZont, ErrorZont
-
+from .models_zont import AccountZont, ErrorZont, SensorZONT
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -47,4 +46,11 @@ class Zont:
         _LOGGER.debug(f'Данные аккаунта {self.mail} обновлены')
         return status_code
 
+    def get_sensor(self, device_id: int, sensor_id: int) -> SensorZONT | None:
+        """Получить сенсор по его id и id устройства"""
 
+        for device in self.data.devices:
+            if device.id == device_id:
+                for sensor in device.sensors:
+                    if sensor.id == sensor_id:
+                        return sensor
