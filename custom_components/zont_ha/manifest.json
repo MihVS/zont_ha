@@ -1,10 +1,11 @@
 {
   "domain": "zont_ha",
   "name": "ZONT",
+  "documentation": "https://github.com/mihvs/zont_ha",
   "codeowners": ["@mihvs"],
   "config_flow": true,
   "integration_type": "hub",
-  "dependencies": ["http"],
+  "dependencies": ["http", "zeroconf"],
   "requirements": [],
   "version": "0.0.1"
 }

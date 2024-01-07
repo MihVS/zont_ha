@@ -1,0 +1,21 @@
+{
+  "title": "MicroLine",
+  "config": {
+    "error": {
+      "invalid_auth": "Ошибка авторизации",
+      "invalid_mail": "Неверный формат почты",
+      "unknown": "Неизвестная ошибка"
+    },
+    "step": {
+      "user": {
+        "title": "Конфигурация контроллера zont",
+        "data": {
+          "name": "Название",
+          "mail": "mail",
+          "token": "токен аккаунта"
+        }
+      }
+    }
+  }
+
+}
