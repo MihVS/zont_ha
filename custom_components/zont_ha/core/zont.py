@@ -51,7 +51,6 @@ class Zont:
     def get_device(self, device_id: int) -> DeviceZONT | None:
         """Получить устройство по его id"""
 
-        _LOGGER.debug('get_device')
         return next(
             (device for device in self.data.devices if device.id == device_id),
             None
@@ -61,7 +60,6 @@ class Zont:
         """Получить сенсор по его id и id устройства"""
 
         device = self.get_device(device_id)
-        _LOGGER.debug('get_sensor')
         return next(
             (sensor for sensor in device.sensors if sensor.id == sensor_id),
             None
@@ -73,7 +71,6 @@ class Zont:
         """Получить сенсор по его id и id устройства"""
 
         device = self.get_device(device_id)
-        _LOGGER.debug('get_heating_circuit')
         return next(
             (heating_circuit for heating_circuit in device.heating_circuits
              if heating_circuit.id == heating_circuit_id), None

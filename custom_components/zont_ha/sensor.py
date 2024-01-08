@@ -55,6 +55,7 @@ class ZontSensor(CoordinatorEntity, Entity):
         super().__init__(coordinator)
         self._device = device
         self._sensor = sensor
+        # self.entity_id = unique_id
         self._unique_id = unique_id
 
     @property
