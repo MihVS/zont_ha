@@ -26,7 +26,7 @@ async def async_setup_entry(
 
     hass.data[DOMAIN][entry_id] = zont
     await hass.config_entries.async_forward_entry_setups(
-        config_entry, ['sensor']
+        config_entry, ['sensor', 'climate']
     )
     return True
 

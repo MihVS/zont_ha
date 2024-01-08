@@ -6,7 +6,9 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.typing import HomeAssistantType
 
 from ..const import URL_GET_DEVICES
-from .models_zont import AccountZont, ErrorZont, SensorZONT
+from .models_zont import (
+    AccountZont, ErrorZont, SensorZONT, DeviceZONT, HeatingCircuitZONT
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -46,11 +48,34 @@ class Zont:
         _LOGGER.debug(f'Данные аккаунта {self.mail} обновлены')
         return status_code
 
+    def get_device(self, device_id: int) -> DeviceZONT | None:
+        """Получить устройство по его id"""
+
+        _LOGGER.debug('get_device')
+        return next(
+            (device for device in self.data.devices if device.id == device_id),
+            None
+        )
+
     def get_sensor(self, device_id: int, sensor_id: int) -> SensorZONT | None:
         """Получить сенсор по его id и id устройства"""
 
-        for device in self.data.devices:
-            if device.id == device_id:
-                for sensor in device.sensors:
-                    if sensor.id == sensor_id:
-                        return sensor
+        device = self.get_device(device_id)
+        _LOGGER.debug('get_sensor')
+        return next(
+            (sensor for sensor in device.sensors if sensor.id == sensor_id),
+            None
+        )
+
+    def get_heating_circuit(
+            self, device_id: int, heating_circuit_id: int
+    ) -> HeatingCircuitZONT | None:
+        """Получить сенсор по его id и id устройства"""
+
+        device = self.get_device(device_id)
+        _LOGGER.debug('get_heating_circuit')
+        return next(
+            (heating_circuit for heating_circuit in device.heating_circuits
+             if heating_circuit.id == heating_circuit_id), None
+        )
+
