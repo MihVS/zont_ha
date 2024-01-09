@@ -1,21 +1,16 @@
 import logging
-from datetime import timedelta
 
-import async_timeout
-
+from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import DiscoveryInfoType
 from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
-    DataUpdateCoordinator,
-    UpdateFailed,
 )
+from . import ZontCoordinator
 from .const import DOMAIN, MANUFACTURER
 from .core.models_zont import SensorZONT, DeviceZONT
-from . import ZontCoordinator
 
 # SCAN_INTERVAL = timedelta(seconds=30)
 
@@ -46,7 +41,7 @@ async def async_setup_entry(
         _LOGGER.debug(f'Добавлены сенсоры: {sens}')
 
 
-class ZontSensor(CoordinatorEntity, Entity):
+class ZontSensor(CoordinatorEntity, SensorEntity):
 
     def __init__(
             self, coordinator: ZontCoordinator, device: DeviceZONT,
@@ -55,7 +50,6 @@ class ZontSensor(CoordinatorEntity, Entity):
         super().__init__(coordinator)
         self._device = device
         self._sensor = sensor
-        # self.entity_id = unique_id
         self._unique_id = unique_id
 
     @property
@@ -64,11 +58,13 @@ class ZontSensor(CoordinatorEntity, Entity):
         return name
 
     @property
-    def state(self) -> float | None:
+    def native_value(self) -> float | str:
+        """Возвращает состояние сенсора"""
         return self._sensor.value
 
     @property
-    def unit_of_measurement(self) -> str | None:
+    def native_unit_of_measurement(self) -> str | None:
+        """Возвращает единицу измерения сенсора из API zont"""
         return self._sensor.unit
 
     @property
