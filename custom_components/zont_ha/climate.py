@@ -1,15 +1,13 @@
 import logging
 
-from homeassistant.components.climate import HVACAction, HVACMode, \
-    ClimateEntity
+from homeassistant.components.climate import HVACMode, \
+    ClimateEntity, PRESET_ECO, PRESET_HOME, PRESET_NONE, HVAC_MODES
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import TEMP_CELSIUS
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import DiscoveryInfoType
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-
 from . import ZontCoordinator, DOMAIN
 from .const import MANUFACTURER
 
@@ -45,9 +43,13 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
     """Базовый класс для климата zont"""
 
     _attr_hvac_modes = [HVACMode.HEAT, HVACMode.OFF]
-    _attr_max_temp = 30
+    _attr_max_temp = 80
     _attr_min_temp = 5
     _attr_target_temperature_step = 0.1
+    # _attr_preset_modes = ['Лето', 'Чилл', 'none']
+    _attr_preset_modes = [PRESET_ECO, PRESET_HOME, PRESET_NONE]
+    # _attr_preset_modes = HVAC_MODES
+    _attr_preset_mode = PRESET_NONE
 
     def __init__(
             self, coordinator: ZontCoordinator, device_id: int,
@@ -61,20 +63,37 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
             device_id, heating_circuit_id
         )
 
+    # @property
+    # def preset_mode(self):
+    #     return self._attr_preset_mode
+    #
+    # @property
+    # def preset_modes(self):
+    #     return self._attr_preset_modes
+    #
+    def set_preset_mode(self, preset_mode):
+        """Set new target preset mode."""
+        _LOGGER.warning(f'Установил режим: {preset_mode}')
+
     @property
     def hvac_mode(self) -> HVACMode | None:
-        if self._heating_circuit.active:
-            return HVACMode.HEAT
-        return HVACMode.OFF
+        if self._heating_circuit.is_off:
+            return HVACMode.OFF
+        return HVACMode.HEAT
+
+    # @property
+    # def hvac_modes(self) -> list[HVACMode]:
+    #     """Return the list of available hvac operation modes."""
+    #     return self._attr_hvac_modes
 
     @property
     def name(self) -> str:
         name = f'{self._device.name}_{self._heating_circuit.name}'
         return name
 
-    async def async_set_temperature(self, **kwargs) -> None:
-        """Set new target temperature."""
-        pass
+    # async def async_set_temperature(self, **kwargs) -> None:
+    #     """Set new target temperature."""
+    #     pass
 
     @property
     def temperature_unit(self) -> str:
@@ -101,3 +120,6 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
             "model": self._device.model,
             "manufacturer": MANUFACTURER,
         }
+
+# Нужно понять как entity_id сделать при создании термостатов.
+# Пока получается None
