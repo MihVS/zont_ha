@@ -1,6 +1,7 @@
 import logging
 
-from homeassistant.components.climate import HVACAction, HVACMode
+from homeassistant.components.climate import HVACAction, HVACMode, \
+    ClimateEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import TEMP_CELSIUS
 from homeassistant.core import HomeAssistant
@@ -40,22 +41,13 @@ async def async_setup_entry(
         _LOGGER.debug(f'Добавлены термостаты: {thermostat}')
 
 
-class ZontClimateEntity(CoordinatorEntity, Entity):
+class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
     """Базовый класс для климата zont"""
 
-    # _attr_current_temperature: float | None = None
-    # _attr_hvac_action: HVACAction | None = None
-    # _attr_hvac_mode: HVACMode | None
-    _attr_hvac_modes: [HVACMode.HEAT, HVACMode.OFF]
-    _attr_is_aux_heat: bool | None
-    _attr_max_temp: 30
-    _attr_min_temp: 5
-    _attr_precision: float
-    _attr_preset_mode: str | None
-    _attr_preset_modes: list[str] | None
-    _attr_target_temperature_step: 0.1
-    # _attr_target_temperature: float | None = None
-    _attr_temperature_unit: str
+    _attr_hvac_modes = [HVACMode.HEAT, HVACMode.OFF]
+    _attr_max_temp = 30
+    _attr_min_temp = 5
+    _attr_target_temperature_step = 0.1
 
     def __init__(
             self, coordinator: ZontCoordinator, device_id: int,
@@ -68,6 +60,12 @@ class ZontClimateEntity(CoordinatorEntity, Entity):
         self._heating_circuit = self.zont.get_heating_circuit(
             device_id, heating_circuit_id
         )
+
+    @property
+    def hvac_mode(self) -> HVACMode | None:
+        if self._heating_circuit.active:
+            return HVACMode.HEAT
+        return HVACMode.OFF
 
     @property
     def name(self) -> str:
