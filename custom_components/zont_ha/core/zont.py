@@ -7,7 +7,8 @@ from homeassistant.helpers.typing import HomeAssistantType
 
 from ..const import URL_GET_DEVICES
 from .models_zont import (
-    AccountZont, ErrorZont, SensorZONT, DeviceZONT, HeatingCircuitZONT
+    AccountZont, ErrorZont, SensorZONT, DeviceZONT, HeatingCircuitZONT,
+    HeatingModeZONT
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -76,3 +77,44 @@ class Zont:
              if heating_circuit.id == heating_circuit_id), None
         )
 
+    @staticmethod
+    def _is_valid_name_heating_mode(name: str) -> bool:
+        """Проверяет валидно ли название для отопительного режима."""
+
+        invalid_names = ('газ', 'электр', 'котл', 'котёл', 'котел')
+        name = name.lower().strip()
+        for invalid_name in invalid_names:
+            if invalid_name in name:
+                return False
+        return True
+
+    def get_heating_modes(self, device: DeviceZONT) -> list[HeatingModeZONT]:
+        """
+        Получить валидные отопительные режимы.
+        От API приходит ответ вместе с котловыми режимами.
+        Метод фильтрует режимы по названию.
+        """
+
+        return [
+            heating_mode for heating_mode in device.heating_modes
+            if self._is_valid_name_heating_mode(heating_mode.name)
+        ]
+
+    def get_heating_mode(
+            self, device_id: int, heating_mode_id: int
+    ) -> HeatingModeZONT:
+        """Получить отопительный режим по его id"""
+
+        device = self.get_device(device_id)
+        return next(
+            (heating_mode for heating_mode in device.heating_modes
+             if heating_mode.id == heating_mode_id), None
+        )
+
+    @staticmethod
+    def get_names_get_heating_mode(
+            heating_modes: list[HeatingModeZONT]
+    ) -> list[str]:
+        """Возвращает список названий отопительных режимов"""
+
+        return [heating_mode.name for heating_mode in heating_modes]

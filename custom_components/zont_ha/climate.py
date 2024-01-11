@@ -1,15 +1,16 @@
 import logging
 
-from homeassistant.components.climate import HVACMode, \
-    ClimateEntity, PRESET_ECO, PRESET_HOME, PRESET_NONE, HVAC_MODES
+from homeassistant.components.climate import (
+    HVACMode, ClimateEntity, ClimateEntityFeature
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import TEMP_CELSIUS
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import DiscoveryInfoType
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator, DOMAIN
-from .const import MANUFACTURER
+from .const import MANUFACTURER, PRESET_NONE
+
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -17,8 +18,7 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(
         hass: HomeAssistant,
         config_entry: ConfigEntry,
-        async_add_entities: AddEntitiesCallback,
-        discovery_info: DiscoveryInfoType | None = None
+        async_add_entities: AddEntitiesCallback
 ) -> None:
     entry_id = config_entry.entry_id
 
@@ -45,11 +45,10 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
     _attr_hvac_modes = [HVACMode.HEAT, HVACMode.OFF]
     _attr_max_temp = 80
     _attr_min_temp = 5
-    _attr_target_temperature_step = 0.1
-    # _attr_preset_modes = ['Лето', 'Чилл', 'none']
-    _attr_preset_modes = [PRESET_ECO, PRESET_HOME, PRESET_NONE]
-    # _attr_preset_modes = HVAC_MODES
-    _attr_preset_mode = PRESET_NONE
+    _attr_supported_features = (
+            ClimateEntityFeature.TARGET_TEMPERATURE |
+            ClimateEntityFeature.PRESET_MODE
+    )
 
     def __init__(
             self, coordinator: ZontCoordinator, device_id: int,
@@ -62,17 +61,29 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
         self._heating_circuit = self.zont.get_heating_circuit(
             device_id, heating_circuit_id
         )
+        self._heating_modes = self.zont.get_heating_modes(self._device)
 
-    # @property
-    # def preset_mode(self):
-    #     return self._attr_preset_mode
-    #
-    # @property
-    # def preset_modes(self):
-    #     return self._attr_preset_modes
-    #
+    @property
+    def preset_modes(self) -> list[str] | None:
+        _preset_modes = self.zont.get_names_get_heating_mode(
+            self._heating_modes
+        )
+        _preset_modes.append(PRESET_NONE)
+        return _preset_modes
+
+    @property
+    def preset_mode(self) -> str | None:
+        id_heating_mode = self._heating_circuit.current_mode
+        heating_mode = self.zont.get_heating_mode(
+            self._device.id, id_heating_mode
+        )
+        if heating_mode is not None:
+            return heating_mode.name
+        return PRESET_NONE
+
     def set_preset_mode(self, preset_mode):
         """Set new target preset mode."""
+        self._attr_preset_mode = preset_mode
         _LOGGER.warning(f'Установил режим: {preset_mode}')
 
     @property
@@ -88,8 +99,7 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
 
     @property
     def name(self) -> str:
-        name = f'{self._device.name}_{self._heating_circuit.name}'
-        return name
+        return f'{self._device.name}_{self._heating_circuit.name}'
 
     # async def async_set_temperature(self, **kwargs) -> None:
     #     """Set new target temperature."""
@@ -121,5 +131,8 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
             "manufacturer": MANUFACTURER,
         }
 
-# Нужно понять как entity_id сделать при создании термостатов.
-# Пока получается None
+    def __repr__(self) -> str:
+        if not self.hass:
+            return f"<Entity {self.name}>"
+
+        return super().__repr__()

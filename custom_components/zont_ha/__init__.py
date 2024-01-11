@@ -5,8 +5,9 @@ import async_timeout
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, \
-    UpdateFailed
+from homeassistant.helpers.update_coordinator import (
+    DataUpdateCoordinator, UpdateFailed
+)
 from .const import DOMAIN
 from .core.zont import Zont
 
@@ -15,7 +16,8 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(
         hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
-    # _LOGGER.warning(config_entry.data)
+    # _LOGGER.warning(f'Настройка: {config_entry.unique_id}')
+    # _LOGGER.warning(f'Смотрим параметры: {config_entry}')
     entry_id = config_entry.entry_id
     email = config_entry.data.get("mail")
     token = config_entry.data.get("token")

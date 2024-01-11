@@ -9,7 +9,7 @@ from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
 )
 from . import ZontCoordinator
-from .const import DOMAIN, MANUFACTURER
+from .const import DOMAIN, MANUFACTURER, VALID_UNITS
 from .core.models_zont import SensorZONT, DeviceZONT
 
 # SCAN_INTERVAL = timedelta(seconds=30)
@@ -20,11 +20,9 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(
         hass: HomeAssistant,
         config_entry: ConfigEntry,
-        async_add_entities: AddEntitiesCallback,
-        discovery_info: DiscoveryInfoType | None = None
+        async_add_entities: AddEntitiesCallback
 ) -> None:
     entry_id = config_entry.entry_id
-    _LOGGER.debug(hass.data[DOMAIN][entry_id])
 
     zont = hass.data[DOMAIN][entry_id]
     coordinator = ZontCoordinator(hass, zont)
@@ -65,7 +63,7 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
     @property
     def native_unit_of_measurement(self) -> str | None:
         """Возвращает единицу измерения сенсора из API zont"""
-        return self._sensor.unit
+        return VALID_UNITS[self._sensor.unit]
 
     @property
     def unique_id(self) -> str:

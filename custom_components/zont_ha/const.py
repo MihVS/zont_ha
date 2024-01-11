@@ -1,3 +1,5 @@
+from homeassistant.const import TEMP_CELSIUS, UnitOfElectricPotential
+
 DOMAIN = 'zont_ha'
 MANUFACTURER = 'MicroLine'
 
@@ -13,3 +15,10 @@ URL_TRIGGER_CUSTOM_BUTTON = (
     'https://lk.zont-online.ru/api/widget/v2/trigger_custom_button'
 )
 URL_GET_TOKEN = 'https://lk.zont-online.ru/api/authtoken/get'
+
+VALID_UNITS = {
+    '°': TEMP_CELSIUS,
+    'В': UnitOfElectricPotential.VOLT
+}
+
+PRESET_NONE = 'Нет'
