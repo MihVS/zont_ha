@@ -1,4 +1,6 @@
-from homeassistant.const import TEMP_CELSIUS, UnitOfElectricPotential
+from homeassistant.const import (
+    TEMP_CELSIUS, UnitOfElectricPotential, PERCENTAGE, UnitOfPressure
+)
 
 DOMAIN = 'zont_ha'
 MANUFACTURER = 'MicroLine'
@@ -17,8 +19,14 @@ URL_TRIGGER_CUSTOM_BUTTON = (
 URL_GET_TOKEN = 'https://lk.zont-online.ru/api/authtoken/get'
 
 VALID_UNITS = {
-    '°': TEMP_CELSIUS,
-    'В': UnitOfElectricPotential.VOLT
+    'temperature': TEMP_CELSIUS,
+    'humidity': PERCENTAGE,
+    'voltage': UnitOfElectricPotential.VOLT,
+    'modulation': PERCENTAGE,
+    'pressure': UnitOfPressure.BAR,
+    'leakage': UnitOfElectricPotential.VOLT,
+    'motion': UnitOfElectricPotential.VOLT,
+    'smoke': UnitOfElectricPotential.VOLT,
+    'opening': UnitOfElectricPotential.VOLT,
+    'dhw_speed': 'л/мин'
 }
-
-PRESET_NONE = 'Нет'

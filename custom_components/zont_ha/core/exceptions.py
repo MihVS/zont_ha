@@ -6,3 +6,8 @@ class RequestAPIZONTError(Exception):
 class InvalidMail(Exception):
     """Ошибка валидации почты"""
     pass
+
+
+class SensorNotFound(Exception):
+    """Сенсор по заданному id не найден"""
+    pass

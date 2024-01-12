@@ -1,7 +1,7 @@
 import logging
 
 from homeassistant.components.climate import (
-    HVACMode, ClimateEntity, ClimateEntityFeature
+    HVACMode, ClimateEntity, ClimateEntityFeature, HVACAction, PRESET_NONE
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import TEMP_CELSIUS
@@ -9,8 +9,9 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator, DOMAIN
-from .const import MANUFACTURER, PRESET_NONE
-
+from .const import MANUFACTURER
+from .core.models_zont import DeviceZONT, AccountZont, HeatingModeZONT
+from .core.zont import Zont
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -55,13 +56,13 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
             heating_circuit_id: int, unique_id: str
     ) -> None:
         super().__init__(coordinator)
-        self._unique_id = unique_id
-        self.zont = coordinator.zont
-        self._device = self.zont.get_device(device_id)
+        self._unique_id: str = unique_id
+        self.zont: Zont = coordinator.zont
+        self._device: DeviceZONT = self.zont.get_device(device_id)
         self._heating_circuit = self.zont.get_heating_circuit(
             device_id, heating_circuit_id
         )
-        self._heating_modes = self.zont.get_heating_modes(self._device)
+        self._heating_modes: list[HeatingModeZONT] = self._device.heating_modes
 
     @property
     def preset_modes(self) -> list[str] | None:
@@ -88,6 +89,7 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
 
     @property
     def hvac_mode(self) -> HVACMode | None:
+        """Return hvac operation ie. heat, cool mode."""
         if self._heating_circuit.is_off:
             return HVACMode.OFF
         return HVACMode.HEAT
@@ -96,6 +98,13 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
     # def hvac_modes(self) -> list[HVACMode]:
     #     """Return the list of available hvac operation modes."""
     #     return self._attr_hvac_modes
+
+    @property
+    def hvac_action(self) -> HVACAction | None:
+        """Return the current running hvac operation if supported."""
+        if self._heating_circuit.active:
+            return HVACAction.HEATING
+        return HVACAction.OFF
 
     @property
     def name(self) -> str:
@@ -133,6 +142,12 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
 
     def __repr__(self) -> str:
         if not self.hass:
-            return f"<Entity {self.name}>"
+            return f"<Climate entity {self.name}>"
 
         return super().__repr__()
+
+# Правильно выставлять пределы температур в терморегуляторах
+# Нужно добавить обновление параметров в климате
+# Добавить функционал упраления заданной температуры
+# Научиться изменять HVAC режим
+# Научиться изменять preset

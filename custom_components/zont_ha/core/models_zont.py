@@ -34,13 +34,27 @@ class HeatingModeZONT(ControlEntityZONT):
     color: str | None
 
 
+class BoilerModeZONT(ControlEntityZONT):
+    """Котловые режимы"""
+
+    can_be_applied: bool
+    color: str | None
+
+
 class SensorZONT(BaseEntityZONT):
     """Сенсоры"""
 
     type: str
     status: str
-    value: float | None
+    value: float | None = None
     unit: str
+
+
+class OTSensorZONT(SensorZONT):
+    """Сенсоры котлов"""
+
+    boiler_adapter_id: int
+    id: str
 
 
 class GuardZoneZONT(ControlEntityZONT):
@@ -72,7 +86,9 @@ class DeviceZONT(BaseEntityZONT):
     widget_type: str
     heating_circuits: list[HeatingCircuitZONT]
     heating_modes: list[HeatingModeZONT]
-    sensors: list[SensorZONT]
+    boiler_modes: list[BoilerModeZONT]
+    sensors: list[SensorZONT] | None
+    ot_sensors: list[OTSensorZONT]
     guard_zones: list[GuardZoneZONT] | None
     custom_controls: list[CustomControlZONT] | None
     scenarios: list[ScenarioZONT] | None

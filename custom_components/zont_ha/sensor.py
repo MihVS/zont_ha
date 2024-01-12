@@ -4,13 +4,13 @@ from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import DiscoveryInfoType
 from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
 )
 from . import ZontCoordinator
 from .const import DOMAIN, MANUFACTURER, VALID_UNITS
-from .core.models_zont import SensorZONT, DeviceZONT
+from .core.exceptions import SensorNotFound
+from .core.models_zont import SensorZONT, DeviceZONT, OTSensorZONT
 
 # SCAN_INTERVAL = timedelta(seconds=30)
 
@@ -32,9 +32,13 @@ async def async_setup_entry(
     for device in zont.data.devices:
         sens = []
         sensors = device.sensors
+        ot_sensors = device.ot_sensors
         for sensor in sensors:
             unique_id = f'{entry_id}{device.id}{sensor.id}'
             sens.append(ZontSensor(coordinator, device, sensor, unique_id))
+        for ot_sensor in ot_sensors:
+            unique_id = f'{entry_id}{device.id}{ot_sensor.id}'
+            sens.append(ZontSensor(coordinator, device, ot_sensor, unique_id))
         async_add_entities(sens)
         _LOGGER.debug(f'Добавлены сенсоры: {sens}')
 
@@ -43,7 +47,7 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
 
     def __init__(
             self, coordinator: ZontCoordinator, device: DeviceZONT,
-            sensor: SensorZONT, unique_id: str
+            sensor: SensorZONT | OTSensorZONT, unique_id: str
     ) -> None:
         super().__init__(coordinator)
         self._device = device
@@ -63,7 +67,7 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
     @property
     def native_unit_of_measurement(self) -> str | None:
         """Возвращает единицу измерения сенсора из API zont"""
-        return VALID_UNITS[self._sensor.unit]
+        return VALID_UNITS[self._sensor.type]
 
     @property
     def unique_id(self) -> str:
@@ -91,6 +95,9 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
             self._device.id,
             self._sensor.id
         )
+        if sensor is None:
+            _LOGGER.error(f'Сенсор по id={self._sensor.id} не найден')
+            raise SensorNotFound
         if sensor.value != self._sensor.value:
             _LOGGER.debug(
                 f'Сенсор "{self._device.name}_{self._sensor.name}" обновился '
