@@ -89,3 +89,20 @@ class Zont:
     ) -> list[str]:
         """Возвращает список названий отопительных режимов"""
         return [heating_mode.name for heating_mode in heating_modes]
+
+    @staticmethod
+    def get_min_max_values_temp(circuit_name: str) -> tuple[int, int]:
+        """
+        Функция для получения максимальной и минимальной температур
+        по имени контура отопления.
+        """
+        val_min, val_max = 5, 35
+        circuit_name = circuit_name.lower().strip()
+        matches_gvs = ('гвс', 'горяч', 'вода',)
+        matches_floor = ('пол', 'тёплый',)
+        if any([x in circuit_name for x in matches_gvs]):
+            val_min, val_max = 5, 75
+        elif any([x in circuit_name for x in matches_floor]):
+            val_min, val_max = 15, 50
+
+        return val_min, val_max

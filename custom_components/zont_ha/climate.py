@@ -63,6 +63,8 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
             device_id, heating_circuit_id
         )
         self._heating_modes: list[HeatingModeZONT] = self._device.heating_modes
+        self._attr_min_temp, self._attr_max_temp = (
+            self.zont.get_min_max_values_temp(self._heating_circuit.name))
 
     @property
     def preset_modes(self) -> list[str] | None:
@@ -146,7 +148,6 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
 
         return super().__repr__()
 
-# Правильно выставлять пределы температур в терморегуляторах
 # Нужно добавить обновление параметров в климате
 # Добавить функционал упраления заданной температуры
 # Научиться изменять HVAC режим
