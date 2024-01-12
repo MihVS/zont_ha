@@ -5,7 +5,7 @@ from homeassistant.components.climate import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import TEMP_CELSIUS
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator, DOMAIN
@@ -56,6 +56,8 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
             heating_circuit_id: int, unique_id: str
     ) -> None:
         super().__init__(coordinator)
+        self._device_id = device_id
+        self._heating_circuit_id = heating_circuit_id
         self._unique_id: str = unique_id
         self.zont: Zont = coordinator.zont
         self._device: DeviceZONT = self.zont.get_device(device_id)
@@ -76,9 +78,9 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
 
     @property
     def preset_mode(self) -> str | None:
-        id_heating_mode = self._heating_circuit.current_mode
+        heating_mode_id = self._heating_circuit.current_mode
         heating_mode = self.zont.get_heating_mode(
-            self._device.id, id_heating_mode
+            self._device_id, heating_mode_id
         )
         if heating_mode is not None:
             return heating_mode.name
@@ -145,10 +147,22 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
     def __repr__(self) -> str:
         if not self.hass:
             return f"<Climate entity {self.name}>"
-
         return super().__repr__()
 
-# Нужно добавить обновление параметров в климате
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Обработка обновлённых данных от координатора"""
+        self._device: DeviceZONT = self.coordinator.data.get_device(
+            self._device_id
+        )
+        self._heating_circuit = self.zont.get_heating_circuit(
+            self._device_id, self._heating_circuit_id
+        )
+
+        self.async_write_ha_state()
+
+
+
 # Добавить функционал упраления заданной температуры
 # Научиться изменять HVAC режим
 # Научиться изменять preset
