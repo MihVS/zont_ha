@@ -6,7 +6,7 @@ from .models_zont import (
     AccountZont, ErrorZont, SensorZONT, DeviceZONT, HeatingCircuitZONT,
     HeatingModeZONT
 )
-from ..const import URL_GET_DEVICES
+from ..const import URL_GET_DEVICES, URL_SET_TARGET_TEMP
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -106,3 +106,20 @@ class Zont:
             val_min, val_max = 15, 50
 
         return val_min, val_max
+
+    async def set_target_temperature(
+            self, device: DeviceZONT, heating_circuit: HeatingCircuitZONT,
+            target_temperature: float
+    ) -> None:
+        """Отправка команды на установку нужной температуры в контуре."""
+        response = await self.session.post(
+            url=URL_SET_TARGET_TEMP,
+            json={
+                'device_id': device.id,
+                'circuit_id': heating_circuit.id,
+                'target_temp': target_temperature
+            },
+            headers=self.headers
+        )
+        text = await response.text()
+        _LOGGER.debug(f'Ответ после отправки target_temp: {text}')

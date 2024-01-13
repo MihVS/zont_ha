@@ -10,6 +10,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator, DOMAIN
 from .const import MANUFACTURER
+from .core.exceptions import TemperatureOutOfRange
 from .core.models_zont import DeviceZONT, AccountZont, HeatingModeZONT
 from .core.zont import Zont
 
@@ -50,6 +51,8 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
             ClimateEntityFeature.TARGET_TEMPERATURE |
             ClimateEntityFeature.PRESET_MODE
     )
+    _attr_target_temperature: float | None = None
+    _attr_target_temperature_step = 0.1
 
     def __init__(
             self, coordinator: ZontCoordinator, device_id: int,
@@ -114,10 +117,6 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
     def name(self) -> str:
         return f'{self._device.name}_{self._heating_circuit.name}'
 
-    # async def async_set_temperature(self, **kwargs) -> None:
-    #     """Set new target temperature."""
-    #     pass
-
     @property
     def temperature_unit(self) -> str:
         return TEMP_CELSIUS
@@ -144,6 +143,28 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
             "manufacturer": MANUFACTURER,
         }
 
+    # async def async_update(self):
+    #     _LOGGER.error('Я что-то обновил!!!')
+
+    async def async_set_temperature(self, **kwargs) -> None:
+        """Set new target temperature."""
+        set_temp = kwargs.get('temperature')
+        if self._attr_min_temp <= set_temp <= self._attr_max_temp:
+            await self.zont.set_target_temperature(
+                device=self._device,
+                heating_circuit=self._heating_circuit,
+                target_temperature=set_temp
+            )
+            self._attr_target_temperature = set_temp
+            self.async_write_ha_state()
+        else:
+            _LOGGER.error(
+                f'Недопустимое значение температуры: {set_temp}.'
+                f'Задайте температуру в пределах от {self._attr_min_temp} '
+                f'до {self._attr_max_temp} включительно.'
+            )
+            raise TemperatureOutOfRange
+
     def __repr__(self) -> str:
         if not self.hass:
             return f"<Climate entity {self.name}>"
@@ -161,8 +182,6 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
 
         self.async_write_ha_state()
 
-
-
-# Добавить функционал упраления заданной температуры
+# Нужно понять как заставить менять заданную температуру сразу же после отправки команды
 # Научиться изменять HVAC режим
 # Научиться изменять preset

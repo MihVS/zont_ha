@@ -1,5 +1,5 @@
 class RequestAPIZONTError(Exception):
-    """Ошибка запроса к сервису zont-online.ru/api"""
+    """Ошибка запроса к сервису zont-online.ru/api."""
     pass
 
 
@@ -9,5 +9,10 @@ class InvalidMail(Exception):
 
 
 class SensorNotFound(Exception):
-    """Сенсор по заданному id не найден"""
+    """Сенсор по заданному id не найден."""
+    pass
+
+
+class TemperatureOutOfRange(Exception):
+    """Задана температура в пределах допустимого диапазона."""
     pass
