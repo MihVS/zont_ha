@@ -1,3 +1,6 @@
+from homeassistant.exceptions import HomeAssistantError
+
+
 class RequestAPIZONTError(Exception):
     """Ошибка запроса к сервису zont-online.ru/api."""
     pass
@@ -8,11 +11,16 @@ class InvalidMail(Exception):
     pass
 
 
-class SensorNotFound(Exception):
+class SensorNotFoundError(Exception):
     """Сенсор по заданному id не найден."""
     pass
 
 
-class TemperatureOutOfRange(Exception):
-    """Задана температура в пределах допустимого диапазона."""
+class TemperatureOutOfRangeError(HomeAssistantError):
+    """Задана температура не в пределах допустимого диапазона."""
+    pass
+
+
+class ResponseZontError(HomeAssistantError):
+    """Ошибка ответа от API zont."""
     pass

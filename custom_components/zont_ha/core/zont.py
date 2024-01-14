@@ -1,11 +1,15 @@
 import logging
 
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from aiohttp import ClientResponse
+
+from homeassistant.helpers.aiohttp_client import async_get_clientsession, \
+    HassClientResponse
 from homeassistant.helpers.typing import HomeAssistantType
 from .models_zont import (
     AccountZont, ErrorZont, SensorZONT, DeviceZONT, HeatingCircuitZONT,
     HeatingModeZONT
 )
+from .utils import check_send_command
 from ..const import URL_GET_DEVICES, URL_SET_TARGET_TEMP
 
 _LOGGER = logging.getLogger(__name__)
@@ -107,19 +111,18 @@ class Zont:
 
         return val_min, val_max
 
+    @check_send_command
     async def set_target_temperature(
             self, device: DeviceZONT, heating_circuit: HeatingCircuitZONT,
-            target_temperature: float
-    ) -> None:
+            target_temp: float
+    ) -> ClientResponse:
         """Отправка команды на установку нужной температуры в контуре."""
-        response = await self.session.post(
+        return await self.session.post(
             url=URL_SET_TARGET_TEMP,
             json={
                 'device_id': device.id,
                 'circuit_id': heating_circuit.id,
-                'target_temp': target_temperature
+                'target_temp': target_temp
             },
             headers=self.headers
         )
-        text = await response.text()
-        _LOGGER.debug(f'Ответ после отправки target_temp: {text}')
