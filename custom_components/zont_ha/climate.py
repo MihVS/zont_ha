@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from homeassistant.components.climate import (
@@ -73,7 +74,7 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
 
     @property
     def preset_modes(self) -> list[str] | None:
-        _preset_modes = self.zont.get_names_get_heating_mode(
+        _preset_modes = self.zont.get_names_heating_mode(
             self._heating_modes
         )
         _preset_modes.append(PRESET_NONE)
@@ -82,17 +83,12 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
     @property
     def preset_mode(self) -> str | None:
         heating_mode_id = self._heating_circuit.current_mode
-        heating_mode = self.zont.get_heating_mode(
+        heating_mode = self.zont.get_heating_mode_by_id(
             self._device_id, heating_mode_id
         )
         if heating_mode is not None:
             return heating_mode.name
         return PRESET_NONE
-
-    def set_preset_mode(self, preset_mode):
-        """Set new target preset mode."""
-        self._attr_preset_mode = preset_mode
-        _LOGGER.warning(f'Установил режим: {preset_mode}')
 
     @property
     def hvac_mode(self) -> HVACMode | None:
@@ -161,6 +157,28 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
                 f'до {self._attr_max_temp} включительно.'
             )
 
+    async def async_set_preset_mode(self, preset_mode):
+        """Set new target preset mode."""
+        heating_mode = self.zont.get_heating_mode_by_name(
+            self._device_id, preset_mode
+        )
+        if heating_mode is not None:
+            await self.zont.set_heating_mode(
+                device=self._device,
+                heating_circuit=self._heating_circuit,
+                heating_mode_id=heating_mode.id
+            )
+        else:
+            await self.zont.set_target_temperature(
+                device=self._device,
+                heating_circuit=self._heating_circuit,
+                target_temp=self._heating_circuit.target_temp
+            )
+            self._heating_circuit.current_mode = None
+        await asyncio.sleep(1)
+        await self.zont.get_update()
+        self._handle_coordinator_update()
+
     def __repr__(self) -> str:
         if not self.hass:
             return f"<Climate entity {self.name}>"
@@ -178,5 +196,5 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
 
         self.async_write_ha_state()
 
+# Выставить таймауты на запросы к api
 # Научиться изменять HVAC режим
-# Научиться изменять preset

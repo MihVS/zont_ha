@@ -10,7 +10,8 @@ from .models_zont import (
     HeatingModeZONT
 )
 from .utils import check_send_command
-from ..const import URL_GET_DEVICES, URL_SET_TARGET_TEMP
+from ..const import URL_GET_DEVICES, URL_SET_TARGET_TEMP, \
+    URL_SEND_COMMAND_ZONT_OLD
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -77,18 +78,28 @@ class Zont:
              if heating_circuit.id == heating_circuit_id), None
         )
 
-    def get_heating_mode(
+    def get_heating_mode_by_id(
             self, device_id: int, heating_mode_id: int
-    ) -> HeatingModeZONT:
-        """Получить отопительный режим по его id"""
+    ) -> HeatingModeZONT | None:
+        """Получить name отопительного режима по его id"""
         device = self.get_device(device_id)
         return next(
             (heating_mode for heating_mode in device.heating_modes
              if heating_mode.id == heating_mode_id), None
         )
 
+    def get_heating_mode_by_name(
+            self, device_id: int, heating_mode_name: str
+    ) -> HeatingModeZONT | None:
+        """Получить id отопительного режима по его name"""
+        device = self.get_device(device_id)
+        return next(
+            (heating_mode for heating_mode in device.heating_modes
+             if heating_mode.name == heating_mode_name), None
+        )
+
     @staticmethod
-    def get_names_get_heating_mode(
+    def get_names_heating_mode(
             heating_modes: list[HeatingModeZONT]
     ) -> list[str]:
         """Возвращает список названий отопительных режимов"""
@@ -126,3 +137,32 @@ class Zont:
             },
             headers=self.headers
         )
+
+    async def set_heating_mode(
+            self, device: DeviceZONT, heating_circuit: HeatingCircuitZONT,
+            heating_mode_id: int
+    ) -> ClientResponse:
+        """Отправка команды на установку нужного режима для контура."""
+        response = await self.session.post(
+            url=URL_SEND_COMMAND_ZONT_OLD,
+            json={
+                'device_id': device.id,
+                'command_name': 'SelectHeatingModeForCircuit',
+                'object_id': heating_circuit.id,
+                'command_args': {'mode_id': heating_mode_id},
+                'request_time': 1000,
+                'is_guaranteed': True
+            },
+            headers=self.headers
+        )
+        _LOGGER.warning(await response.text())
+        return response
+
+    # {
+    #     "device_id": 278936,
+    #     "command_name": "SelectHeatingModeForCircuit",
+    #     "object_id": 8550,
+    #     "command_args": {"mode_id": 8389},
+    #     "request_time": 1000,
+    #     "is_guaranteed": true
+    # }
