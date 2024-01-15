@@ -65,5 +65,5 @@ class ZontButton(ButtonEntity):
     async def async_press(self) -> None:
         """Handle the button press."""
         await self._zont.toggle_switch(
-            device=self._device, control=self._control
+            device=self._device, control=self._control, command=True
         )

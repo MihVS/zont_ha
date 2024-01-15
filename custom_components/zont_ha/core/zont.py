@@ -13,7 +13,7 @@ from .utils import check_send_command
 from ..const import (
     URL_GET_DEVICES, URL_SET_TARGET_TEMP, URL_SEND_COMMAND_ZONT_OLD,
     MIN_TEMP_AIR, MAX_TEMP_AIR, MIN_TEMP_GVS, MAX_TEMP_GVS, MIN_TEMP_FLOOR,
-    MAX_TEMP_FLOOR, MATCHES_GVS, MATCHES_FLOOR
+    MAX_TEMP_FLOOR, MATCHES_GVS, MATCHES_FLOOR, URL_TRIGGER_CUSTOM_BUTTON
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -161,14 +161,14 @@ class Zont:
         _LOGGER.warning(await response.text())
         return response
 
-    # @check_send_command
+    @check_send_command
     async def toggle_switch(
             self, device: DeviceZONT, control: CustomControlZONT,
-            command: bool = True
+            command: bool
     ) -> ClientResponse:
         """Отправка команды на установку нужной температуры в контуре."""
         return await self.session.post(
-            url=URL_SET_TARGET_TEMP,
+            url=URL_TRIGGER_CUSTOM_BUTTON,
             json={
                 'device_id': device.id,
                 'control_id': control.id,
