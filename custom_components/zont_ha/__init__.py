@@ -8,7 +8,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator, UpdateFailed
 )
-from .const import DOMAIN
+from .const import DOMAIN, PLATFORMS
 from .core.zont import Zont
 
 _LOGGER = logging.getLogger(__name__)
@@ -28,7 +28,7 @@ async def async_setup_entry(
 
     hass.data[DOMAIN][entry_id] = zont
     await hass.config_entries.async_forward_entry_setups(
-        config_entry, ['sensor', 'climate']
+        config_entry, PLATFORMS
     )
     return True
 

@@ -17,20 +17,19 @@ def check_send_command(func):
         device = kwargs.get('device')
         heating_circuit = kwargs.get('heating_circuit')
         target_temp = kwargs.get('target_temp')
+        custom_control = kwargs.get('control')
+        command = kwargs.get('command')
 
-        control = heating_circuit
+        if target_temp is not None:
+            control = heating_circuit
+            set_value = target_temp
+        elif custom_control is not None:
+            control = custom_control
+            set_value = command
+        else:
+            return func
 
-        # length = len(args)
-        # if length == 3:
-        #     device, control, target_state = args
-        # elif length == 2:
-        #     device, control = args
-        # else:
-        #     return func
         response: ClientResponse = await func(*args, **kwargs)
-        # _target_state = (
-        #     lambda: str(target_state) if (length == 3) else 'toggle'
-        # )
         status = response.status
         data = await response.json()
         if status == HTTPStatus.OK:
@@ -38,7 +37,7 @@ def check_send_command(func):
             if data.get('ok'):
                 _LOGGER.info(
                     f'На устройстве {device.model}-{device.name} '
-                    f'Изменено состояние {control.name}: {target_temp}'
+                    f'Изменено состояние {control.name}: {set_value}'
                 )
             else:
                 raise ResponseZontError(

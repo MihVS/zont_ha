@@ -1,4 +1,5 @@
 import logging
+from http import HTTPStatus
 
 from aiohttp import ClientResponse
 
@@ -6,11 +7,14 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.typing import HomeAssistantType
 from .models_zont import (
     AccountZont, ErrorZont, SensorZONT, DeviceZONT, HeatingCircuitZONT,
-    HeatingModeZONT
+    HeatingModeZONT, CustomControlZONT
 )
 from .utils import check_send_command
-from ..const import URL_GET_DEVICES, URL_SET_TARGET_TEMP, \
-    URL_SEND_COMMAND_ZONT_OLD
+from ..const import (
+    URL_GET_DEVICES, URL_SET_TARGET_TEMP, URL_SEND_COMMAND_ZONT_OLD,
+    MIN_TEMP_AIR, MAX_TEMP_AIR, MIN_TEMP_GVS, MAX_TEMP_GVS, MIN_TEMP_FLOOR,
+    MAX_TEMP_FLOOR, MATCHES_GVS, MATCHES_FLOOR
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -41,7 +45,7 @@ class Zont:
         )
         text = await response.text()
         status_code = response.status
-        if status_code != 200:
+        if status_code != HTTPStatus.OK:
             self.error = ErrorZont.parse_raw(text)
             _LOGGER.error(self.error.error_ui)
             return status_code
@@ -110,14 +114,14 @@ class Zont:
         Функция для получения максимальной и минимальной температур
         по имени контура отопления.
         """
-        val_min, val_max = 5, 35
+        val_min, val_max = MIN_TEMP_AIR, MAX_TEMP_AIR
         circuit_name = circuit_name.lower().strip()
-        matches_gvs = ('гвс', 'горяч', 'вода',)
-        matches_floor = ('пол', 'тёплый',)
+        matches_gvs = MATCHES_GVS
+        matches_floor = MATCHES_FLOOR
         if any([x in circuit_name for x in matches_gvs]):
-            val_min, val_max = 5, 75
+            val_min, val_max = MIN_TEMP_GVS, MAX_TEMP_GVS
         elif any([x in circuit_name for x in matches_floor]):
-            val_min, val_max = 15, 50
+            val_min, val_max = MIN_TEMP_FLOOR, MAX_TEMP_FLOOR
 
         return val_min, val_max
 
@@ -156,3 +160,19 @@ class Zont:
         )
         _LOGGER.warning(await response.text())
         return response
+
+    # @check_send_command
+    async def toggle_switch(
+            self, device: DeviceZONT, control: CustomControlZONT,
+            command: bool = True
+    ) -> ClientResponse:
+        """Отправка команды на установку нужной температуры в контуре."""
+        return await self.session.post(
+            url=URL_SET_TARGET_TEMP,
+            json={
+                'device_id': device.id,
+                'control_id': control.id,
+                'target_state': command
+            },
+            headers=self.headers
+        )

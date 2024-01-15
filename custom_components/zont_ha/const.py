@@ -32,3 +32,17 @@ VALID_UNITS = {
     'opening': UnitOfElectricPotential.VOLT,
     'dhw_speed': 'л/мин'
 }
+
+MIN_TEMP_AIR = 5
+MAX_TEMP_AIR = 35
+MIN_TEMP_GVS = 25
+MAX_TEMP_GVS = 75
+MIN_TEMP_FLOOR = 15
+MAX_TEMP_FLOOR = 45
+MATCHES_GVS = ('гвс', 'горяч', 'вода',)
+MATCHES_FLOOR = ('пол', 'тёплый',)
+
+BUTTON_ZONT = 'button'
+SWITCH_ZONT = 'toggle_button'
+
+PLATFORMS = ['sensor', 'climate', 'button']
