@@ -12,8 +12,6 @@ from .const import DOMAIN, MANUFACTURER, VALID_UNITS
 from .core.exceptions import SensorNotFoundError
 from .core.models_zont import SensorZONT, DeviceZONT, OTSensorZONT
 
-# SCAN_INTERVAL = timedelta(seconds=30)
-
 _LOGGER = logging.getLogger(__name__)
 
 

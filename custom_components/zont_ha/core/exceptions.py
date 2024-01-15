@@ -24,3 +24,8 @@ class TemperatureOutOfRangeError(HomeAssistantError):
 class ResponseZontError(HomeAssistantError):
     """Ошибка ответа от API zont."""
     pass
+
+
+class SetHvacModeError(HomeAssistantError):
+    """Ошибка изменения HVAC mode"""
+    pass

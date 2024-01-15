@@ -2,8 +2,7 @@ import logging
 
 from aiohttp import ClientResponse
 
-from homeassistant.helpers.aiohttp_client import async_get_clientsession, \
-    HassClientResponse
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.typing import HomeAssistantType
 from .models_zont import (
     AccountZont, ErrorZont, SensorZONT, DeviceZONT, HeatingCircuitZONT,
@@ -157,12 +156,3 @@ class Zont:
         )
         _LOGGER.warning(await response.text())
         return response
-
-    # {
-    #     "device_id": 278936,
-    #     "command_name": "SelectHeatingModeForCircuit",
-    #     "object_id": 8550,
-    #     "command_args": {"mode_id": 8389},
-    #     "request_time": 1000,
-    #     "is_guaranteed": true
-    # }

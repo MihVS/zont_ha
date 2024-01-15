@@ -11,8 +11,8 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator, DOMAIN
 from .const import MANUFACTURER
-from .core.exceptions import TemperatureOutOfRangeError
-from .core.models_zont import DeviceZONT, AccountZont, HeatingModeZONT
+from .core.exceptions import TemperatureOutOfRangeError, SetHvacModeError
+from .core.models_zont import DeviceZONT, HeatingModeZONT
 from .core.zont import Zont
 
 _LOGGER = logging.getLogger(__name__)
@@ -52,7 +52,6 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
             ClimateEntityFeature.TARGET_TEMPERATURE |
             ClimateEntityFeature.PRESET_MODE
     )
-    # _attr_target_temperature: float | None = None
     _attr_target_temperature_step = 0.1
 
     def __init__(
@@ -96,11 +95,6 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
         if self._heating_circuit.is_off:
             return HVACMode.OFF
         return HVACMode.HEAT
-
-    # @property
-    # def hvac_modes(self) -> list[HVACMode]:
-    #     """Return the list of available hvac operation modes."""
-    #     return self._attr_hvac_modes
 
     @property
     def hvac_action(self) -> HVACAction | None:
@@ -148,8 +142,9 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
                 heating_circuit=self._heating_circuit,
                 target_temp=set_temp
             )
-            self._heating_circuit.target_temp = set_temp
-            self.async_write_ha_state()
+            await asyncio.sleep(1)
+            await self.zont.get_update()
+            self._handle_coordinator_update()
         else:
             raise TemperatureOutOfRangeError(
                 f'Недопустимое значение температуры: {set_temp}. '
@@ -184,6 +179,13 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
             return f"<Climate entity {self.name}>"
         return super().__repr__()
 
+    def set_hvac_mode(self, hvac_mode):
+        """Set new target hvac mode."""
+        raise SetHvacModeError(
+            'Изменение HVAC не поддерживается ZONT. '
+            'Контур управляется котлом.'
+        )
+
     @callback
     def _handle_coordinator_update(self) -> None:
         """Обработка обновлённых данных от координатора"""
@@ -195,6 +197,3 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
         )
 
         self.async_write_ha_state()
-
-# Выставить таймауты на запросы к api
-# Научиться изменять HVAC режим
