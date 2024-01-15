@@ -50,7 +50,7 @@ class Zont:
             _LOGGER.error(self.error.error_ui)
             return status_code
         self.data = AccountZont.parse_raw(text)
-        _LOGGER.debug(f'Данные аккаунта {self.mail} обновлены')
+        _LOGGER.warning(f'Данные аккаунта {self.mail} обновлены')
         return status_code
 
     def get_device(self, device_id: int) -> DeviceZONT | None:
@@ -124,6 +124,15 @@ class Zont:
             val_min, val_max = MIN_TEMP_FLOOR, MAX_TEMP_FLOOR
 
         return val_min, val_max
+
+    def get_custom_control(self, device_id: int, control_id: int
+                           ) -> CustomControlZONT:
+        device = self.get_device(device_id)
+        return next(
+            (control for control in device.custom_controls
+             if control.id == control_id), None
+        )
+
 
     @check_send_command
     async def set_target_temperature(

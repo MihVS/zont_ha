@@ -37,8 +37,9 @@ async def async_setup_entry(
         for ot_sensor in ot_sensors:
             unique_id = f'{entry_id}{device.id}{ot_sensor.id}'
             sens.append(ZontSensor(coordinator, device, ot_sensor, unique_id))
-        async_add_entities(sens)
-        _LOGGER.debug(f'Добавлены сенсоры: {sens}')
+        if sens:
+            async_add_entities(sens)
+            _LOGGER.debug(f'Добавлены сенсоры: {sens}')
 
 
 class ZontSensor(CoordinatorEntity, SensorEntity):

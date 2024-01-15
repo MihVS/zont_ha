@@ -38,8 +38,9 @@ async def async_setup_entry(
             thermostat.append(ZontClimateEntity(
                 coordinator, device.id, heating_circuit.id, unique_id)
             )
-        async_add_entities(thermostat)
-        _LOGGER.debug(f'Добавлены термостаты: {thermostat}')
+        if thermostat:
+            async_add_entities(thermostat)
+            _LOGGER.debug(f'Добавлены термостаты: {thermostat}')
 
 
 class ZontClimateEntity(CoordinatorEntity, ClimateEntity):

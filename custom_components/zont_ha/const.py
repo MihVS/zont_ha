@@ -45,4 +45,4 @@ MATCHES_FLOOR = ('пол', 'тёплый',)
 BUTTON_ZONT = 'button'
 SWITCH_ZONT = 'toggle_button'
 
-PLATFORMS = ['sensor', 'climate', 'button']
+PLATFORMS = ['sensor', 'climate', 'button', 'switch']
