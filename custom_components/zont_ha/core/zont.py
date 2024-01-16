@@ -132,7 +132,6 @@ class Zont:
              if control.id == control_id), None
         )
 
-
     @check_send_command
     async def set_target_temperature(
             self, device: DeviceZONT, heating_circuit: HeatingCircuitZONT,

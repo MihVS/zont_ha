@@ -1,4 +1,3 @@
-import asyncio
 import logging
 
 from homeassistant.components.switch import SwitchEntity
@@ -45,7 +44,7 @@ class ZontSwitch(CoordinatorEntity, SwitchEntity):
             control: CustomControlZONT, unique_id: str
     ) -> None:
         super().__init__(coordinator)
-        self.zont: Zont = coordinator.zont
+        self._zont: Zont = coordinator.zont
         self._device = device
         self._control = control
         self._unique_id = unique_id
@@ -58,8 +57,7 @@ class ZontSwitch(CoordinatorEntity, SwitchEntity):
     @property
     def name(self) -> str:
         name = self._control.name.get('when_active')
-        name = f'{self._device.name}_{name}'
-        return name
+        return f'{self._device.name}_{name}'
 
     @property
     def unique_id(self) -> str:
@@ -82,24 +80,41 @@ class ZontSwitch(CoordinatorEntity, SwitchEntity):
 
     async def async_turn_on(self, **kwargs):
         """Turn the entity on."""
-        _LOGGER.warning('Включил выключатель')
-        # await asyncio.sleep(1)
-        # await self.zont.get_update()
-        # self._handle_coordinator_update()
+        await self._zont.toggle_switch(
+            device=self._device, control=self._control, command=True
+        )
+        self._control.status = True
+        self.async_write_ha_state()
 
     async def async_turn_off(self, **kwargs):
         """Turn the entity off."""
-        _LOGGER.warning('Выключил выключатель')
+        await self._zont.toggle_switch(
+            device=self._device, control=self._control, command=False
+        )
+        self._control.status = False
+        self.async_write_ha_state()
+
+    async def async_toggle(self, **kwargs):
+        """Toggle the entity."""
+        if self._control.status:
+            await self._zont.toggle_switch(
+                device=self._device, control=self._control, command=False
+            )
+            self._control.status = False
+        else:
+            await self._zont.toggle_switch(
+                device=self._device, control=self._control, command=True
+            )
+            self._control.status = True
+        self.async_write_ha_state()
 
     @callback
     def _handle_coordinator_update(self) -> None:
         """Обработка обновлённых данных от координатора"""
-        # _LOGGER.debug(self.coordinator.data)
-        # _LOGGER.warning(self.coordinator.zont)
-        self._device: DeviceZONT = self.coordinator.data.get_device(
+        self._device: DeviceZONT = self._zont.get_device(
             self._device.id
         )
-        self._control = self.zont.get_custom_control(
+        self._control = self._zont.get_custom_control(
             self._device.id, self._control.id
         )
 

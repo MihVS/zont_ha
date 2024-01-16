@@ -53,8 +53,7 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def name(self) -> str:
-        name = f'{self._device.name}_{self._sensor.name}'
-        return name
+        return f'{self._device.name}_{self._sensor.name}'
 
     @property
     def native_value(self) -> float | str:

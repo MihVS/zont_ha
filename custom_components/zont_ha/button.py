@@ -46,8 +46,7 @@ class ZontButton(ButtonEntity):
 
     @property
     def name(self) -> str:
-        name = f'{self._device.name}_{self._control.name}'
-        return name
+        return f'{self._device.name}_{self._control.name}'
 
     @property
     def unique_id(self) -> str:
