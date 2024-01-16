@@ -25,10 +25,8 @@ async def async_setup_entry(
 ) -> None:
     entry_id = config_entry.entry_id
 
-    zont = hass.data[DOMAIN][entry_id]
-    coordinator = ZontCoordinator(hass, zont)
-
-    await coordinator.async_config_entry_first_refresh()
+    coordinator = hass.data[DOMAIN][entry_id]
+    zont = coordinator.zont
 
     for device in zont.data.devices:
         thermostat = []
@@ -53,7 +51,7 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
             ClimateEntityFeature.TARGET_TEMPERATURE |
             ClimateEntityFeature.PRESET_MODE
     )
-    _attr_target_temperature_step = 0.1
+    _attr_target_temperature_step = 0.5
 
     def __init__(
             self, coordinator: ZontCoordinator, device_id: int,
@@ -143,9 +141,8 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
                 heating_circuit=self._heating_circuit,
                 target_temp=set_temp
             )
-            await asyncio.sleep(1)
-            await self.zont.get_update()
-            self._handle_coordinator_update()
+            await asyncio.sleep(2)
+            await self.coordinator.async_config_entry_first_refresh()
         else:
             raise TemperatureOutOfRangeError(
                 f'Недопустимое значение температуры: {set_temp}. '
@@ -171,9 +168,8 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
                 target_temp=self._heating_circuit.target_temp
             )
             self._heating_circuit.current_mode = None
-        await asyncio.sleep(1)
-        await self.zont.get_update()
-        self._handle_coordinator_update()
+        await asyncio.sleep(2)
+        await self.coordinator.async_config_entry_first_refresh()
 
     def __repr__(self) -> str:
         if not self.hass:

@@ -7,7 +7,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator
-from .const import DOMAIN, BUTTON_ZONT, MANUFACTURER, SWITCH_ZONT
+from .const import DOMAIN, MANUFACTURER, SWITCH_ZONT
 from .core.models_zont import DeviceZONT, CustomControlZONT
 from .core.zont import Zont
 
@@ -21,10 +21,8 @@ async def async_setup_entry(
 ) -> None:
     entry_id = config_entry.entry_id
 
-    zont: Zont = hass.data[DOMAIN][entry_id]
-    coordinator = ZontCoordinator(hass, zont)
-
-    await coordinator.async_config_entry_first_refresh()
+    coordinator = hass.data[DOMAIN][entry_id]
+    zont = coordinator.zont
 
     for device in zont.data.devices:
         switch = []
@@ -106,5 +104,3 @@ class ZontSwitch(CoordinatorEntity, SwitchEntity):
         )
 
         self.async_write_ha_state()
-
-# как обновлять всё один раз через координатор

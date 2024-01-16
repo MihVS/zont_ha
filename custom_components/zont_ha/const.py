@@ -30,6 +30,7 @@ VALID_UNITS = {
     'motion': UnitOfElectricPotential.VOLT,
     'smoke': UnitOfElectricPotential.VOLT,
     'opening': UnitOfElectricPotential.VOLT,
+    'room_thermostat': UnitOfElectricPotential.VOLT,
     'dhw_speed': 'л/мин'
 }
 

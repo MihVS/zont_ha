@@ -18,7 +18,8 @@ async def async_setup_entry(
 ) -> None:
     entry_id = config_entry.entry_id
 
-    zont: Zont = hass.data[DOMAIN][entry_id]
+    coordinator = hass.data[DOMAIN][entry_id]
+    zont = coordinator.zont
 
     for device in zont.data.devices:
         buttons = []
@@ -61,6 +62,11 @@ class ZontButton(ButtonEntity):
             "model": self._device.model,
             "manufacturer": MANUFACTURER
         }
+
+    def __repr__(self) -> str:
+        if not self.hass:
+            return f"<Button entity {self.name}>"
+        return super().__repr__()
 
     async def async_press(self) -> None:
         """Handle the button press."""

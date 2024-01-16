@@ -33,12 +33,11 @@ class Zont:
         }
         self.mail = mail
         self.session = async_get_clientsession(hass)
-        _LOGGER.debug(f'Создан объект Zont')
+        _LOGGER.warning(f'Создан объект Zont')
 
     async def get_update(self):
         """Получаем обновление данных объекта Zont"""
         headers = self.headers
-        _LOGGER.debug(headers)
         response = await self.session.post(
             url=URL_GET_DEVICES,
             headers=headers
@@ -50,7 +49,7 @@ class Zont:
             _LOGGER.error(self.error.error_ui)
             return status_code
         self.data = AccountZont.parse_raw(text)
-        _LOGGER.warning(f'Данные аккаунта {self.mail} обновлены')
+        _LOGGER.info(f'Данные аккаунта {self.mail} обновлены')
         return status_code
 
     def get_device(self, device_id: int) -> DeviceZONT | None:
@@ -167,7 +166,7 @@ class Zont:
             },
             headers=self.headers
         )
-        _LOGGER.warning(await response.text())
+        _LOGGER.debug(await response.text())
         return response
 
     @check_send_command

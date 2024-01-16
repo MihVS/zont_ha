@@ -22,10 +22,8 @@ async def async_setup_entry(
 ) -> None:
     entry_id = config_entry.entry_id
 
-    zont = hass.data[DOMAIN][entry_id]
-    coordinator = ZontCoordinator(hass, zont)
-
-    await coordinator.async_config_entry_first_refresh()
+    coordinator = hass.data[DOMAIN][entry_id]
+    zont = coordinator.zont
 
     for device in zont.data.devices:
         sens = []
