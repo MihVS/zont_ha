@@ -1,13 +1,14 @@
 import logging
 import re
+from http import HTTPStatus
 
 import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from .const import DOMAIN
-from .core.zont import Zont
 from .core.exceptions import RequestAPIZONTError, InvalidMail
+from .core.zont import Zont
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -19,7 +20,7 @@ async def validate_auth(hass: HomeAssistant, mail: str, token: str) -> None:
 
     result = await zont.get_update()
     _LOGGER.debug(f'validate_auth: {result}')
-    if result != 200:
+    if result != HTTPStatus.OK:
         hass.data['error'] = zont.error
         raise RequestAPIZONTError
 
