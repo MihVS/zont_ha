@@ -46,4 +46,10 @@ MATCHES_FLOOR = ('пол', 'тёплый',)
 BUTTON_ZONT = 'button'
 SWITCH_ZONT = 'toggle_button'
 
-PLATFORMS = ['sensor', 'climate', 'button', 'switch']
+PLATFORMS = ['sensor', 'climate', 'button', 'switch', 'alarm_control_panel']
+
+STATE_UNKNOWN_ZONT = 'unknown'
+STATE_DISABLED_ZONT = 'disabled'
+STATE_ENABLED_ZONT = 'enabled'
+STATE_DISABLING_ZONT = 'disabling'
+STATE_ENABLING_ZONT = 'enabling'

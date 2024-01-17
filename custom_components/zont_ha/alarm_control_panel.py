@@ -2,7 +2,7 @@ import asyncio
 import logging
 
 from homeassistant.components.alarm_control_panel import \
-    AlarmControlPanelEntity
+    AlarmControlPanelEntity, AlarmControlPanelEntityFeature
 from homeassistant.components.climate import (
     HVACMode, ClimateEntity, ClimateEntityFeature, HVACAction, PRESET_NONE
 )
@@ -10,6 +10,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import TEMP_CELSIUS
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.typing import StateType
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator, DOMAIN
 from .const import MANUFACTURER
@@ -46,6 +47,11 @@ async def async_setup_entry(
 class ZontAlarm(CoordinatorEntity, AlarmControlPanelEntity):
 
     _attr_code_format = None
+    # _attr_changed_by = 'pending'
+    _attr_supported_features = (
+        AlarmControlPanelEntityFeature.ARM_AWAY |
+        AlarmControlPanelEntityFeature.TRIGGER
+    )
 
     def __init__(
             self, coordinator: ZontCoordinator, device_id: int,
@@ -62,8 +68,22 @@ class ZontAlarm(CoordinatorEntity, AlarmControlPanelEntity):
         )
 
     @property
+    def name(self) -> str:
+        return f'{self._device.name}_{self._guard_zone.name}'
+
+    @property
+    def state(self) -> StateType:
+        """Return the state of the entity."""
+        return 'arming'
+
+    @property
     def unique_id(self) -> str:
         return self._unique_id
+
+    @property
+    def supported_features(self) -> AlarmControlPanelEntityFeature:
+        """Return the list of supported features."""
+        return self._attr_supported_features
 
     @property
     def device_info(self):

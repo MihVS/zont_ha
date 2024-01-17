@@ -3,6 +3,10 @@ from http import HTTPStatus
 
 from aiohttp import ClientResponse
 
+from homeassistant.const import (
+    STATE_ALARM_TRIGGERED, STATE_UNAVAILABLE, STATE_ALARM_DISARMED,
+    STATE_ALARM_ARMED_HOME, STATE_ALARM_DISARMING, STATE_ALARM_ARMING
+)
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.typing import HomeAssistantType
 from .models_zont import (
@@ -13,7 +17,9 @@ from .utils import check_send_command
 from ..const import (
     URL_GET_DEVICES, URL_SET_TARGET_TEMP, URL_SEND_COMMAND_ZONT_OLD,
     MIN_TEMP_AIR, MAX_TEMP_AIR, MIN_TEMP_GVS, MAX_TEMP_GVS, MIN_TEMP_FLOOR,
-    MAX_TEMP_FLOOR, MATCHES_GVS, MATCHES_FLOOR, URL_TRIGGER_CUSTOM_BUTTON
+    MAX_TEMP_FLOOR, MATCHES_GVS, MATCHES_FLOOR, URL_TRIGGER_CUSTOM_BUTTON,
+    STATE_UNKNOWN_ZONT, STATE_DISABLED_ZONT, STATE_ENABLED_ZONT,
+    STATE_DISABLING_ZONT, STATE_ENABLING_ZONT
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -89,6 +95,11 @@ class Zont:
             (guard_zone for guard_zone in device.guard_zones
              if guard_zone.id == guard_zone_id), None
         )
+
+    def get_state_guard_zone_for_ha(self, guard_zone: GuardZoneZONT) -> str:
+        """Получить статус охранной зоны"""
+        if guard_zone.state:
+            return STATE_ALARM_TRIGGERED
 
     def get_heating_mode_by_id(
             self, device_id: int, heating_mode_id: int
