@@ -7,7 +7,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.typing import HomeAssistantType
 from .models_zont import (
     AccountZont, ErrorZont, SensorZONT, DeviceZONT, HeatingCircuitZONT,
-    HeatingModeZONT, CustomControlZONT
+    HeatingModeZONT, CustomControlZONT, GuardZoneZONT
 )
 from .utils import check_send_command
 from ..const import (
@@ -78,6 +78,16 @@ class Zont:
         return next(
             (heating_circuit for heating_circuit in device.heating_circuits
              if heating_circuit.id == heating_circuit_id), None
+        )
+
+    def get_guard_zone(
+            self, device_id: int, guard_zone_id: int
+    ) -> GuardZoneZONT | None:
+        """Получить охранную зону по её id и id устройства"""
+        device = self.get_device(device_id)
+        return next(
+            (guard_zone for guard_zone in device.guard_zones
+             if guard_zone.id == guard_zone_id), None
         )
 
     def get_heating_mode_by_id(
