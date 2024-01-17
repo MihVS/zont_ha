@@ -1,21 +1,19 @@
 import asyncio
 import logging
 
-from homeassistant.components.alarm_control_panel import \
+from homeassistant.components.alarm_control_panel import (
     AlarmControlPanelEntity, AlarmControlPanelEntityFeature
-from homeassistant.components.climate import (
-    HVACMode, ClimateEntity, ClimateEntityFeature, HVACAction, PRESET_NONE
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import TEMP_CELSIUS
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator, DOMAIN
-from .const import MANUFACTURER
-from .core.exceptions import TemperatureOutOfRangeError, SetHvacModeError
-from .core.models_zont import DeviceZONT, HeatingModeZONT
+from .const import (
+    MANUFACTURER, COUNTER_REPEAT, TIME_OUT_REPEAT, TIME_OUT_REQUEST
+)
+from .core.models_zont import DeviceZONT
 from .core.zont import Zont
 
 _LOGGER = logging.getLogger(__name__)
@@ -47,7 +45,6 @@ async def async_setup_entry(
 class ZontAlarm(CoordinatorEntity, AlarmControlPanelEntity):
 
     _attr_code_format = None
-    # _attr_changed_by = 'pending'
     _attr_supported_features = (
         AlarmControlPanelEntityFeature.ARM_AWAY |
         AlarmControlPanelEntityFeature.TRIGGER
@@ -74,7 +71,7 @@ class ZontAlarm(CoordinatorEntity, AlarmControlPanelEntity):
     @property
     def state(self) -> StateType:
         """Return the state of the entity."""
-        return 'arming'
+        return self.zont.get_state_guard_zone_for_ha(self._guard_zone)
 
     @property
     def unique_id(self) -> str:
@@ -100,3 +97,44 @@ class ZontAlarm(CoordinatorEntity, AlarmControlPanelEntity):
             return f"<Alarm entity {self.name}>"
         return super().__repr__()
 
+    async def _repeat_check_state(self):
+        """
+        Обновляем статус охранной зоны пока не получим стабильное
+        состояние охранной зоны (под охраной или снято с охраны)
+        """
+        counter = COUNTER_REPEAT
+        while self.zont.need_repeat_update(
+                self._guard_zone.state) and counter > 0:
+            counter -= 1
+            await self.coordinator.async_config_entry_first_refresh()
+            _LOGGER.debug(f'Обновляю статус охраны ещё {counter} раз.')
+            await asyncio.sleep(TIME_OUT_REPEAT)
+
+    async def async_alarm_disarm(self, code: str | None = None) -> None:
+        """Send disarm command."""
+        await self.zont.toggle_alarm(
+            device=self._device, guard_zone=self._guard_zone, command=False
+        )
+        await asyncio.sleep(TIME_OUT_REQUEST)
+        await self.coordinator.async_config_entry_first_refresh()
+        await self._repeat_check_state()
+
+    async def async_alarm_arm_away(self, code: str | None = None) -> None:
+        """Send arm home command."""
+        await self.zont.toggle_alarm(
+            device=self._device, guard_zone=self._guard_zone, command=True
+        )
+        await asyncio.sleep(TIME_OUT_REQUEST)
+        await self.coordinator.async_config_entry_first_refresh()
+        await self._repeat_check_state()
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Обработка обновлённых данных от координатора"""
+        self._device: DeviceZONT = self.coordinator.data.get_device(
+            self._device_id
+        )
+        self._guard_zone = self.zont.get_guard_zone(
+            self._device_id, self._guard_zone_id
+        )
+        self.async_write_ha_state()

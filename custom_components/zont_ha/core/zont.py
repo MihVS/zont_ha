@@ -1,4 +1,5 @@
 import logging
+from collections import namedtuple
 from http import HTTPStatus
 
 from aiohttp import ClientResponse
@@ -9,6 +10,7 @@ from homeassistant.const import (
 )
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.typing import HomeAssistantType
+from .exceptions import StateGuardError
 from .models_zont import (
     AccountZont, ErrorZont, SensorZONT, DeviceZONT, HeatingCircuitZONT,
     HeatingModeZONT, CustomControlZONT, GuardZoneZONT
@@ -18,11 +20,18 @@ from ..const import (
     URL_GET_DEVICES, URL_SET_TARGET_TEMP, URL_SEND_COMMAND_ZONT_OLD,
     MIN_TEMP_AIR, MAX_TEMP_AIR, MIN_TEMP_GVS, MAX_TEMP_GVS, MIN_TEMP_FLOOR,
     MAX_TEMP_FLOOR, MATCHES_GVS, MATCHES_FLOOR, URL_TRIGGER_CUSTOM_BUTTON,
-    STATE_UNKNOWN_ZONT, STATE_DISABLED_ZONT, STATE_ENABLED_ZONT,
-    STATE_DISABLING_ZONT, STATE_ENABLING_ZONT
+    URL_SET_GUARD,
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+StateZont = namedtuple('StateZont', [
+    'unknown', 'disabled', 'enabled', 'disabling', 'enabling'
+])
+
+state_zont = StateZont(
+    'unknown', 'disabled', 'enabled', 'disabling', 'enabling'
+)
 
 
 class Zont:
@@ -96,10 +105,33 @@ class Zont:
              if guard_zone.id == guard_zone_id), None
         )
 
-    def get_state_guard_zone_for_ha(self, guard_zone: GuardZoneZONT) -> str:
+    @staticmethod
+    def need_repeat_update(state_guard_zone: str) -> bool:
+        values = (state_zont.enabling, state_zont.disabling)
+        if state_guard_zone in values:
+            return True
+        return False
+
+    @staticmethod
+    def get_state_guard_zone_for_ha(guard_zone: GuardZoneZONT) -> str:
         """Получить статус охранной зоны"""
-        if guard_zone.state:
+        if guard_zone.alarm:
             return STATE_ALARM_TRIGGERED
+        match guard_zone.state:
+            case state_zont.unknown:
+                return STATE_UNAVAILABLE
+            case state_zont.disabled:
+                return STATE_ALARM_DISARMED
+            case state_zont.enabled:
+                return STATE_ALARM_ARMED_HOME
+            case state_zont.disabling:
+                return STATE_ALARM_DISARMING
+            case state_zont.enabling:
+                return STATE_ALARM_ARMING
+            case _:
+                raise StateGuardError(
+                    f'Неизвестный статус охранной зоны: {guard_zone.state}'
+                )
 
     def get_heating_mode_by_id(
             self, device_id: int, heating_mode_id: int
@@ -201,6 +233,22 @@ class Zont:
                 'device_id': device.id,
                 'control_id': control.id,
                 'target_state': command
+            },
+            headers=self.headers
+        )
+
+    @check_send_command
+    async def toggle_alarm(
+            self, device: DeviceZONT, guard_zone: GuardZoneZONT,
+            command: bool
+    ) -> ClientResponse:
+        """Отправка команды на изменение состояния охранной зоны."""
+        return await self.session.post(
+            url=URL_SET_GUARD,
+            json={
+                'device_id': device.id,
+                'zone_id': guard_zone.id,
+                'enable': command
             },
             headers=self.headers
         )

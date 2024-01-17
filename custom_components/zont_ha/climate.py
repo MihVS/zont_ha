@@ -10,7 +10,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator, DOMAIN
-from .const import MANUFACTURER
+from .const import MANUFACTURER, TIME_OUT_REQUEST, MAX_TEMP_AIR, MIN_TEMP_AIR
 from .core.exceptions import TemperatureOutOfRangeError, SetHvacModeError
 from .core.models_zont import DeviceZONT, HeatingModeZONT
 from .core.zont import Zont
@@ -45,13 +45,13 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
     """Базовый класс для климата zont"""
 
     _attr_hvac_modes = [HVACMode.HEAT, HVACMode.OFF]
-    _attr_max_temp = 80
-    _attr_min_temp = 5
+    _attr_max_temp = MAX_TEMP_AIR
+    _attr_min_temp = MIN_TEMP_AIR
     _attr_supported_features = (
             ClimateEntityFeature.TARGET_TEMPERATURE |
             ClimateEntityFeature.PRESET_MODE
     )
-    _attr_target_temperature_step = 0.5
+    _attr_target_temperature_step = 0.1
 
     def __init__(
             self, coordinator: ZontCoordinator, device_id: int,
@@ -141,7 +141,7 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
                 heating_circuit=self._heating_circuit,
                 target_temp=set_temp
             )
-            await asyncio.sleep(2)
+            await asyncio.sleep(TIME_OUT_REQUEST)
             await self.coordinator.async_config_entry_first_refresh()
         else:
             raise TemperatureOutOfRangeError(
@@ -168,7 +168,7 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
                 target_temp=self._heating_circuit.target_temp
             )
             self._heating_circuit.current_mode = None
-        await asyncio.sleep(2)
+        await asyncio.sleep(TIME_OUT_REQUEST)
         await self.coordinator.async_config_entry_first_refresh()
 
     def __repr__(self) -> str:

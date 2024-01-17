@@ -17,6 +17,7 @@ def check_send_command(func):
         device = kwargs.get('device')
         heating_circuit = kwargs.get('heating_circuit')
         target_temp = kwargs.get('target_temp')
+        guard_zone = kwargs.get('guard_zone')
         custom_control = kwargs.get('control')
         command = kwargs.get('command')
 
@@ -25,6 +26,9 @@ def check_send_command(func):
             set_value = target_temp
         elif custom_control is not None:
             control = custom_control
+            set_value = command
+        elif guard_zone is not None:
+            control = guard_zone
             set_value = command
         else:
             return func

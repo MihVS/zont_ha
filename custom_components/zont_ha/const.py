@@ -48,8 +48,6 @@ SWITCH_ZONT = 'toggle_button'
 
 PLATFORMS = ['sensor', 'climate', 'button', 'switch', 'alarm_control_panel']
 
-STATE_UNKNOWN_ZONT = 'unknown'
-STATE_DISABLED_ZONT = 'disabled'
-STATE_ENABLED_ZONT = 'enabled'
-STATE_DISABLING_ZONT = 'disabling'
-STATE_ENABLING_ZONT = 'enabling'
+COUNTER_REPEAT = 18
+TIME_OUT_REPEAT = 10
+TIME_OUT_REQUEST = 2

@@ -29,3 +29,8 @@ class ResponseZontError(HomeAssistantError):
 class SetHvacModeError(HomeAssistantError):
     """Ошибка изменения HVAC mode"""
     pass
+
+
+class StateGuardError(HomeAssistantError):
+    """Ошибка статуса охранной зоны"""
+    pass
