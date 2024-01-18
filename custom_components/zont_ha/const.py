@@ -31,8 +31,12 @@ VALID_UNITS = {
     'smoke': UnitOfElectricPotential.VOLT,
     'opening': UnitOfElectricPotential.VOLT,
     'room_thermostat': UnitOfElectricPotential.VOLT,
+    'boiler_failure': UnitOfElectricPotential.VOLT,
+    'power_source': UnitOfElectricPotential.VOLT,
+    'discrete': UnitOfElectricPotential.VOLT,
     'dhw_speed': 'л/мин'
 }
+BINARY_SENSOR_TYPES = ('leakage', 'smoke', 'opening', 'motion')
 
 MIN_TEMP_AIR = 5
 MAX_TEMP_AIR = 35
@@ -46,7 +50,14 @@ MATCHES_FLOOR = ('пол', 'тёплый',)
 BUTTON_ZONT = 'button'
 SWITCH_ZONT = 'toggle_button'
 
-PLATFORMS = ['sensor', 'climate', 'button', 'switch', 'alarm_control_panel']
+PLATFORMS = [
+    'sensor',
+    'climate',
+    'button',
+    'switch',
+    'alarm_control_panel',
+    'binary_sensor'
+]
 
 COUNTER_REPEAT = 18
 TIME_OUT_REPEAT = 10

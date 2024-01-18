@@ -4,6 +4,7 @@ from http import HTTPStatus
 
 from aiohttp import ClientResponse
 
+from homeassistant.components.binary_sensor import BinarySensorDeviceClass
 from homeassistant.const import (
     STATE_ALARM_TRIGGERED, STATE_UNAVAILABLE, STATE_ALARM_DISARMED,
     STATE_ALARM_ARMED_HOME, STATE_ALARM_DISARMING, STATE_ALARM_ARMING
@@ -20,7 +21,7 @@ from ..const import (
     URL_GET_DEVICES, URL_SET_TARGET_TEMP, URL_SEND_COMMAND_ZONT_OLD,
     MIN_TEMP_AIR, MAX_TEMP_AIR, MIN_TEMP_GVS, MAX_TEMP_GVS, MIN_TEMP_FLOOR,
     MAX_TEMP_FLOOR, MATCHES_GVS, MATCHES_FLOOR, URL_TRIGGER_CUSTOM_BUTTON,
-    URL_SET_GUARD,
+    URL_SET_GUARD, BINARY_SENSOR_TYPES,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -32,6 +33,12 @@ StateZont = namedtuple('StateZont', [
 state_zont = StateZont(
     'unknown', 'disabled', 'enabled', 'disabling', 'enabling'
 )
+
+TypeBinarySensorZont = namedtuple('TypeBinarySensorZont', [
+    'leakage', 'smoke', 'opening', 'motion'
+])
+
+type_binary_sensor = TypeBinarySensorZont(*BINARY_SENSOR_TYPES)
 
 
 class Zont:
@@ -132,6 +139,43 @@ class Zont:
                 raise StateGuardError(
                     f'Неизвестный статус охранной зоны: {guard_zone.state}'
                 )
+
+    @staticmethod
+    def get_voltage(device: DeviceZONT, sensor_id: int = 0) -> int | None:
+        return next(
+            (sensor.value for sensor in device.sensors
+             if sensor.id == sensor_id), None
+        )
+
+    @staticmethod
+    def _is_on_leakage(voltage: float, current_value: float) -> bool:
+        return not 0.25 * voltage < current_value < 0.75 * voltage
+
+    @staticmethod
+    def _is_on_smoke(voltage: float, current_value: float) -> bool:
+        return not 0.52 * voltage < current_value < 0.85 * voltage
+
+    @staticmethod
+    def _is_on_contact(voltage: float, current_value: float) -> bool:
+        return current_value > 0.6 * voltage
+
+    def is_on_binary(self, device: DeviceZONT, sensor: SensorZONT) -> bool:
+        current_value = sensor.value
+        if current_value is None:
+            return False
+        voltage = self.get_voltage(device)
+        if voltage is None:
+            return False
+        match sensor.type:
+            case type_binary_sensor.leakage:
+                return self._is_on_leakage(voltage, current_value)
+            case type_binary_sensor.smoke:
+                return self._is_on_smoke(voltage, current_value)
+            case type_binary_sensor.opening | type_binary_sensor.motion:
+                return self._is_on_contact(voltage, current_value)
+            case _:
+                _LOGGER.warning(f"Unknown sensor type: {sensor.type}")
+                return False
 
     def get_heating_mode_by_id(
             self, device_id: int, heating_mode_id: int

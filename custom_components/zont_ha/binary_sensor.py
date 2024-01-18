@@ -1,5 +1,9 @@
 import logging
+from collections import namedtuple
 
+from homeassistant.components.binary_sensor import (
+    BinarySensorDeviceClass, BinarySensorEntity
+)
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
@@ -11,8 +15,10 @@ from . import ZontCoordinator
 from .const import DOMAIN, MANUFACTURER, VALID_UNITS, BINARY_SENSOR_TYPES
 from .core.exceptions import SensorNotFoundError
 from .core.models_zont import SensorZONT, DeviceZONT, OTSensorZONT
+from .core.zont import type_binary_sensor, Zont
 
 _LOGGER = logging.getLogger(__name__)
+
 
 async def async_setup_entry(
         hass: HomeAssistant,
@@ -25,53 +31,58 @@ async def async_setup_entry(
     zont = coordinator.zont
 
     for device in zont.data.devices:
-        sens = []
+        binary_sensors = []
         sensors = device.sensors
-        ot_sensors = device.ot_sensors
         for sensor in sensors:
             unique_id = f'{entry_id}{device.id}{sensor.id}'
-            if sensor.type not in BINARY_SENSOR_TYPES:
-                sens.append(ZontSensor(coordinator, device, sensor, unique_id))
-        for ot_sensor in ot_sensors:
-            unique_id = f'{entry_id}{device.id}{ot_sensor.id}'
-            sens.append(ZontSensor(coordinator, device, ot_sensor, unique_id))
-        if sens:
-            async_add_entities(sens)
-            _LOGGER.debug(f'Добавлены сенсоры: {sens}')
+            if sensor.type in BINARY_SENSOR_TYPES:
+                binary_sensors.append(ZontBinarySensor(
+                    coordinator, device, sensor, unique_id
+                ))
+        if binary_sensors:
+            async_add_entities(binary_sensors)
+            _LOGGER.debug(f'Добавлены бинарные сенсоры: {binary_sensors}')
 
 
-class ZontSensor(CoordinatorEntity, SensorEntity):
+class ZontBinarySensor(CoordinatorEntity, BinarySensorEntity):
 
     def __init__(
             self, coordinator: ZontCoordinator, device: DeviceZONT,
-            sensor: SensorZONT | OTSensorZONT, unique_id: str
+            sensor: SensorZONT, unique_id: str
     ) -> None:
         super().__init__(coordinator)
-        self._device = device
-        self._sensor = sensor
-        self._unique_id = unique_id
+        self._zont: Zont = coordinator.zont
+        self._device: DeviceZONT = device
+        self._sensor: SensorZONT = sensor
+        self._unique_id: str = unique_id
 
     @property
     def name(self) -> str:
         return f'{self._device.name}_{self._sensor.name}'
 
     @property
-    def native_value(self) -> float | str:
-        """Возвращает состояние сенсора"""
-        return self._sensor.value
-
-    @property
-    def native_unit_of_measurement(self) -> str | None:
-        """Возвращает единицу измерения сенсора из API zont"""
-        return VALID_UNITS[self._sensor.type]
-
-    @property
     def unique_id(self) -> str:
         return self._unique_id
 
     @property
-    def device_class(self) -> str | None:
-        return self._sensor.type
+    def device_class(self) -> BinarySensorDeviceClass | None:
+        """Return the class of this entity."""
+        match self._sensor.type:
+            case type_binary_sensor.leakage:
+                return BinarySensorDeviceClass.MOISTURE
+            case type_binary_sensor.smoke:
+                return BinarySensorDeviceClass.SMOKE
+            case type_binary_sensor.opening:
+                return BinarySensorDeviceClass.DOOR
+            case type_binary_sensor.motion:
+                return BinarySensorDeviceClass.MOTION
+            case _:
+                return None
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if the binary sensor is on."""
+        return self._zont.is_on_binary(self._device, self._sensor)
 
     @property
     def device_info(self):
@@ -83,6 +94,11 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
             "manufacturer": MANUFACTURER,
         }
 
+    def __repr__(self) -> str:
+        if not self.hass:
+            return f"<Binary sensor entity {self.name}>"
+        return super().__repr__()
+
     @callback
     def _handle_coordinator_update(self) -> None:
         """Обработка обновлённых данных от координатора"""
@@ -91,12 +107,5 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
             self._device.id,
             self._sensor.id
         )
-        if sensor is None:
-            _LOGGER.error(f'Сенсор по id={self._sensor.id} не найден')
-            raise SensorNotFoundError
-        if sensor.value != self._sensor.value:
-            _LOGGER.debug(
-                f'Сенсор "{self._device.name}_{self._sensor.name}" обновился '
-                f'с {self._sensor.value} на {sensor.value}')
         self._sensor.value = sensor.value
         self.async_write_ha_state()
