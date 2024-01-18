@@ -61,18 +61,18 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
         self._device_id = device_id
         self._heating_circuit_id = heating_circuit_id
         self._unique_id: str = unique_id
-        self.zont: Zont = coordinator.zont
-        self._device: DeviceZONT = self.zont.get_device(device_id)
-        self._heating_circuit = self.zont.get_heating_circuit(
-            device_id, heating_circuit_id
+        self._zont: Zont = coordinator.zont
+        self._device: DeviceZONT = self._zont.get_device(device_id)
+        self._heating_circuit = self._zont.get_heating_circuit(
+            self._device, heating_circuit_id
         )
         self._heating_modes: list[HeatingModeZONT] = self._device.heating_modes
         self._attr_min_temp, self._attr_max_temp = (
-            self.zont.get_min_max_values_temp(self._heating_circuit.name))
+            self._zont.get_min_max_values_temp(self._heating_circuit.name))
 
     @property
     def preset_modes(self) -> list[str] | None:
-        _preset_modes = self.zont.get_names_heating_mode(
+        _preset_modes = self._zont.get_names_heating_mode(
             self._heating_modes
         )
         _preset_modes.append(PRESET_NONE)
@@ -81,8 +81,8 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
     @property
     def preset_mode(self) -> str | None:
         heating_mode_id = self._heating_circuit.current_mode
-        heating_mode = self.zont.get_heating_mode_by_id(
-            self._device_id, heating_mode_id
+        heating_mode = self._zont.get_heating_mode_by_id(
+            self._device, heating_mode_id
         )
         if heating_mode is not None:
             return heating_mode.name
@@ -136,7 +136,7 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
         """Set new target temperature."""
         set_temp = kwargs.get('temperature')
         if self._attr_min_temp <= set_temp <= self._attr_max_temp:
-            await self.zont.set_target_temperature(
+            await self._zont.set_target_temperature(
                 device=self._device,
                 heating_circuit=self._heating_circuit,
                 target_temp=set_temp
@@ -152,17 +152,17 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
 
     async def async_set_preset_mode(self, preset_mode):
         """Set new target preset mode."""
-        heating_mode = self.zont.get_heating_mode_by_name(
-            self._device_id, preset_mode
+        heating_mode = self._zont.get_heating_mode_by_name(
+            self._device, preset_mode
         )
         if heating_mode is not None:
-            await self.zont.set_heating_mode(
+            await self._zont.set_heating_mode(
                 device=self._device,
                 heating_circuit=self._heating_circuit,
                 heating_mode_id=heating_mode.id
             )
         else:
-            await self.zont.set_target_temperature(
+            await self._zont.set_target_temperature(
                 device=self._device,
                 heating_circuit=self._heating_circuit,
                 target_temp=self._heating_circuit.target_temp
@@ -189,8 +189,8 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
         self._device: DeviceZONT = self.coordinator.data.get_device(
             self._device_id
         )
-        self._heating_circuit = self.zont.get_heating_circuit(
-            self._device_id, self._heating_circuit_id
+        self._heating_circuit = self._zont.get_heating_circuit(
+            self._device, self._heating_circuit_id
         )
 
         self.async_write_ha_state()

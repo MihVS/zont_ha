@@ -1,10 +1,8 @@
 import logging
-from collections import namedtuple
 
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass, BinarySensorEntity
 )
-from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -12,9 +10,8 @@ from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
 )
 from . import ZontCoordinator
-from .const import DOMAIN, MANUFACTURER, VALID_UNITS, BINARY_SENSOR_TYPES
-from .core.exceptions import SensorNotFoundError
-from .core.models_zont import SensorZONT, DeviceZONT, OTSensorZONT
+from .const import DOMAIN, MANUFACTURER, BINARY_SENSOR_TYPES
+from .core.models_zont import SensorZONT, DeviceZONT
 from .core.zont import type_binary_sensor, Zont
 
 _LOGGER = logging.getLogger(__name__)

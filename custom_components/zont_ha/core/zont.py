@@ -4,7 +4,6 @@ from http import HTTPStatus
 
 from aiohttp import ClientResponse
 
-from homeassistant.components.binary_sensor import BinarySensorDeviceClass
 from homeassistant.const import (
     STATE_ALARM_TRIGGERED, STATE_UNAVAILABLE, STATE_ALARM_DISARMED,
     STATE_ALARM_ARMED_HOME, STATE_ALARM_DISARMING, STATE_ALARM_ARMING
@@ -92,21 +91,21 @@ class Zont:
             None
         )
 
+    @staticmethod
     def get_heating_circuit(
-            self, device_id: int, heating_circuit_id: int
+            device: DeviceZONT, heating_circuit_id: int
     ) -> HeatingCircuitZONT | None:
         """Получить сенсор по его id и id устройства"""
-        device = self.get_device(device_id)
         return next(
             (heating_circuit for heating_circuit in device.heating_circuits
              if heating_circuit.id == heating_circuit_id), None
         )
 
+    @staticmethod
     def get_guard_zone(
-            self, device_id: int, guard_zone_id: int
+            device: DeviceZONT, guard_zone_id: int
     ) -> GuardZoneZONT | None:
         """Получить охранную зону по её id и id устройства"""
-        device = self.get_device(device_id)
         return next(
             (guard_zone for guard_zone in device.guard_zones
              if guard_zone.id == guard_zone_id), None
@@ -177,21 +176,21 @@ class Zont:
                 _LOGGER.warning(f"Unknown sensor type: {sensor.type}")
                 return False
 
+    @staticmethod
     def get_heating_mode_by_id(
-            self, device_id: int, heating_mode_id: int
+            device: DeviceZONT, heating_mode_id: int
     ) -> HeatingModeZONT | None:
         """Получить name отопительного режима по его id"""
-        device = self.get_device(device_id)
         return next(
             (heating_mode for heating_mode in device.heating_modes
              if heating_mode.id == heating_mode_id), None
         )
 
+    @staticmethod
     def get_heating_mode_by_name(
-            self, device_id: int, heating_mode_name: str
+            device: DeviceZONT, heating_mode_name: str
     ) -> HeatingModeZONT | None:
         """Получить id отопительного режима по его name"""
-        device = self.get_device(device_id)
         return next(
             (heating_mode for heating_mode in device.heating_modes
              if heating_mode.name == heating_mode_name), None

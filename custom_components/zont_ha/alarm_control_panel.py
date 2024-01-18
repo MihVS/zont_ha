@@ -58,10 +58,10 @@ class ZontAlarm(CoordinatorEntity, AlarmControlPanelEntity):
         self._device_id = device_id
         self._guard_zone_id = guard_zone_id
         self._unique_id = unique_id
-        self.zont: Zont = coordinator.zont
-        self._device: DeviceZONT = self.zont.get_device(device_id)
-        self._guard_zone = self.zont.get_guard_zone(
-            device_id, guard_zone_id
+        self._zont: Zont = coordinator.zont
+        self._device: DeviceZONT = self._zont.get_device(device_id)
+        self._guard_zone = self._zont.get_guard_zone(
+            self._device, guard_zone_id
         )
 
     @property
@@ -71,7 +71,7 @@ class ZontAlarm(CoordinatorEntity, AlarmControlPanelEntity):
     @property
     def state(self) -> StateType:
         """Return the state of the entity."""
-        return self.zont.get_state_guard_zone_for_ha(self._guard_zone)
+        return self._zont.get_state_guard_zone_for_ha(self._guard_zone)
 
     @property
     def unique_id(self) -> str:
@@ -103,7 +103,7 @@ class ZontAlarm(CoordinatorEntity, AlarmControlPanelEntity):
         состояние охранной зоны (под охраной или снято с охраны)
         """
         counter = COUNTER_REPEAT
-        while self.zont.need_repeat_update(
+        while self._zont.need_repeat_update(
                 self._guard_zone.state) and counter > 0:
             counter -= 1
             await self.coordinator.async_config_entry_first_refresh()
@@ -112,7 +112,7 @@ class ZontAlarm(CoordinatorEntity, AlarmControlPanelEntity):
 
     async def async_alarm_disarm(self, code: str | None = None) -> None:
         """Send disarm command."""
-        await self.zont.toggle_alarm(
+        await self._zont.toggle_alarm(
             device=self._device, guard_zone=self._guard_zone, command=False
         )
         await asyncio.sleep(TIME_OUT_REQUEST)
@@ -121,7 +121,7 @@ class ZontAlarm(CoordinatorEntity, AlarmControlPanelEntity):
 
     async def async_alarm_arm_away(self, code: str | None = None) -> None:
         """Send arm home command."""
-        await self.zont.toggle_alarm(
+        await self._zont.toggle_alarm(
             device=self._device, guard_zone=self._guard_zone, command=True
         )
         await asyncio.sleep(TIME_OUT_REQUEST)
@@ -131,10 +131,10 @@ class ZontAlarm(CoordinatorEntity, AlarmControlPanelEntity):
     @callback
     def _handle_coordinator_update(self) -> None:
         """Обработка обновлённых данных от координатора"""
-        self._device: DeviceZONT = self.coordinator.data.get_device(
+        self._device: DeviceZONT = self.coordinator.zont.get_device(
             self._device_id
         )
-        self._guard_zone = self.zont.get_guard_zone(
-            self._device_id, self._guard_zone_id
+        self._guard_zone = self._zont.get_guard_zone(
+            self._device, self._guard_zone_id
         )
         self.async_write_ha_state()
