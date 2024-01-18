@@ -1,10 +1,10 @@
 ## ZONT для Home Assistant
 
-## **Технологии**
 ![python version](https://img.shields.io/badge/Python-3.11-yellowgreen?style=plastic&logo=python)
 ![pydantic version](https://img.shields.io/badge/pydantic-ha-yellowgreen?style=plastic&logo=fastapi)
 ![aiohttp version](https://img.shields.io/badge/aiohttp-ha-yellowgreen?style=plastic)
 ![Home Assistant](https://img.shields.io/badge/HomeAssistant-latest-yellowgreen?style=plastic&logo=homeassistant)
+[![Donate](https://img.shields.io/badge/donate-Tinkoff-FFDD2D.svg)](https://www.tinkoff.ru/cf/6ZagDrNCsJF)
 
 ## Описание
 Компонент для управления устройствами [ZONT](https://zont-online.ru/) из Home Assistant. 
@@ -49,7 +49,9 @@
 В НА добавляются все охранные зоны устройства. Можно поставить на охрану или снять с охраны охранную зону.
 
 ## Установка
-Вручную скопируйте каталог `zont_ha` в директорию `/config/custom_components`
+**Способ 1.** [HACS](https://hacs.xyz/) -> Интеграции -> Добавить -> ZONT -> Установить
+
+**Способ 2.** Вручную скопируйте каталог `zont_ha` в директорию `/config/custom_components`
 
 **Не забываем поставить ★ интеграции.**
 
