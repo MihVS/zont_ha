@@ -3,7 +3,7 @@ from http import HTTPStatus
 
 from aiohttp import ClientResponse
 
-from config.custom_components.zont_ha.core.exceptions import ResponseZontError
+from .exceptions import ResponseZontError
 
 _LOGGER = logging.getLogger(__name__)
 
