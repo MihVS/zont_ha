@@ -10,7 +10,5 @@ home-assistant*
 scenes.yaml
 scripts.yaml
 secrets.yaml
-/custom_components/hello_state/
-/custom_components/github_custom/
 __pycache__
 /custom_components/zont_ha/temp_data/
