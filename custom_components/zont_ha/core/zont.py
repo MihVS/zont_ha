@@ -6,7 +6,7 @@ from aiohttp import ClientResponse
 
 from homeassistant.const import (
     STATE_ALARM_TRIGGERED, STATE_UNAVAILABLE, STATE_ALARM_DISARMED,
-    STATE_ALARM_ARMED_HOME, STATE_ALARM_DISARMING, STATE_ALARM_ARMING
+    STATE_ALARM_DISARMING, STATE_ALARM_ARMING, STATE_ALARM_ARMED_AWAY
 )
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.typing import HomeAssistantType
@@ -129,7 +129,7 @@ class Zont:
             case state_zont.disabled:
                 return STATE_ALARM_DISARMED
             case state_zont.enabled:
-                return STATE_ALARM_ARMED_HOME
+                return STATE_ALARM_ARMED_AWAY
             case state_zont.disabling:
                 return STATE_ALARM_DISARMING
             case state_zont.enabling:
