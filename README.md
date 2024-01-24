@@ -4,7 +4,7 @@
 ![pydantic version](https://img.shields.io/badge/pydantic-ha-yellowgreen?style=plastic&logo=fastapi)
 ![aiohttp version](https://img.shields.io/badge/aiohttp-ha-yellowgreen?style=plastic)
 ![Home Assistant](https://img.shields.io/badge/HomeAssistant-latest-yellowgreen?style=plastic&logo=homeassistant)
-[![Donate](https://img.shields.io/badge/donate-Tinkoff-FFDD2D.svg)](https://www.tinkoff.ru/cf/6ZagDrNCsJF)
+[![Donate](https://img.shields.io/badge/donate-Tinkoff-FFDD2D.svg)](https://www.tinkoff.ru/rm/shutov.mikhail19/wUyu873109)
 
 ## Описание
 Компонент для управления устройствами [ZONT](https://zont-online.ru/) из Home Assistant. 
