@@ -102,7 +102,7 @@ class AccountZont(BaseModel):
 
 
 class TokenZont(BaseModel):
-    """Клас ответа об ошибке"""
+    """Клас ответа получения токена"""
 
     token: str
     token_id: str

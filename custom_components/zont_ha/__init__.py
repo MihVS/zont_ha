@@ -16,19 +16,18 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(
         hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
-    _LOGGER.debug(f'config entry: {config_entry.data}')
-    # entry_id = config_entry.entry_id
-    # email = config_entry.data.get("mail")
-    # token = config_entry.data.get("token")
-    # zont = Zont(hass, email, token)
-    # coordinator = ZontCoordinator(hass, zont)
-    # await coordinator.async_config_entry_first_refresh()
-    #
-    # hass.data.setdefault(DOMAIN, {})
-    # hass.data[DOMAIN][entry_id] = coordinator
-    # await hass.config_entries.async_forward_entry_setups(
-    #     config_entry, PLATFORMS
-    # )
+    entry_id = config_entry.entry_id
+    email = config_entry.data.get("mail")
+    token = config_entry.data.get("token")
+    zont = Zont(hass, email, token)
+    coordinator = ZontCoordinator(hass, zont)
+    await coordinator.async_config_entry_first_refresh()
+
+    hass.data.setdefault(DOMAIN, {})
+    hass.data[DOMAIN][entry_id] = coordinator
+    await hass.config_entries.async_forward_entry_setups(
+        config_entry, PLATFORMS
+    )
     return True
 
 

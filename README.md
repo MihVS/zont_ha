@@ -4,12 +4,17 @@
 ![pydantic version](https://img.shields.io/badge/pydantic-ha-yellowgreen?style=plastic&logo=fastapi)
 ![aiohttp version](https://img.shields.io/badge/aiohttp-ha-yellowgreen?style=plastic)
 ![Home Assistant](https://img.shields.io/badge/HomeAssistant-latest-yellowgreen?style=plastic&logo=homeassistant)
+
+
 [![Donate](https://img.shields.io/badge/donate-Tinkoff-FFDD2D.svg)](https://www.tinkoff.ru/rm/shutov.mikhail19/wUyu873109)
 
 ## Описание
 Компонент для управления устройствами [ZONT](https://zont-online.ru/) из Home Assistant. 
 
-Для входа в ваш аккаунт потребуется токен. Токен можно получить [здесь](https://lk.zont-online.ru/widget-api/v2).
+Для входа в ваш аккаунт потребуется токен. Его можно получить из Home Assistant.
+При добавлении устройства нажмите галочку "Получить токен". При каждом получении токена
+создаётся новый. Что бы их не плодить на аккаунте ZONT, запишите полученный токен.
+Как удалить токен описано [здесь](https://lk.zont-online.ru/widget-api/v2).
 
 После авторизации в Home Assistant (далее НА) добавляются все устройства аккаунта.
 

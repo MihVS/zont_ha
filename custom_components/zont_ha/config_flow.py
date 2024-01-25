@@ -20,18 +20,23 @@ async def get_token(
         hass: HomeAssistant, mail: str, login: str, password: str
 ) -> str:
     session = async_get_clientsession(hass)
-    basic = f'{login}:{password}'.encode("utf-8")
-    basic = base64.b64decode(basic).decode()
+    encoded = f'{login}:{password}'.encode("utf-8")
+    basic = base64.b64encode(encoded).decode()
     headers = {
         'Authorization': f'Basic {basic}',
         'X-ZONT-Client': mail,
         'Content-Type': 'application/json'
     }
-    response = await session.post(url=URL_GET_TOKEN, headers=headers)
+    response = await session.post(
+        url=URL_GET_TOKEN,
+        json={'client_name': 'Home Assistant'},
+        headers=headers
+    )
     text = await response.text()
     status_code = response.status
     if status_code != HTTPStatus.OK:
         error = ErrorZont.parse_raw(text)
+        hass.data['error'] = error.error_ui
         raise RequestAPIZONTError(error)
     data = TokenZont.parse_raw(text)
     return data.token
@@ -45,7 +50,6 @@ async def validate_auth_token(
     zont = Zont(hass, mail, token)
 
     result = await zont.get_update()
-    _LOGGER.debug(f'validate_auth: {result}')
     if result != HTTPStatus.OK:
         hass.data['error'] = zont.error
         raise RequestAPIZONTError
@@ -70,7 +74,6 @@ class ZontConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
         if user_input is not None:
             try:
-                _LOGGER.debug(f'user input start: {user_input}')
                 validate_mail(user_input['mail'])
                 if not errors:
                     self.data = user_input
@@ -100,17 +103,14 @@ class ZontConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
         if user_input is not None:
             try:
-                _LOGGER.debug(f'data: {self.data}')
-                _LOGGER.debug(f'user input pswd: {user_input}')
                 token = await get_token(
                     self.hass,
-                    user_input['mail'],
+                    self.data['mail'],
                     user_input['login'],
                     user_input['password']
                 )
-                self.data['token'] = token
                 if not errors:
-                    self.data['token'] = 'asdfghjkl'
+                    self.data['token'] = token
                 return await self.async_step_auth_token()
             except RequestAPIZONTError:
                 _LOGGER.error(self.hass.data['error'])
@@ -133,11 +133,10 @@ class ZontConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
         if user_input is not None:
             try:
-                _LOGGER.debug(f'data: {self.data}')
-                _LOGGER.debug(f'user input pswd: {user_input}')
                 await validate_auth_token(
                     self.hass,
-                    user_input['mail'], user_input['token']
+                    self.data['mail'],
+                    user_input['token']
                 )
                 if not errors:
                     self.data.update(user_input)
