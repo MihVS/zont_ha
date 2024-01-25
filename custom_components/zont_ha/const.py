@@ -5,9 +5,9 @@ from homeassistant.const import (
 DOMAIN = 'zont_ha'
 MANUFACTURER = 'MicroLine'
 
-ZONT_API_URL = "https://lk.zont-online.ru/api/widget/v2/"
+ZONT_API_URL = 'https://lk.zont-online.ru/api/widget/v2/'
 
-URL_SEND_COMMAND_ZONT_OLD = "https://lk.zont-online.ru/api/send_z3k_command"
+URL_SEND_COMMAND_ZONT_OLD = 'https://lk.zont-online.ru/api/send_z3k_command'
 
 URL_GET_DEVICES = 'https://lk.zont-online.ru/api/widget/v2/get_devices'
 URL_SET_TARGET_TEMP = 'https://lk.zont-online.ru/api/widget/v2/set_target_temp'

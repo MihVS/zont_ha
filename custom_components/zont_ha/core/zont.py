@@ -54,7 +54,7 @@ class Zont:
         }
         self.mail = mail
         self.session = async_get_clientsession(hass)
-        _LOGGER.warning(f'Создан объект Zont')
+        _LOGGER.debug(f'Создан объект Zont')
 
     async def get_update(self):
         """Получаем обновление данных объекта Zont"""

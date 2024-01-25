@@ -101,6 +101,14 @@ class AccountZont(BaseModel):
     ok: bool
 
 
+class TokenZont(BaseModel):
+    """Клас ответа получения токена"""
+
+    token: str
+    token_id: str
+    ok: bool
+
+
 class ErrorZont(BaseModel):
     """Клас ответа об ошибке"""
 
