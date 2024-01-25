@@ -12,7 +12,20 @@
         "data": {
           "name": "Название",
           "mail": "mail",
-          "token": "токен аккаунта"
+          "get_token": "Получить токен"
+        }
+      },
+      "auth_pswd": {
+        "title": "Получить токен",
+        "data": {
+          "login": "Логин",
+          "password": "Пароль"
+        }
+      },
+      "auth_token": {
+        "title": "Авторизация в ZONT",
+        "data": {
+          "token": "Токен"
         }
       }
     }
