@@ -29,6 +29,10 @@ async def async_setup_entry(
         sens = []
         sensors = device.sensors
         ot_sensors = device.ot_sensors
+        if sensors is None:
+            sensors = []
+        if ot_sensors is None:
+            ot_sensors = []
         for sensor in sensors:
             unique_id = f'{entry_id}{device.id}{sensor.id}'
             if sensor.type not in BINARY_SENSOR_TYPES:

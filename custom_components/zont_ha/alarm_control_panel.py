@@ -32,6 +32,8 @@ async def async_setup_entry(
     for device in zont.data.devices:
         alarms = []
         guard_zones = device.guard_zones
+        if guard_zones in None:
+            guard_zones = []
         for guard_zone in guard_zones:
             unique_id = f'{entry_id}{device.id}{guard_zone.id}'
             alarms.append(ZontAlarm(
