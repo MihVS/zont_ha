@@ -86,9 +86,9 @@ class DeviceZONT(BaseEntityZONT):
     widget_type: str
     heating_circuits: list[HeatingCircuitZONT]
     heating_modes: list[HeatingModeZONT]
-    boiler_modes: list[BoilerModeZONT]
+    boiler_modes: list[BoilerModeZONT] | None
     sensors: list[SensorZONT] | None
-    ot_sensors: list[OTSensorZONT]
+    ot_sensors: list[OTSensorZONT] | None
     guard_zones: list[GuardZoneZONT] | None
     custom_controls: list[CustomControlZONT] | None
     scenarios: list[ScenarioZONT] | None
