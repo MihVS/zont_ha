@@ -24,6 +24,8 @@ async def async_setup_entry(
     for device in zont.data.devices:
         buttons = []
         controls = device.custom_controls
+        if controls in None:
+            controls = []
         for control in controls:
             if control.type == BUTTON_ZONT:
                 unique_id = f'{entry_id}{device.id}{control.id}'
