@@ -20,7 +20,7 @@ from ..const import (
     URL_GET_DEVICES, URL_SET_TARGET_TEMP, URL_SEND_COMMAND_ZONT_OLD,
     MIN_TEMP_AIR, MAX_TEMP_AIR, MIN_TEMP_GVS, MAX_TEMP_GVS, MIN_TEMP_FLOOR,
     MAX_TEMP_FLOOR, MATCHES_GVS, MATCHES_FLOOR, URL_TRIGGER_CUSTOM_BUTTON,
-    URL_SET_GUARD, BINARY_SENSOR_TYPES,
+    URL_SET_GUARD, BINARY_SENSOR_TYPES, URL_SEND_COMMAND_ZONT,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -70,7 +70,7 @@ class Zont:
             _LOGGER.error(self.error.error_ui)
             return status_code
         self.data = AccountZont.parse_raw(text)
-        _LOGGER.info(f'Данные аккаунта {self.mail} обновлены')
+        _LOGGER.debug(f'Данные аккаунта {self.mail} обновлены')
         return status_code
 
     def get_device(self, device_id: int) -> DeviceZONT | None:
@@ -263,6 +263,20 @@ class Zont:
         )
         _LOGGER.debug(await response.text())
         return response
+
+    @check_send_command
+    async def set_heating_mode_all_heating_circuits(
+            self, device: DeviceZONT, heating_mode: HeatingModeZONT
+    ) -> ClientResponse:
+        """Отправка команды на установку нужного режима для всех контуров."""
+        return await self.session.post(
+            url=URL_SEND_COMMAND_ZONT,
+            json={
+                'device_id': device.id,
+                'mode_id': heating_mode.id
+            },
+            headers=self.headers
+        )
 
     @check_send_command
     async def toggle_switch(

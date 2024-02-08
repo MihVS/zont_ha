@@ -16,7 +16,7 @@ class ControlEntityZONT(BaseEntityZONT):
 class HeatingCircuitZONT(ControlEntityZONT):
     """Контур отопления"""
 
-    status: str
+    status: str | None
     active: bool
     actual_temp: float | None
     is_off: bool

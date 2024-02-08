@@ -10,7 +10,10 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator, DOMAIN
-from .const import MANUFACTURER, TIME_OUT_REQUEST, MAX_TEMP_AIR, MIN_TEMP_AIR
+from .const import (
+    MANUFACTURER, TIME_OUT_REQUEST, MAX_TEMP_AIR, MIN_TEMP_AIR,
+    MODELS_THERMOSTAT_ZONT
+)
 from .core.exceptions import TemperatureOutOfRangeError, SetHvacModeError
 from .core.models_zont import DeviceZONT, HeatingModeZONT
 from .core.zont import Zont
@@ -156,11 +159,17 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
             self._device, preset_mode
         )
         if heating_mode is not None:
-            await self._zont.set_heating_mode(
-                device=self._device,
-                heating_circuit=self._heating_circuit,
-                heating_mode_id=heating_mode.id
-            )
+            if self._device.model in MODELS_THERMOSTAT_ZONT:
+                await self._zont.set_heating_mode_all_heating_circuits(
+                    device=self._device,
+                    heating_mode=heating_mode
+                )
+            else:
+                await self._zont.set_heating_mode(
+                    device=self._device,
+                    heating_circuit=self._heating_circuit,
+                    heating_mode_id=heating_mode.id
+                )
         else:
             await self._zont.set_target_temperature(
                 device=self._device,
