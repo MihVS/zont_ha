@@ -16,6 +16,7 @@ def check_send_command(func):
     async def check_response(*args, **kwargs):
         device = kwargs.get('device')
         heating_circuit = kwargs.get('heating_circuit')
+        heating_mode = kwargs.get('heating_mode')
         target_temp = kwargs.get('target_temp')
         guard_zone = kwargs.get('guard_zone')
         custom_control = kwargs.get('control')
@@ -30,6 +31,9 @@ def check_send_command(func):
         elif guard_zone is not None:
             control = guard_zone
             set_value = command
+        elif heating_mode is not None:
+            control = heating_mode
+            set_value = 'Установлен во всех контурах'
         else:
             return func
 

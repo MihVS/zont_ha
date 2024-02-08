@@ -8,7 +8,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator, UpdateFailed
 )
-from .const import DOMAIN, PLATFORMS
+from .const import DOMAIN, PLATFORMS, TIME_UPDATE
 from .core.zont import Zont
 
 _LOGGER = logging.getLogger(__name__)
@@ -39,7 +39,7 @@ class ZontCoordinator(DataUpdateCoordinator):
             hass,
             _LOGGER,
             name="ZONT",
-            update_interval=timedelta(seconds=60),
+            update_interval=timedelta(seconds=TIME_UPDATE),
         )
         self.zont = zont
 

@@ -9,6 +9,7 @@ ZONT_API_URL = 'https://lk.zont-online.ru/api/widget/v2/'
 
 URL_SEND_COMMAND_ZONT_OLD = 'https://lk.zont-online.ru/api/send_z3k_command'
 
+URL_SEND_COMMAND_ZONT = 'https://lk.zont-online.ru/api/widget/v2/activate_heating_mode'
 URL_GET_DEVICES = 'https://lk.zont-online.ru/api/widget/v2/get_devices'
 URL_SET_TARGET_TEMP = 'https://lk.zont-online.ru/api/widget/v2/set_target_temp'
 URL_SET_GUARD = 'https://lk.zont-online.ru/api/widget/v2/set_guard'
@@ -62,3 +63,6 @@ PLATFORMS = [
 COUNTER_REPEAT = 18
 TIME_OUT_REPEAT = 10
 TIME_OUT_REQUEST = 2
+TIME_UPDATE = 60
+
+MODELS_THERMOSTAT_ZONT = ('T100', 'T102')
