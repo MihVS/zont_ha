@@ -23,8 +23,7 @@ async def async_setup_entry(
 
     for device in zont.data.devices:
         buttons = []
-        controls = device.custom_controls
-        for control in controls:
+        for control in device.custom_controls:
             if control.type == BUTTON_ZONT:
                 unique_id = f'{entry_id}{device.id}{control.id}'
                 buttons.append(ZontButton(zont, device, control, unique_id))

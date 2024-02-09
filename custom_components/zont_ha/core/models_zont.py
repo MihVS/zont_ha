@@ -1,10 +1,10 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 
 
 class BaseEntityZONT(BaseModel):
     """Базовая модель сущностей контроллера"""
 
-    id: int
+    id: int | str
     name: str
 
 
@@ -83,15 +83,23 @@ class DeviceZONT(BaseEntityZONT):
 
     model: str
     online: bool
-    widget_type: str
-    heating_circuits: list[HeatingCircuitZONT]
-    heating_modes: list[HeatingModeZONT]
+    widget_type: str | None
+    heating_circuits: list[HeatingCircuitZONT] = []
+    heating_modes: list[HeatingModeZONT] | None
     boiler_modes: list[BoilerModeZONT] = []
     sensors: list[SensorZONT] = []
     ot_sensors: list[OTSensorZONT] = []
-    guard_zones: list[GuardZoneZONT] = []
+    guard_zones: list[GuardZoneZONT] | GuardZoneZONT = []
     custom_controls: list[CustomControlZONT] = []
     scenarios: list[ScenarioZONT] = []
+
+    @validator('guard_zones')
+    def guard_zones_should_be_list(
+        cls, v: list[GuardZoneZONT] | GuardZoneZONT
+    ) -> list[GuardZoneZONT]:
+        if isinstance(v, GuardZoneZONT):
+            return [v]
+        return v
 
 
 class AccountZont(BaseModel):

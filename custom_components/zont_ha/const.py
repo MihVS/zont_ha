@@ -1,5 +1,5 @@
 from homeassistant.const import (
-    TEMP_CELSIUS, UnitOfElectricPotential, PERCENTAGE, UnitOfPressure
+    UnitOfTemperature, UnitOfElectricPotential, PERCENTAGE, UnitOfPressure
 )
 
 DOMAIN = 'zont_ha'
@@ -22,7 +22,7 @@ URL_TRIGGER_CUSTOM_BUTTON = (
 URL_GET_TOKEN = 'https://lk.zont-online.ru/api/authtoken/get'
 
 VALID_UNITS = {
-    'temperature': TEMP_CELSIUS,
+    'temperature': UnitOfTemperature.CELSIUS,
     'humidity': PERCENTAGE,
     'voltage': UnitOfElectricPotential.VOLT,
     'modulation': PERCENTAGE,
@@ -45,7 +45,7 @@ MIN_TEMP_GVS = 25
 MAX_TEMP_GVS = 75
 MIN_TEMP_FLOOR = 15
 MAX_TEMP_FLOOR = 45
-MATCHES_GVS = ('гвс', 'горяч', 'вода',)
+MATCHES_GVS = ('гвс', 'горяч', 'вода', 'бкн',)
 MATCHES_FLOOR = ('пол', 'тёплый',)
 
 BUTTON_ZONT = 'button'
