@@ -27,13 +27,11 @@ async def async_setup_entry(
 
     for device in zont.data.devices:
         sens = []
-        sensors = device.sensors
-        ot_sensors = device.ot_sensors
-        for sensor in sensors:
+        for sensor in device.sensors:
             unique_id = f'{entry_id}{device.id}{sensor.id}'
             if sensor.type not in BINARY_SENSOR_TYPES:
                 sens.append(ZontSensor(coordinator, device, sensor, unique_id))
-        for ot_sensor in ot_sensors:
+        for ot_sensor in device.ot_sensors:
             unique_id = f'{entry_id}{device.id}{ot_sensor.id}'
             sens.append(ZontSensor(coordinator, device, ot_sensor, unique_id))
         if sens:

@@ -5,7 +5,7 @@ from homeassistant.components.climate import (
     HVACMode, ClimateEntity, ClimateEntityFeature, HVACAction, PRESET_NONE
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import TEMP_CELSIUS
+from homeassistant.const import UnitOfTemperature
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -111,7 +111,7 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
 
     @property
     def temperature_unit(self) -> str:
-        return TEMP_CELSIUS
+        return UnitOfTemperature.CELSIUS
 
     @property
     def current_temperature(self) -> float:

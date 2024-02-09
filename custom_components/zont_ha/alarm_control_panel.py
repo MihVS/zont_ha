@@ -13,7 +13,7 @@ from . import ZontCoordinator, DOMAIN
 from .const import (
     MANUFACTURER, COUNTER_REPEAT, TIME_OUT_REPEAT, TIME_OUT_REQUEST
 )
-from .core.models_zont import DeviceZONT
+from .core.models_zont import DeviceZONT, GuardZoneZONT
 from .core.zont import Zont
 
 _LOGGER = logging.getLogger(__name__)
@@ -28,11 +28,9 @@ async def async_setup_entry(
 
     coordinator = hass.data[DOMAIN][entry_id]
     zont: Zont = coordinator.zont
-
     for device in zont.data.devices:
         alarms = []
-        guard_zones = device.guard_zones
-        for guard_zone in guard_zones:
+        for guard_zone in device.guard_zones:
             unique_id = f'{entry_id}{device.id}{guard_zone.id}'
             alarms.append(ZontAlarm(
                 coordinator, device.id, guard_zone.id, unique_id)
