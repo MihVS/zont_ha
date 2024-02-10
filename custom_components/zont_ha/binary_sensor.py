@@ -29,8 +29,18 @@ async def async_setup_entry(
 
     for device in zont.data.devices:
         binary_sensors = []
-        sensors = device.sensors
-        for sensor in sensors:
+        states = device.car_state
+        fields = []
+        if states:
+            fields = states.__fields__.keys()
+        for name_state in fields:
+            if isinstance(getattr(states, name_state), bool):
+                unique_id = f'{entry_id}{device.id}{name_state}'
+                binary_sensors.append(CarBinarySensor(
+                    coordinator, device, name_state, unique_id
+                ))
+
+        for sensor in device.sensors:
             unique_id = f'{entry_id}{device.id}{sensor.id}'
             if sensor.type in BINARY_SENSOR_TYPES:
                 binary_sensors.append(ZontBinarySensor(
@@ -39,6 +49,54 @@ async def async_setup_entry(
         if binary_sensors:
             async_add_entities(binary_sensors)
             _LOGGER.debug(f'Добавлены бинарные сенсоры: {binary_sensors}')
+
+
+class CarBinarySensor(CoordinatorEntity, BinarySensorEntity):
+
+    def __init__(
+            self, coordinator: ZontCoordinator, device: DeviceZONT,
+            sensor_name: str, unique_id: str
+    ) -> None:
+        super().__init__(coordinator)
+        self._zont: Zont = coordinator.zont
+        self._device: DeviceZONT = device
+        self._sensor_name: str = sensor_name
+        self._unique_id: str = unique_id
+
+    @property
+    def name(self) -> str:
+        return f'{self._device.name}_{self._sensor_name}'
+
+    @property
+    def unique_id(self) -> str:
+        return self._unique_id
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if the binary sensor is on."""
+        return getattr(self._device.car_state, self._sensor_name)
+
+    @property
+    def device_info(self):
+        return {
+            "identifiers": {(DOMAIN, self._device.id)},
+            "name": self._device.name,
+            "sw_version": None,
+            "model": self._device.model,
+            "manufacturer": MANUFACTURER,
+        }
+
+    def __repr__(self) -> str:
+        if not self.hass:
+            return f"<Binary sensor entity {self.name}>"
+        return super().__repr__()
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Обработка обновлённых данных от координатора"""
+
+        self._device = self.coordinator.data.get_device(self._device.id)
+        self.async_write_ha_state()
 
 
 class ZontBinarySensor(CoordinatorEntity, BinarySensorEntity):
