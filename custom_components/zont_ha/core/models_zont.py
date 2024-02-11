@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, validator
 
 
@@ -78,6 +80,47 @@ class ScenarioZONT(ControlEntityZONT):
     pass
 
 
+class AutoStart(BaseModel):
+    """Модель автостарта автомобиля"""
+
+    available: bool
+    status: str
+    until: datetime = None
+
+
+class CarView(BaseModel):
+    """Модель внешнего вида автомобиля"""
+
+    model: str
+
+
+class Position(BaseModel):
+    """Модель местонахождения автомобиля"""
+
+    x: float
+    y: float
+    time: datetime
+
+
+class CarStateZONT(BaseModel):
+    """Модель статуса автомобиля"""
+
+    engine_on: bool
+    autostart: AutoStart
+    engine_block: bool
+    siren: bool
+    door_front_left: bool
+    door_front_right: bool
+    door_rear_left: bool
+    door_rear_right: bool
+    trunk: bool
+    hood: bool
+    power_source: str
+    car_view: CarView
+    position: Position
+    address: str
+
+
 class DeviceZONT(BaseEntityZONT):
     """Модель контроллера"""
 
@@ -92,6 +135,7 @@ class DeviceZONT(BaseEntityZONT):
     guard_zones: list[GuardZoneZONT] | GuardZoneZONT = []
     custom_controls: list[CustomControlZONT] = []
     scenarios: list[ScenarioZONT] = []
+    car_state: CarStateZONT = []
 
     @validator('guard_zones')
     def guard_zones_should_be_list(
