@@ -6,11 +6,9 @@ from homeassistant.components.binary_sensor import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import (
-    CoordinatorEntity,
-)
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator
-from .const import DOMAIN, MANUFACTURER, BINARY_SENSOR_TYPES
+from .const import DOMAIN, MANUFACTURER, BINARY_SENSOR_TYPES, STATES_CAR
 from .core.models_zont import SensorZONT, DeviceZONT
 from .core.zont import type_binary_sensor, Zont
 
@@ -65,7 +63,7 @@ class CarBinarySensor(CoordinatorEntity, BinarySensorEntity):
 
     @property
     def name(self) -> str:
-        return f'{self._device.name}_{self._sensor_name}'
+        return f'{self._device.name}_{STATES_CAR[self._sensor_name]}'
 
     @property
     def unique_id(self) -> str:

@@ -57,7 +57,8 @@ PLATFORMS = [
     'button',
     'switch',
     'alarm_control_panel',
-    'binary_sensor'
+    'binary_sensor',
+    'device_tracker'
 ]
 
 COUNTER_REPEAT = 18
@@ -66,3 +67,15 @@ TIME_OUT_REQUEST = 2
 TIME_UPDATE = 60
 
 MODELS_THERMOSTAT_ZONT = ('T100', 'T102')
+
+STATES_CAR = {
+    'engine_on': 'Двигатель заведён',
+    'engine_block': 'Состояние блокировки двигателя',
+    'siren': 'Состояние сирены',
+    'door_front_left': 'Передняя левая дверь открыта',
+    'door_front_right': 'Передняя правая дверь открыта',
+    'door_rear_left': 'Задняя левая дверь открыта',
+    'door_rear_right': 'Задняя правая дверь открыта',
+    'trunk': 'Багажник открыт',
+    'hood': 'Капот открыт'
+}
