@@ -52,3 +52,10 @@ class ZontCoordinator(DataUpdateCoordinator):
 
         except Exception as err:
             raise UpdateFailed(f"Ошибка соединения с API zont: {err}")
+
+
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
+    """Unload a config entry."""
+    for platform in PLATFORMS:
+        await hass.config_entries.async_forward_entry_unload(entry, platform)
+    return True
