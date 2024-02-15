@@ -8,7 +8,7 @@ from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
 )
 from . import ZontCoordinator
-from .const import DOMAIN, MANUFACTURER, VALID_UNITS, BINARY_SENSOR_TYPES
+from .const import DOMAIN, VALID_UNITS, BINARY_SENSOR_TYPES
 from .core.exceptions import SensorNotFoundError
 from .core.models_zont import SensorZONT, DeviceZONT, OTSensorZONT
 
@@ -49,6 +49,7 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
         self._device = device
         self._sensor = sensor
         self._unique_id = unique_id
+        self._attr_device_info = coordinator.devices_info(device.id)
 
     @property
     def name(self) -> str:
@@ -71,16 +72,6 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
     @property
     def device_class(self) -> str | None:
         return self._sensor.type
-
-    @property
-    def device_info(self):
-        return {
-            "identifiers": {(DOMAIN, self._device.id)},
-            "name": self._device.name,
-            "sw_version": None,
-            "model": self._device.model,
-            "manufacturer": MANUFACTURER,
-        }
 
     @callback
     def _handle_coordinator_update(self) -> None:

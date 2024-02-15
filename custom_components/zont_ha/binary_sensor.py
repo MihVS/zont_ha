@@ -8,7 +8,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator
-from .const import DOMAIN, MANUFACTURER, BINARY_SENSOR_TYPES, STATES_CAR
+from .const import DOMAIN, BINARY_SENSOR_TYPES, STATES_CAR
 from .core.models_zont import SensorZONT, DeviceZONT
 from .core.zont import type_binary_sensor, Zont
 
@@ -60,6 +60,7 @@ class CarBinarySensor(CoordinatorEntity, BinarySensorEntity):
         self._device: DeviceZONT = device
         self._sensor_name: str = sensor_name
         self._unique_id: str = unique_id
+        self._attr_device_info = coordinator.devices_info(device.id)
 
     @property
     def name(self) -> str:
@@ -73,16 +74,6 @@ class CarBinarySensor(CoordinatorEntity, BinarySensorEntity):
     def is_on(self) -> bool | None:
         """Return true if the binary sensor is on."""
         return getattr(self._device.car_state, self._sensor_name)
-
-    @property
-    def device_info(self):
-        return {
-            "identifiers": {(DOMAIN, self._device.id)},
-            "name": self._device.name,
-            "sw_version": None,
-            "model": self._device.model,
-            "manufacturer": MANUFACTURER,
-        }
 
     def __repr__(self) -> str:
         if not self.hass:
@@ -136,16 +127,6 @@ class ZontBinarySensor(CoordinatorEntity, BinarySensorEntity):
     def is_on(self) -> bool | None:
         """Return true if the binary sensor is on."""
         return self._zont.is_on_binary(self._device, self._sensor)
-
-    @property
-    def device_info(self):
-        return {
-            "identifiers": {(DOMAIN, self._device.id)},
-            "name": self._device.name,
-            "sw_version": None,
-            "model": self._device.model,
-            "manufacturer": MANUFACTURER,
-        }
 
     def __repr__(self) -> str:
         if not self.hass:

@@ -11,9 +11,9 @@ from homeassistant.helpers.typing import StateType
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator, DOMAIN
 from .const import (
-    MANUFACTURER, COUNTER_REPEAT, TIME_OUT_REPEAT, TIME_OUT_REQUEST
+    COUNTER_REPEAT, TIME_OUT_REPEAT, TIME_OUT_REQUEST
 )
-from .core.models_zont import DeviceZONT, GuardZoneZONT
+from .core.models_zont import DeviceZONT
 from .core.zont import Zont
 
 _LOGGER = logging.getLogger(__name__)
@@ -61,6 +61,7 @@ class ZontAlarm(CoordinatorEntity, AlarmControlPanelEntity):
         self._guard_zone = self._zont.get_guard_zone(
             self._device, guard_zone_id
         )
+        self._attr_device_info = coordinator.devices_info(device_id)
 
     @property
     def name(self) -> str:
@@ -79,16 +80,6 @@ class ZontAlarm(CoordinatorEntity, AlarmControlPanelEntity):
     def supported_features(self) -> AlarmControlPanelEntityFeature:
         """Return the list of supported features."""
         return self._attr_supported_features
-
-    @property
-    def device_info(self):
-        return {
-            "identifiers": {(DOMAIN, self._device.id)},
-            "name": self._device.name,
-            "sw_version": None,
-            "model": self._device.model,
-            "manufacturer": MANUFACTURER,
-        }
 
     def __repr__(self) -> str:
         if not self.hass:

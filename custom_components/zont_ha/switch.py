@@ -6,7 +6,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator
-from .const import DOMAIN, MANUFACTURER, SWITCH_ZONT
+from .const import DOMAIN, SWITCH_ZONT
 from .core.models_zont import DeviceZONT, CustomControlZONT
 from .core.zont import Zont
 
@@ -47,6 +47,7 @@ class ZontSwitch(CoordinatorEntity, SwitchEntity):
         self._device = device
         self._control = control
         self._unique_id = unique_id
+        self._attr_device_info = coordinator.devices_info(device.id)
 
     @property
     def is_on(self) -> bool | None:
@@ -61,16 +62,6 @@ class ZontSwitch(CoordinatorEntity, SwitchEntity):
     @property
     def unique_id(self) -> str:
         return self._unique_id
-
-    @property
-    def device_info(self):
-        return {
-            "identifiers": {(DOMAIN, self._device.id)},
-            "name": self._device.name,
-            "sw_version": None,
-            "model": self._device.model,
-            "manufacturer": MANUFACTURER
-        }
 
     def __repr__(self) -> str:
         if not self.hass:

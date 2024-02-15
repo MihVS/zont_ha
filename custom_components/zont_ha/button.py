@@ -56,7 +56,6 @@ class ZontButton(ButtonEntity):
         return {
             "identifiers": {(DOMAIN, self._device.id)},
             "name": self._device.name,
-            "sw_version": None,
             "model": self._device.model,
             "manufacturer": MANUFACTURER
         }

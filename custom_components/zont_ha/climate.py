@@ -11,11 +11,11 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator, DOMAIN
 from .const import (
-    MANUFACTURER, TIME_OUT_REQUEST, MAX_TEMP_AIR, MIN_TEMP_AIR,
-    MODELS_THERMOSTAT_ZONT
+    TIME_OUT_REQUEST, MAX_TEMP_AIR, MIN_TEMP_AIR, MODELS_THERMOSTAT_ZONT
 )
 from .core.exceptions import TemperatureOutOfRangeError, SetHvacModeError
 from .core.models_zont import DeviceZONT, HeatingModeZONT
+from .core.models_zont_old import DeviceZontOld
 from .core.zont import Zont
 
 _LOGGER = logging.getLogger(__name__)
@@ -54,7 +54,6 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
             ClimateEntityFeature.TARGET_TEMPERATURE |
             ClimateEntityFeature.PRESET_MODE
     )
-    _attr_target_temperature_step = 0.1
 
     def __init__(
             self, coordinator: ZontCoordinator, device_id: int,
@@ -66,12 +65,15 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
         self._unique_id: str = unique_id
         self._zont: Zont = coordinator.zont
         self._device: DeviceZONT = self._zont.get_device(device_id)
+        self._device_old: DeviceZontOld = self._zont.get_device_old(device_id)
         self._heating_circuit = self._zont.get_heating_circuit(
             self._device, heating_circuit_id
         )
+        self._attr_target_temperature_step = self._device_old.tempstep
         self._heating_modes: list[HeatingModeZONT] = self._device.heating_modes
         self._attr_min_temp, self._attr_max_temp = (
             self._zont.get_min_max_values_temp(self._heating_circuit.name))
+        self._attr_device_info = coordinator.devices_info(device_id)
 
     @property
     def preset_modes(self) -> list[str] | None:
@@ -124,16 +126,6 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
     @property
     def unique_id(self) -> str:
         return self._unique_id
-
-    @property
-    def device_info(self):
-        return {
-            "identifiers": {(DOMAIN, self._device.id)},
-            "name": self._device.name,
-            "sw_version": None,
-            "model": self._device.model,
-            "manufacturer": MANUFACTURER,
-        }
 
     async def async_set_temperature(self, **kwargs) -> None:
         """Set new target temperature."""

@@ -4,22 +4,22 @@ from homeassistant.const import (
 
 DOMAIN = 'zont_ha'
 MANUFACTURER = 'MicroLine'
+CONFIGURATION_URL = 'https://lk.zont-online.ru/'
 
-ZONT_API_URL = 'https://lk.zont-online.ru/api/widget/v2/'
+ZONT_API_URL_ROOT = 'https://lk.zont-online.ru/api/'
+ZONT_API_URL = ZONT_API_URL_ROOT + 'widget/v2/'
 
-URL_SEND_COMMAND_ZONT_OLD = 'https://lk.zont-online.ru/api/send_z3k_command'
+URL_GET_DEVICES_OLD = ZONT_API_URL_ROOT + 'devices'
+URL_SEND_COMMAND_ZONT_OLD = ZONT_API_URL_ROOT + 'send_z3k_command'
 
-URL_SEND_COMMAND_ZONT = 'https://lk.zont-online.ru/api/widget/v2/activate_heating_mode'
-URL_GET_DEVICES = 'https://lk.zont-online.ru/api/widget/v2/get_devices'
-URL_SET_TARGET_TEMP = 'https://lk.zont-online.ru/api/widget/v2/set_target_temp'
-URL_SET_GUARD = 'https://lk.zont-online.ru/api/widget/v2/set_guard'
-URL_ACTIVATE_HEATING_MODE = (
-    'https://lk.zont-online.ru/api/widget/v2/activate_heating_mode'
-)
-URL_TRIGGER_CUSTOM_BUTTON = (
-    'https://lk.zont-online.ru/api/widget/v2/trigger_custom_button'
-)
-URL_GET_TOKEN = 'https://lk.zont-online.ru/api/authtoken/get'
+URL_SEND_COMMAND_ZONT = ZONT_API_URL + 'activate_heating_mode'
+URL_GET_DEVICES = ZONT_API_URL + 'get_devices'
+URL_SET_TARGET_TEMP = ZONT_API_URL + 'set_target_temp'
+URL_SET_GUARD = ZONT_API_URL + 'set_guard'
+URL_ACTIVATE_HEATING_MODE = ZONT_API_URL + 'activate_heating_mode'
+URL_TRIGGER_CUSTOM_BUTTON = ZONT_API_URL + 'trigger_custom_button'
+
+URL_GET_TOKEN = ZONT_API_URL_ROOT + 'authtoken/get'
 
 VALID_UNITS = {
     'temperature': UnitOfTemperature.CELSIUS,
