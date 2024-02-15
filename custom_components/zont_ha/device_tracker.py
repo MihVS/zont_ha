@@ -44,6 +44,7 @@ class CarPosition(CoordinatorEntity, TrackerEntity):
         self._zont: Zont = coordinator.zont
         self._device: DeviceZONT = device
         self._unique_id: str = unique_id
+        self._attr_device_info = coordinator.devices_info(device.id)
 
     @property
     def name(self) -> str:

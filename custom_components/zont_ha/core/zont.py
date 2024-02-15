@@ -15,12 +15,14 @@ from .models_zont import (
     AccountZont, ErrorZont, SensorZONT, DeviceZONT, HeatingCircuitZONT,
     HeatingModeZONT, CustomControlZONT, GuardZoneZONT
 )
+from .models_zont_old import AccountZontOld, DeviceZontOld
 from .utils import check_send_command
 from ..const import (
     URL_GET_DEVICES, URL_SET_TARGET_TEMP, URL_SEND_COMMAND_ZONT_OLD,
     MIN_TEMP_AIR, MAX_TEMP_AIR, MIN_TEMP_GVS, MAX_TEMP_GVS, MIN_TEMP_FLOOR,
     MAX_TEMP_FLOOR, MATCHES_GVS, MATCHES_FLOOR, URL_TRIGGER_CUSTOM_BUTTON,
     URL_SET_GUARD, BINARY_SENSOR_TYPES, URL_SEND_COMMAND_ZONT,
+    URL_GET_DEVICES_OLD,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -44,6 +46,7 @@ class Zont:
     """Класс контроллера zont"""
 
     data: AccountZont = None
+    data_old: AccountZontOld
     error: ErrorZont = None
 
     def __init__(self, hass: HomeAssistantType, mail: str, token: str):
@@ -56,11 +59,20 @@ class Zont:
         self.session = async_get_clientsession(hass)
         _LOGGER.debug(f'Создан объект Zont')
 
-    async def get_update(self):
-        """Получаем обновление данных объекта Zont"""
+    async def get_update(self, old_api=False):
+        """Получаем обновление данных Zont"""
+        if old_api:
+            url = URL_GET_DEVICES_OLD
+            version = 'old'
+            account = AccountZontOld
+        else:
+            url = URL_GET_DEVICES
+            version = 'new'
+            account = AccountZont
+
         headers = self.headers
         response = await self.session.post(
-            url=URL_GET_DEVICES,
+            url=url,
             headers=headers
         )
         text = await response.text()
@@ -69,14 +81,25 @@ class Zont:
             self.error = ErrorZont.parse_raw(text)
             _LOGGER.error(self.error.error_ui)
             return status_code
-        self.data = AccountZont.parse_raw(text)
-        _LOGGER.debug(f'Данные аккаунта {self.mail} обновлены')
+        if old_api:
+            self.data_old = account.parse_raw(text)
+        else:
+            self.data = account.parse_raw(text)
+        _LOGGER.debug(f'Данные аккаунта {self.mail} обновлены. ver: {version}')
         return status_code
 
     def get_device(self, device_id: int) -> DeviceZONT | None:
         """Получить устройство по его id"""
         return next(
             (device for device in self.data.devices if device.id == device_id),
+            None
+        )
+
+    def get_device_old(self, device_id: int) -> DeviceZontOld | None:
+        """Получить устройство по его id для старого API"""
+        return next(
+            (device for device in self.data_old.devices
+             if device.id == device_id),
             None
         )
 
