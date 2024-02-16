@@ -73,6 +73,11 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
     def device_class(self) -> str | None:
         return self._sensor.type
 
+    def __repr__(self) -> str:
+        if not self.hass:
+            return f"<Sensor entity {self.name}>"
+        return super().__repr__()
+
     @callback
     def _handle_coordinator_update(self) -> None:
         """Обработка обновлённых данных от координатора"""

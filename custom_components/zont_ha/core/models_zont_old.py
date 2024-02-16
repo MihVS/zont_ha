@@ -1,24 +1,19 @@
-from pydantic import BaseModel, validator
-
-
-class Coordinate(BaseModel):
-    """Модель координат устройства"""
-
-    latitude: float
-    longitude: float
+from pydantic import BaseModel, validator, root_validator
 
 
 class StationaryLocationZontOld(BaseModel):
     """Модель локации устройства"""
 
     loc: list
+    latitude: float | None
+    longitude: float | None
 
-    @validator('loc')
-    def loc_get_latitude_longitude(cls, v: list[int]) -> Coordinate:
-        coordinate = Coordinate.parse_obj(
-            {'latitude': v[0], 'longitude': v[1]}
-        )
-        return coordinate
+    @root_validator
+    def add_fild_latitude_longitude(cls, values):
+        return {
+            'longitude': values['loc'][0],
+            'latitude': values['loc'][1]
+        }
 
 
 class HardwareType(BaseModel):
@@ -39,8 +34,10 @@ class DeviceZontOld(BaseModel):
 
     id: int
     serial: str
+    name: str
+    widget_type: str
     appliance_type: str
-    tempstep: int | float = 0.1
+    tempstep: float = 0.1
     firmware_version: list
     hardware_type: HardwareType
     serial: str
