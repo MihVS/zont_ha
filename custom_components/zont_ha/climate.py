@@ -54,6 +54,7 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
             ClimateEntityFeature.TARGET_TEMPERATURE |
             ClimateEntityFeature.PRESET_MODE
     )
+    _enable_turn_on_off_backwards_compatibility: bool = False
 
     def __init__(
             self, coordinator: ZontCoordinator, device_id: int,

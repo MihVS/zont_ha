@@ -8,6 +8,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator
 from .const import DOMAIN
 from .core.models_zont import DeviceZONT
+from .core.models_zont_old import DeviceZontOld
 from .core.zont import Zont
 
 _LOGGER = logging.getLogger(__name__)
@@ -25,8 +26,18 @@ async def async_setup_entry(
 
     for device in zont.data.devices:
         states = device.car_state
+        device_old: DeviceZontOld = zont.get_device_old(device.id)
+        stationary_location = device_old.stationary_location
+        widget_type = device_old.widget_type
+        if stationary_location and widget_type != 'ztc':
+            unique_id = f'{entry_id}{device.id}{device_old.serial}'
+            device_tracker = StationaryPosition(coordinator, device, unique_id)
+            async_add_entities([device_tracker])
+            _LOGGER.debug(
+                f'Добавлено устройство отслеживания: {device_tracker}'
+            )
         if states:
-            unique_id = f'{entry_id}{device.id}{"position"}'
+            unique_id = f'{entry_id}{device.id}{device_old.serial}'
             device_tracker = CarPosition(coordinator, device, unique_id)
             async_add_entities([device_tracker])
             _LOGGER.debug(
@@ -34,7 +45,7 @@ async def async_setup_entry(
             )
 
 
-class CarPosition(CoordinatorEntity, TrackerEntity):
+class Position(CoordinatorEntity, TrackerEntity):
 
     def __init__(
             self, coordinator: ZontCoordinator, device: DeviceZONT,
@@ -55,6 +66,29 @@ class CarPosition(CoordinatorEntity, TrackerEntity):
         return self._unique_id
 
     @property
+    def latitude(self) -> float | None:
+        """Return latitude value of the device."""
+        raise NotImplementedError()
+
+    @property
+    def longitude(self) -> float | None:
+        """Return longitude value of the device."""
+        raise NotImplementedError()
+
+    @property
+    def source_type(self) -> SourceType | str:
+        """Return the source type, eg gps or router, of the device."""
+        return SourceType.GPS
+
+    def __repr__(self) -> str:
+        if not self.hass:
+            return f"<Device tracker entity {self.name}>"
+        return super().__repr__()
+
+
+class CarPosition(Position):
+
+    @property
     def location_name(self) -> str | None:
         """Return a location name for the current location of the device."""
         return self._device.car_state.address
@@ -69,14 +103,28 @@ class CarPosition(CoordinatorEntity, TrackerEntity):
         """Return longitude value of the device."""
         return self._device.car_state.position.x
 
-    @property
-    def source_type(self) -> SourceType | str:
-        """Return the source type, eg gps or router, of the device."""
-        return SourceType.GPS
-
     @callback
     def _handle_coordinator_update(self) -> None:
         """Обработка обновлённых данных от координатора"""
-
         self._device = self.coordinator.data.get_device(self._device.id)
         self.async_write_ha_state()
+
+
+class StationaryPosition(Position):
+
+    def __init__(
+            self, coordinator: ZontCoordinator, device: DeviceZONT,
+            unique_id: str
+    ) -> None:
+        super().__init__(coordinator, device, unique_id)
+        self._device_old: DeviceZontOld = self._zont.get_device_old(device.id)
+
+    @property
+    def latitude(self) -> float | None:
+        """Return latitude value of the device."""
+        return self._device_old.stationary_location.latitude
+
+    @property
+    def longitude(self) -> float | None:
+        """Return longitude value of the device."""
+        return self._device_old.stationary_location.longitude

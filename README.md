@@ -1,6 +1,6 @@
 ## ZONT для Home Assistant
 
-![python version](https://img.shields.io/badge/Python-3.11-yellowgreen?style=plastic&logo=python)
+![python version](https://img.shields.io/badge/Python-3.12-yellowgreen?style=plastic&logo=python)
 ![pydantic version](https://img.shields.io/badge/pydantic-ha-yellowgreen?style=plastic&logo=fastapi)
 ![aiohttp version](https://img.shields.io/badge/aiohttp-ha-yellowgreen?style=plastic)
 ![Home Assistant](https://img.shields.io/badge/HomeAssistant-latest-yellowgreen?style=plastic&logo=homeassistant)
@@ -42,9 +42,9 @@
 
 ### Контуры отопления.
 Контур отопления добавляется в НА в виде термостата. Все, созданные в ZONT, режимы отопления добавляются в НА.
+Шаг регулировки температуры берётся из аккаунта ZONT.
 
 Называйте контуры отопления в ZONT осмысленно. От названия контура зависят пределы регулировки температуры.
-
 Например, если контур отопления тёплого пола, то в названии должно быть слово "пол", а для контура ГВС - "гвс", "вода".
 
 ### Сенсоры.
