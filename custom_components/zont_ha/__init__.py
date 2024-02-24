@@ -49,11 +49,15 @@ class ZontCoordinator(DataUpdateCoordinator):
     def devices_info(self, device_id: int):
         device_old = self.zont.get_device_old(device_id)
         device = self.zont.get_device(device_id)
+        hardware_type = device_old.hardware_type
+        hw_version = None
+        if hardware_type is not None:
+            hw_version = hardware_type.code
         device_info = DeviceInfo(**{
             "identifiers": {(DOMAIN, device.id)},
             "name": device.name,
             "sw_version": device_old.firmware_version,
-            "hw_version": device_old.hardware_type.code,
+            "hw_version": hw_version,
             "serial_number": device_old.serial,
             "configuration_url": CONFIGURATION_URL,
             "model": device.model,

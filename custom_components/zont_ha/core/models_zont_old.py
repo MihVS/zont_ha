@@ -38,8 +38,8 @@ class DeviceZontOld(BaseModel):
     widget_type: str
     appliance_type: str
     tempstep: float = 0.1
-    firmware_version: list
-    hardware_type: HardwareType
+    firmware_version: list | None
+    hardware_type: HardwareType | None
     serial: str
     stationary_location: StationaryLocationZontOld | None
     z3k_config: Z3kZontOld | None
