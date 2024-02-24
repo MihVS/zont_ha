@@ -46,7 +46,8 @@ class DeviceZontOld(BaseModel):
 
     @validator('firmware_version')
     def firmware_version_get_first_element(cls, v: list[int]) -> int | None:
-        return v[0] if len(v) else None
+        if v is not None:
+            return v[0] if len(v) else None
 
 
 class AccountZontOld(BaseModel):
