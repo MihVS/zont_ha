@@ -9,8 +9,10 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator, UpdateFailed
 )
-from .const import DOMAIN, PLATFORMS, TIME_UPDATE, MANUFACTURER, \
-    CONFIGURATION_URL
+from .const import (
+    DOMAIN, PLATFORMS, TIME_UPDATE, MANUFACTURER,
+    CONFIGURATION_URL, COUNTER_CONNECT, TIME_OUT_UPDATE_DATA
+)
 from .core.zont import Zont
 
 _LOGGER = logging.getLogger(__name__)
@@ -36,6 +38,8 @@ async def async_setup_entry(
 
 class ZontCoordinator(DataUpdateCoordinator):
     """Координатор для общего обновления данных"""
+
+    _count_connect: int = 0
 
     def __init__(self, hass, zont):
         super().__init__(
@@ -68,12 +72,20 @@ class ZontCoordinator(DataUpdateCoordinator):
     async def _async_update_data(self):
         """Обновление данных API zont"""
         try:
-            async with async_timeout.timeout(10):
+            async with async_timeout.timeout(TIME_OUT_UPDATE_DATA):
                 await self.zont.get_update()
+                self._count_connect = 0
                 return self.zont
-
         except Exception as err:
-            raise UpdateFailed(f"Ошибка соединения с API zont: {err}")
+            if self._count_connect < COUNTER_CONNECT:
+                self._count_connect += 1
+                _LOGGER.warning(
+                    f'Неудачная попытка обновления данных ZONT. '
+                    f'Осталось попыток: {COUNTER_CONNECT - self._count_connect}'
+                )
+                return self.zont
+            else:
+                raise UpdateFailed(f"Ошибка соединения с API zont: {err}")
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
