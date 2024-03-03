@@ -1,0 +1,2287 @@
+{
+    "devices": [
+        {
+            "id": 312210,
+            "name": "SMART NEW",
+            "model": "SMART",
+            "online": true,
+            "widget_type": "z3k",
+            "heating_circuits": [
+                {
+                    "id": 20496,
+                    "name": "Отопление",
+                    "status": "ok",
+                    "active": false,
+                    "actual_temp": 18.8,
+                    "is_off": false,
+                    "target_temp": 18.0,
+                    "current_mode": null,
+                    "target_min": 5,
+                    "target_max": 35
+                },
+                {
+                    "id": 8284,
+                    "name": "ГВС",
+                    "status": "ok",
+                    "active": false,
+                    "actual_temp": null,
+                    "is_off": true,
+                    "target_temp": null,
+                    "current_mode": 20502,
+                    "target_min": 5,
+                    "target_max": 35
+                }
+            ],
+            "boiler_circuits": [
+                {
+                    "id": 20494,
+                    "name": "Котел",
+                    "active": false,
+                    "status": "ok",
+                    "target_temp": 20.0,
+                    "water_min_temp": 10.0,
+                    "water_max_temp": 90.0,
+                    "water_temp": 39,
+                    "modulation_level": 0.0
+                }
+            ],
+            "heating_modes": [
+                {
+                    "id": 20501,
+                    "name": "Комфорт",
+                    "can_be_applied": true,
+                    "color": "#dd4747"
+                },
+                {
+                    "id": 20502,
+                    "name": "Эконом",
+                    "can_be_applied": true,
+                    "color": "#73b8d3"
+                },
+                {
+                    "id": 20503,
+                    "name": "Расписание",
+                    "can_be_applied": true,
+                    "color": "#f2c30b"
+                },
+                {
+                    "id": 20504,
+                    "name": "Выключен",
+                    "can_be_applied": true,
+                    "color": "#515151"
+                }
+            ],
+            "boiler_modes": [],
+            "sensors": [
+                {
+                    "id": 0,
+                    "name": "Напряжение питания",
+                    "type": "voltage",
+                    "status": "ok",
+                    "value": 11.9,
+                    "unit": "В"
+                },
+                {
+                    "id": 4097,
+                    "name": "Улица",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 2.6,
+                    "unit": "°"
+                },
+                {
+                    "id": 4099,
+                    "name": "Помещение",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 18.8,
+                    "unit": "°"
+                },
+                {
+                    "id": 20550,
+                    "name": "Контроль напряжения питания",
+                    "type": "voltage",
+                    "status": "failure",
+                    "value": 11.9,
+                    "unit": "В"
+                }
+            ],
+            "guard_zones": [],
+            "custom_controls": [],
+            "scenarios": [],
+            "ot_sensors": [
+                {
+                    "id": "4098:rml",
+                    "boiler_adapter_id": 4098,
+                    "name": "Адаптер цифровой шины Модуляция",
+                    "type": "modulation",
+                    "status": "unknown",
+                    "value": 0.0,
+                    "unit": "%",
+                    "limits": {
+                        "high": 0,
+                        "low": 100
+                    }
+                },
+                {
+                    "id": "4098:bt",
+                    "boiler_adapter_id": 4098,
+                    "name": "Адаптер цифровой шины t° ТН",
+                    "type": "temperature",
+                    "status": "unknown",
+                    "value": 38.69921875,
+                    "unit": "°",
+                    "limits": {
+                        "high": 90.0,
+                        "low": 10.0
+                    }
+                }
+            ]
+        },
+        {
+            "id": 202313,
+            "name": "H1V NEW",
+            "model": "H1V",
+            "online": true,
+            "widget_type": "z3k",
+            "heating_circuits": [
+                {
+                    "id": 20496,
+                    "name": "Отопление",
+                    "status": "ok",
+                    "active": false,
+                    "actual_temp": 18.8,
+                    "is_off": false,
+                    "target_temp": 18.0,
+                    "current_mode": null,
+                    "target_min": 5,
+                    "target_max": 35
+                },
+                {
+                    "id": 8284,
+                    "name": "ГВС",
+                    "status": "ok",
+                    "active": false,
+                    "actual_temp": null,
+                    "is_off": true,
+                    "target_temp": null,
+                    "current_mode": 20502,
+                    "target_min": 5,
+                    "target_max": 35
+                }
+            ],
+            "boiler_circuits": [
+                {
+                    "id": 20494,
+                    "name": "Котел",
+                    "active": false,
+                    "status": "ok",
+                    "target_temp": 20.0,
+                    "water_min_temp": 10.0,
+                    "water_max_temp": 90.0,
+                    "water_temp": 39,
+                    "modulation_level": 0.0
+                }
+            ],
+            "heating_modes": [
+                {
+                    "id": 20501,
+                    "name": "Комфорт",
+                    "can_be_applied": true,
+                    "color": "#dd4747"
+                },
+                {
+                    "id": 20502,
+                    "name": "Эконом",
+                    "can_be_applied": true,
+                    "color": "#73b8d3"
+                },
+                {
+                    "id": 20503,
+                    "name": "Расписание",
+                    "can_be_applied": true,
+                    "color": "#f2c30b"
+                },
+                {
+                    "id": 20504,
+                    "name": "Выключен",
+                    "can_be_applied": true,
+                    "color": "#515151"
+                }
+            ],
+            "boiler_modes": [],
+            "sensors": [
+                {
+                    "id": 0,
+                    "name": "Напряжение питания",
+                    "type": "voltage",
+                    "status": "ok",
+                    "value": 11.9,
+                    "unit": "В"
+                },
+                {
+                    "id": 4097,
+                    "name": "Улица",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 2.6,
+                    "unit": "°"
+                },
+                {
+                    "id": 4099,
+                    "name": "Помещение",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 18.8,
+                    "unit": "°"
+                },
+                {
+                    "id": 20550,
+                    "name": "Контроль напряжения питания",
+                    "type": "voltage",
+                    "status": "failure",
+                    "value": 11.9,
+                    "unit": "В"
+                }
+            ],
+            "guard_zones": [],
+            "custom_controls": [],
+            "scenarios": [],
+            "ot_sensors": [
+                {
+                    "id": "4098:rml",
+                    "boiler_adapter_id": 4098,
+                    "name": "Адаптер цифровой шины Модуляция",
+                    "type": "modulation",
+                    "status": "unknown",
+                    "value": 0.0,
+                    "unit": "%",
+                    "limits": {
+                        "high": 0,
+                        "low": 100
+                    }
+                },
+                {
+                    "id": "4098:bt",
+                    "boiler_adapter_id": 4098,
+                    "name": "Адаптер цифровой шины t° ТН",
+                    "type": "temperature",
+                    "status": "unknown",
+                    "value": 38.69921875,
+                    "unit": "°",
+                    "limits": {
+                        "high": 90.0,
+                        "low": 10.0
+                    }
+                }
+            ]
+        },
+        {
+            "id": 202312,
+            "name": "Climatic",
+            "model": "CLIMATIC",
+            "online": true,
+            "widget_type": "z3k",
+            "heating_circuits": [
+                {
+                    "id": 20496,
+                    "name": "Ц и 2 этаж",
+                    "status": "ok",
+                    "active": true,
+                    "actual_temp": 18.0,
+                    "is_off": false,
+                    "target_temp": 18.0,
+                    "current_mode": 20502,
+                    "target_min": -30,
+                    "target_max": 100
+                },
+                {
+                    "id": 20497,
+                    "name": "1 этаж",
+                    "status": "ok",
+                    "active": true,
+                    "actual_temp": 18.1,
+                    "is_off": false,
+                    "target_temp": 18.0,
+                    "current_mode": 20502,
+                    "target_min": -30,
+                    "target_max": 100
+                },
+                {
+                    "id": 20498,
+                    "name": "Тёплый пол",
+                    "status": "ok",
+                    "active": true,
+                    "actual_temp": 19.3,
+                    "is_off": false,
+                    "target_temp": 20.0,
+                    "current_mode": 20502,
+                    "target_min": 5.0,
+                    "target_max": 55.0
+                },
+                {
+                    "id": 20499,
+                    "name": "ГВС",
+                    "status": "ok",
+                    "active": false,
+                    "actual_temp": 45.4,
+                    "is_off": true,
+                    "target_temp": null,
+                    "current_mode": 20504,
+                    "target_min": 5,
+                    "target_max": 35
+                }
+            ],
+            "boiler_circuits": [
+                {
+                    "id": 20494,
+                    "name": "Котёл1",
+                    "active": true,
+                    "status": "ok",
+                    "target_temp": 20.0,
+                    "water_min_temp": 5.0,
+                    "water_max_temp": 75.0,
+                    "water_temp": 43,
+                    "rwt_temp": 0.0,
+                    "modulation_level": 16.0,
+                    "pressure": 1.8984375
+                }
+            ],
+            "heating_modes": [
+                {
+                    "id": 20501,
+                    "name": "Комфорт",
+                    "can_be_applied": true,
+                    "color": "#862fde"
+                },
+                {
+                    "id": 20502,
+                    "name": "Эконом",
+                    "can_be_applied": true,
+                    "color": "#de2fc1"
+                },
+                {
+                    "id": 20503,
+                    "name": "Расписание",
+                    "can_be_applied": true,
+                    "color": "#dd4747"
+                },
+                {
+                    "id": 20504,
+                    "name": "Выкл",
+                    "can_be_applied": true,
+                    "color": "#b20000"
+                },
+                {
+                    "id": 20505,
+                    "name": "Нагрев ГВС",
+                    "can_be_applied": true,
+                    "color": "#127fb6"
+                }
+            ],
+            "boiler_modes": [],
+            "sensors": [
+                {
+                    "id": 0,
+                    "name": "Напряжение питания",
+                    "type": "voltage",
+                    "status": "ok",
+                    "value": 11.7,
+                    "unit": "В"
+                },
+                {
+                    "id": 20522,
+                    "name": "tтн Ц и 2 этаж",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 25.7,
+                    "unit": "°"
+                },
+                {
+                    "id": 20523,
+                    "name": "tтн 1 этаж",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 19.8,
+                    "unit": "°"
+                },
+                {
+                    "id": 20524,
+                    "name": "tтн Тёплый пол",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 19.3,
+                    "unit": "°"
+                },
+                {
+                    "id": 20525,
+                    "name": "t ГВС",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 45.4,
+                    "unit": "°"
+                },
+                {
+                    "id": 20526,
+                    "name": "Уличный",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 10.7,
+                    "unit": "°"
+                },
+                {
+                    "id": 20527,
+                    "name": "Теплоноситель",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 43.2,
+                    "unit": "°"
+                },
+                {
+                    "id": 4099,
+                    "name": "Радио 0-2",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 18.0,
+                    "unit": "°",
+                    "battery": 3.1,
+                    "rssi": -77.5
+                },
+                {
+                    "id": 4100,
+                    "name": "Радио 1",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 18.1,
+                    "unit": "°",
+                    "battery": 3.0,
+                    "rssi": -71.5
+                },
+                {
+                    "id": 20530,
+                    "name": "Внешний термостат 1",
+                    "type": "room_thermostat",
+                    "status": "failure",
+                    "value": 0.0,
+                    "unit": "В"
+                },
+                {
+                    "id": 20531,
+                    "name": "Внешний термостат 2",
+                    "type": "room_thermostat",
+                    "status": "failure",
+                    "value": 0.0,
+                    "unit": "В"
+                },
+                {
+                    "id": 20532,
+                    "name": "Внешний термостат 3",
+                    "type": "room_thermostat",
+                    "status": "failure",
+                    "value": 0.0,
+                    "unit": "В"
+                },
+                {
+                    "id": 20550,
+                    "name": "Контроль напряжения питания",
+                    "type": "voltage",
+                    "status": "failure",
+                    "value": 11.7,
+                    "unit": "В"
+                },
+                {
+                    "id": 20551,
+                    "name": "Контроль батареи",
+                    "type": "voltage",
+                    "status": "failure",
+                    "value": 4.1,
+                    "unit": "В"
+                }
+            ],
+            "guard_zones": [],
+            "custom_controls": [],
+            "scenarios": [],
+            "ot_sensors": [
+                {
+                    "id": "4098:ot",
+                    "boiler_adapter_id": 4098,
+                    "name": "Адаптер цифровой шины №1 t° снаружи",
+                    "type": "temperature",
+                    "status": "ok",
+                    "unit": "°",
+                    "limits": {
+                        "high": 40,
+                        "low": -40
+                    }
+                },
+                {
+                    "id": "4098:bt",
+                    "boiler_adapter_id": 4098,
+                    "name": "Адаптер цифровой шины №1 t° ТН",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 43.0,
+                    "unit": "°",
+                    "limits": {
+                        "high": 75.0,
+                        "low": 5.0
+                    }
+                },
+                {
+                    "id": "4098:wp",
+                    "boiler_adapter_id": 4098,
+                    "name": "Адаптер цифровой шины №1 Давление ТН",
+                    "type": "pressure",
+                    "status": "ok",
+                    "value": 1.8984375,
+                    "unit": "бар",
+                    "limits": {
+                        "high": 0,
+                        "low": 3
+                    }
+                },
+                {
+                    "id": "4098:dt",
+                    "boiler_adapter_id": 4098,
+                    "name": "Адаптер цифровой шины №1 t° ГВС",
+                    "type": "temperature",
+                    "status": "ok",
+                    "unit": "°",
+                    "limits": {
+                        "high": 75.0,
+                        "low": 5.0
+                    }
+                },
+                {
+                    "id": "4098:rwt",
+                    "boiler_adapter_id": 4098,
+                    "name": "Адаптер цифровой шины №1 t° обратного потока",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 0.0,
+                    "unit": "°",
+                    "limits": {
+                        "high": 75.0,
+                        "low": 5.0
+                    }
+                },
+                {
+                    "id": "4098:rml",
+                    "boiler_adapter_id": 4098,
+                    "name": "Адаптер цифровой шины №1 Модуляция",
+                    "type": "modulation",
+                    "status": "ok",
+                    "value": 16.0,
+                    "unit": "%",
+                    "limits": {
+                        "high": 0,
+                        "low": 100
+                    }
+                }
+            ]
+        },
+        {
+            "id": 202309,
+            "name": "SMART 2.0",
+            "model": "SMART+",
+            "online": true,
+            "widget_type": "z3k",
+            "heating_circuits": [
+                {
+                    "id": 20496,
+                    "name": "Отопление",
+                    "status": "ok",
+                    "active": false,
+                    "actual_temp": 15.6,
+                    "is_off": false,
+                    "target_temp": 16.0,
+                    "current_mode": null,
+                    "target_min": 5,
+                    "target_max": 35
+                },
+                {
+                    "id": 4098,
+                    "name": "ГВС",
+                    "status": "ok",
+                    "active": false,
+                    "actual_temp": 25.5,
+                    "is_off": true,
+                    "target_temp": null,
+                    "current_mode": 20501,
+                    "target_min": 5,
+                    "target_max": 35
+                }
+            ],
+            "boiler_circuits": [
+                {
+                    "id": 20494,
+                    "name": "КОТЕЛ",
+                    "active": false,
+                    "status": "ok",
+                    "target_temp": 40.0,
+                    "water_min_temp": 15.0,
+                    "water_max_temp": 75.0,
+                    "water_temp": 19,
+                    "dhw_temp": 25.5
+                },
+                {
+                    "id": 9169,
+                    "name": "резервный котел",
+                    "active": false,
+                    "status": "ok",
+                    "target_temp": 20.0,
+                    "water_min_temp": 13.0,
+                    "water_max_temp": 25.0,
+                    "water_temp": 16.1
+                }
+            ],
+            "heating_modes": [
+                {
+                    "id": 20501,
+                    "name": "Комфорт",
+                    "can_be_applied": true,
+                    "color": "#33aa66"
+                },
+                {
+                    "id": 20502,
+                    "name": "Эконом",
+                    "can_be_applied": true,
+                    "color": "#f2c30b"
+                },
+                {
+                    "id": 20503,
+                    "name": "Расписание",
+                    "can_be_applied": true,
+                    "color": "#862fde"
+                },
+                {
+                    "id": 20504,
+                    "name": "Выключен",
+                    "can_be_applied": true,
+                    "color": "#515151"
+                }
+            ],
+            "boiler_modes": [
+                {
+                    "id": 9170,
+                    "name": "резервный котел",
+                    "can_be_applied": true,
+                    "color": "#dd4747"
+                }
+            ],
+            "sensors": [
+                {
+                    "id": 0,
+                    "name": "Напряжение питания",
+                    "type": "voltage",
+                    "status": "ok",
+                    "value": 24.0,
+                    "unit": "В"
+                },
+                {
+                    "id": 9235,
+                    "name": "Погода из интернета",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 3.6,
+                    "unit": "°"
+                },
+                {
+                    "id": 4108,
+                    "name": "Топочная",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 17.1,
+                    "unit": "°",
+                    "battery": 3.1,
+                    "rssi": -41.5
+                },
+                {
+                    "id": 4109,
+                    "name": "1 эт. Гостинная",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 15.6,
+                    "unit": "°",
+                    "battery": 3.2,
+                    "rssi": -56.5
+                },
+                {
+                    "id": 4110,
+                    "name": "2 эт. Туалет ",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 16.1,
+                    "unit": "°",
+                    "battery": 3.2,
+                    "rssi": -71.0
+                },
+                {
+                    "id": 20550,
+                    "name": "Контроль напряжения питания",
+                    "type": "voltage",
+                    "status": "failure",
+                    "value": 24.0,
+                    "unit": "В"
+                }
+            ],
+            "guard_zones": [],
+            "custom_controls": [],
+            "scenarios": [],
+            "ot_sensors": [
+                {
+                    "id": "4097:ot",
+                    "boiler_adapter_id": 4097,
+                    "name": "Адаптер BAXI t° снаружи",
+                    "type": "temperature",
+                    "status": "ok",
+                    "unit": "°",
+                    "limits": {
+                        "high": 40,
+                        "low": -40
+                    }
+                },
+                {
+                    "id": "4097:bt",
+                    "boiler_adapter_id": 4097,
+                    "name": "Адаптер BAXI t° ТН",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 19.0,
+                    "unit": "°",
+                    "limits": {
+                        "high": 75.0,
+                        "low": 15.0
+                    }
+                },
+                {
+                    "id": "4097:wp",
+                    "boiler_adapter_id": 4097,
+                    "name": "Адаптер BAXI Давление ТН",
+                    "type": "pressure",
+                    "status": "ok",
+                    "unit": "бар",
+                    "limits": {
+                        "high": 0,
+                        "low": 3
+                    }
+                },
+                {
+                    "id": "4097:fr",
+                    "boiler_adapter_id": 4097,
+                    "name": "Адаптер BAXI Скорость потока ГВС",
+                    "type": "dhw_speed",
+                    "status": "ok",
+                    "unit": "л/мин",
+                    "limits": {
+                        "high": 0,
+                        "low": 35
+                    }
+                },
+                {
+                    "id": "4097:dt",
+                    "boiler_adapter_id": 4097,
+                    "name": "Адаптер BAXI t° ГВС",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 25.5,
+                    "unit": "°",
+                    "limits": {
+                        "high": 75.0,
+                        "low": 15.0
+                    }
+                },
+                {
+                    "id": "4097:rwt",
+                    "boiler_adapter_id": 4097,
+                    "name": "Адаптер BAXI t° обратного потока",
+                    "type": "temperature",
+                    "status": "ok",
+                    "unit": "°",
+                    "limits": {
+                        "high": 75.0,
+                        "low": 15.0
+                    }
+                },
+                {
+                    "id": "4097:rml",
+                    "boiler_adapter_id": 4097,
+                    "name": "Адаптер BAXI Модуляция",
+                    "type": "modulation",
+                    "status": "ok",
+                    "unit": "%",
+                    "limits": {
+                        "high": 0,
+                        "low": 100
+                    }
+                }
+            ]
+        },
+        {
+            "id": 202306,
+            "name": "H1500 PRO",
+            "model": "H1500_PRO",
+            "online": true,
+            "widget_type": "z3k",
+            "heating_circuits": [
+                {
+                    "id": 8333,
+                    "name": "Гвс",
+                    "status": "ok",
+                    "active": true,
+                    "actual_temp": 10.2,
+                    "is_off": false,
+                    "target_temp": 40.0,
+                    "current_mode": 8344,
+                    "target_min": 5,
+                    "target_max": 35
+                }
+            ],
+            "boiler_circuits": [
+                {
+                    "id": 8276,
+                    "name": "контур отопления",
+                    "active": false,
+                    "status": "ok",
+                    "target_temp": -272.8,
+                    "water_min_temp": 60.0,
+                    "water_max_temp": 75.0
+                },
+                {
+                    "id": 8350,
+                    "name": "ЭКО",
+                    "active": false,
+                    "status": "ok",
+                    "target_temp": 20.0,
+                    "water_min_temp": 15.0,
+                    "water_max_temp": 30.0
+                }
+            ],
+            "heating_modes": [
+                {
+                    "id": 8344,
+                    "name": "ГВС",
+                    "can_be_applied": true,
+                    "color": "#862fde"
+                },
+                {
+                    "id": 8352,
+                    "name": "Эко",
+                    "can_be_applied": true,
+                    "color": "#de2fc1"
+                }
+            ],
+            "boiler_modes": [
+                {
+                    "id": 8283,
+                    "name": "Отопление ВКЛ",
+                    "can_be_applied": true,
+                    "color": "#33aa66"
+                },
+                {
+                    "id": 8289,
+                    "name": "Отопление ВЫКЛ",
+                    "can_be_applied": true,
+                    "color": "#b20000"
+                }
+            ],
+            "sensors": [
+                {
+                    "id": 0,
+                    "name": "Напряжение питания",
+                    "type": "voltage",
+                    "status": "ok",
+                    "value": 12.2,
+                    "unit": "В"
+                },
+                {
+                    "id": 4099,
+                    "name": "Помещение",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 9.9,
+                    "unit": "°"
+                },
+                {
+                    "id": 4100,
+                    "name": "Чердак",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 3.6,
+                    "unit": "°"
+                },
+                {
+                    "id": 4101,
+                    "name": "Улица",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 2.4,
+                    "unit": "°"
+                },
+                {
+                    "id": 4102,
+                    "name": "Контур котла",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 10.2,
+                    "unit": "°"
+                }
+            ],
+            "guard_zones": [
+                {
+                    "id": 8249,
+                    "name": "Дом размыкание",
+                    "state": "enabled",
+                    "alarm": false
+                },
+                {
+                    "id": 8252,
+                    "name": "Дом движение",
+                    "state": "enabled",
+                    "alarm": false
+                }
+            ],
+            "custom_controls": [
+                {
+                    "id": 8211,
+                    "type": "button",
+                    "name": "ВНИМАНИЕ Перезагрузка котла Ручная от 1сек после выключения принудительного, до 6сек без выключения, уход в ошибку. Выставить в ручную"
+                },
+                {
+                    "id": 8362,
+                    "type": "toggle_button",
+                    "name": {
+                        "when_active": "Включить Серену ",
+                        "when_inactive": "Выключить сирену "
+                    },
+                    "status": false
+                }
+            ],
+            "scenarios": [
+                {
+                    "id": 8353,
+                    "name": "Сирена вкл"
+                },
+                {
+                    "id": 8358,
+                    "name": "Сирена Выкл"
+                },
+                {
+                    "id": 8359,
+                    "name": "Охрана ВКЛ"
+                },
+                {
+                    "id": 8360,
+                    "name": "Охрана Выкл"
+                }
+            ],
+            "ot_sensors": [
+                {
+                    "id": "4136:ot",
+                    "boiler_adapter_id": 4136,
+                    "name": "Цифровая шина  t° снаружи",
+                    "type": "temperature",
+                    "status": "unknown",
+                    "unit": "°",
+                    "limits": {
+                        "high": 40,
+                        "low": -40
+                    }
+                },
+                {
+                    "id": "4136:bt",
+                    "boiler_adapter_id": 4136,
+                    "name": "Цифровая шина  t° ТН",
+                    "type": "temperature",
+                    "status": "unknown",
+                    "unit": "°",
+                    "limits": {
+                        "high": 75.0,
+                        "low": 60.0
+                    }
+                },
+                {
+                    "id": "4136:wp",
+                    "boiler_adapter_id": 4136,
+                    "name": "Цифровая шина  Давление ТН",
+                    "type": "pressure",
+                    "status": "unknown",
+                    "unit": "бар",
+                    "limits": {
+                        "high": 0,
+                        "low": 3
+                    }
+                },
+                {
+                    "id": "4136:fr",
+                    "boiler_adapter_id": 4136,
+                    "name": "Цифровая шина  Скорость потока ГВС",
+                    "type": "dhw_speed",
+                    "status": "unknown",
+                    "unit": "л/мин",
+                    "limits": {
+                        "high": 0,
+                        "low": 35
+                    }
+                },
+                {
+                    "id": "4136:dt",
+                    "boiler_adapter_id": 4136,
+                    "name": "Цифровая шина  t° ГВС",
+                    "type": "temperature",
+                    "status": "unknown",
+                    "unit": "°",
+                    "limits": {
+                        "high": 75.0,
+                        "low": 60.0
+                    }
+                },
+                {
+                    "id": "4136:rwt",
+                    "boiler_adapter_id": 4136,
+                    "name": "Цифровая шина  t° обратного потока",
+                    "type": "temperature",
+                    "status": "unknown",
+                    "unit": "°",
+                    "limits": {
+                        "high": 75.0,
+                        "low": 60.0
+                    }
+                },
+                {
+                    "id": "4136:rml",
+                    "boiler_adapter_id": 4136,
+                    "name": "Цифровая шина  Модуляция",
+                    "type": "modulation",
+                    "status": "unknown",
+                    "unit": "%",
+                    "limits": {
+                        "high": 0,
+                        "low": 100
+                    }
+                }
+            ]
+        },
+        {
+            "id": 202305,
+            "name": "C2000+",
+            "model": "C2000+",
+            "online": true,
+            "widget_type": "z3k",
+            "heating_circuits": [],
+            "boiler_circuits": [],
+            "heating_modes": [],
+            "boiler_modes": [],
+            "sensors": [
+                {
+                    "id": 0,
+                    "name": "Напряжение питания",
+                    "type": "voltage",
+                    "status": "ok",
+                    "value": 15.9,
+                    "unit": "В"
+                },
+                {
+                    "id": 4097,
+                    "name": "прямая ",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 41.6,
+                    "unit": "°"
+                },
+                {
+                    "id": 4098,
+                    "name": "обратка ",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 42.9,
+                    "unit": "°"
+                },
+                {
+                    "id": 4133,
+                    "name": "помещение",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 19.2,
+                    "unit": "°"
+                },
+                {
+                    "id": 4135,
+                    "name": "датчик у котла",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 21.8,
+                    "unit": "°"
+                },
+                {
+                    "id": 8265,
+                    "name": "Пожарные дом",
+                    "type": "smoke",
+                    "status": "failure",
+                    "value": 10.6,
+                    "unit": "В"
+                },
+                {
+                    "id": 8273,
+                    "name": "Напряжение питания",
+                    "type": "voltage",
+                    "status": "failure",
+                    "value": 15.9,
+                    "unit": "В"
+                },
+                {
+                    "id": 8274,
+                    "name": "Контроль напряжения батареи",
+                    "type": "voltage",
+                    "status": "failure",
+                    "value": 14.2,
+                    "unit": "В"
+                },
+                {
+                    "id": 8284,
+                    "name": "Дверь дом",
+                    "type": "opening",
+                    "status": "failure",
+                    "value": 0.0,
+                    "unit": "В"
+                },
+                {
+                    "id": 8285,
+                    "name": "Движение дом",
+                    "type": "motion",
+                    "status": "failure",
+                    "value": 0.0,
+                    "unit": "В"
+                },
+                {
+                    "id": 8286,
+                    "name": "Движение улица",
+                    "type": "motion",
+                    "status": "failure",
+                    "value": 0.1,
+                    "unit": "В"
+                },
+                {
+                    "id": 8310,
+                    "name": "Кнопка сброса пожарное тревоги",
+                    "type": "voltage",
+                    "status": "failure",
+                    "value": 14.4,
+                    "unit": "В"
+                },
+                {
+                    "id": 8333,
+                    "name": "Блок расширения: Напряжение питания",
+                    "type": "voltage",
+                    "status": "failure",
+                    "value": 15.9,
+                    "unit": "В"
+                },
+                {
+                    "id": 8342,
+                    "name": "Аналог БР вх2 на БРвых4",
+                    "type": "voltage",
+                    "status": "failure",
+                    "value": 15.5,
+                    "unit": "В"
+                }
+            ],
+            "guard_zones": [
+                {
+                    "id": 8289,
+                    "name": "Дом, улица ",
+                    "state": "disabled",
+                    "alarm": false
+                },
+                {
+                    "id": 8290,
+                    "name": "Дверь дом, улица",
+                    "state": "disabled",
+                    "alarm": false
+                },
+                {
+                    "id": 8291,
+                    "name": "Пожарная охрана",
+                    "state": "disabled",
+                    "alarm": false
+                },
+                {
+                    "id": 8396,
+                    "name": "Баня",
+                    "state": "disabled",
+                    "alarm": false
+                }
+            ],
+            "custom_controls": [
+                {
+                    "id": 8236,
+                    "type": "button",
+                    "name": "ОТКРЫВАНИЕ ВОРОТ"
+                },
+                {
+                    "id": 8238,
+                    "type": "button",
+                    "name": "ОТКРЫВАНИЕ ВОДЫ"
+                },
+                {
+                    "id": 8239,
+                    "type": "button",
+                    "name": "Закрывание воды"
+                },
+                {
+                    "id": 8245,
+                    "type": "toggle_button",
+                    "name": {
+                        "when_active": "Котел греет",
+                        "when_inactive": "Котел не греет"
+                    },
+                    "status": true
+                },
+                {
+                    "id": 8313,
+                    "type": "toggle_button",
+                    "name": {
+                        "when_active": "Сирену выключить",
+                        "when_inactive": "Сирену включить"
+                    },
+                    "status": false
+                },
+                {
+                    "id": 8336,
+                    "type": "button",
+                    "name": "Открыть калитку"
+                }
+            ],
+            "scenarios": [],
+            "ot_sensors": []
+        },
+        {
+            "id": 202303,
+            "name": "H2000 PRO",
+            "model": "H2000_PRO",
+            "online": true,
+            "widget_type": "z3k",
+            "heating_circuits": [
+                {
+                    "id": 8225,
+                    "name": "ГВС",
+                    "status": "ok",
+                    "active": false,
+                    "actual_temp": 32.0,
+                    "is_off": true,
+                    "target_temp": null,
+                    "current_mode": 9042,
+                    "target_min": 5,
+                    "target_max": 35
+                },
+                {
+                    "id": 8226,
+                    "name": "Радиаторы",
+                    "status": "ok",
+                    "active": false,
+                    "actual_temp": null,
+                    "is_off": true,
+                    "target_temp": null,
+                    "current_mode": 9042,
+                    "target_min": 5,
+                    "target_max": 35
+                },
+                {
+                    "id": 8231,
+                    "name": "Котельная",
+                    "status": "ok",
+                    "active": false,
+                    "actual_temp": 15.9,
+                    "is_off": false,
+                    "target_temp": 14.5,
+                    "current_mode": null,
+                    "target_min": -30,
+                    "target_max": 100
+                },
+                {
+                    "id": 8258,
+                    "name": " Ванная 1 этаж",
+                    "status": "ok",
+                    "active": true,
+                    "actual_temp": 22.6,
+                    "is_off": false,
+                    "target_temp": 22.0,
+                    "current_mode": null,
+                    "target_min": 10.0,
+                    "target_max": 30.0
+                },
+                {
+                    "id": 8270,
+                    "name": "Лестница ",
+                    "status": "ok",
+                    "active": true,
+                    "actual_temp": 13.7,
+                    "is_off": false,
+                    "target_temp": 15.0,
+                    "current_mode": null,
+                    "target_min": -30,
+                    "target_max": 100
+                },
+                {
+                    "id": 9199,
+                    "name": "Баня",
+                    "status": "ok",
+                    "active": false,
+                    "actual_temp": 29.4,
+                    "is_off": false,
+                    "target_temp": 30.0,
+                    "current_mode": 9042,
+                    "target_min": 10.0,
+                    "target_max": 50.0
+                },
+                {
+                    "id": 8269,
+                    "name": "Кухня",
+                    "status": "ok",
+                    "active": false,
+                    "actual_temp": 13.6,
+                    "is_off": false,
+                    "target_temp": 14.0,
+                    "current_mode": null,
+                    "target_min": 5,
+                    "target_max": 35
+                },
+                {
+                    "id": 8267,
+                    "name": "Столовая",
+                    "status": "ok",
+                    "active": false,
+                    "actual_temp": 13.7,
+                    "is_off": false,
+                    "target_temp": 14.0,
+                    "current_mode": null,
+                    "target_min": 5,
+                    "target_max": 35
+                },
+                {
+                    "id": 8265,
+                    "name": "Спальня 1 этаж",
+                    "status": "ok",
+                    "active": false,
+                    "actual_temp": 13.9,
+                    "is_off": false,
+                    "target_temp": 14.0,
+                    "current_mode": null,
+                    "target_min": 5,
+                    "target_max": 35
+                },
+                {
+                    "id": 8263,
+                    "name": "Ванная 2 этаж",
+                    "status": "ok",
+                    "active": false,
+                    "actual_temp": 14.0,
+                    "is_off": false,
+                    "target_temp": 14.0,
+                    "current_mode": null,
+                    "target_min": 5,
+                    "target_max": 35
+                },
+                {
+                    "id": 8229,
+                    "name": "Гостиная",
+                    "status": "ok",
+                    "active": false,
+                    "actual_temp": 16.8,
+                    "is_off": false,
+                    "target_temp": 14.0,
+                    "current_mode": null,
+                    "target_min": 5,
+                    "target_max": 35
+                },
+                {
+                    "id": 8228,
+                    "name": "Детская",
+                    "status": "ok",
+                    "active": false,
+                    "actual_temp": 16.6,
+                    "is_off": false,
+                    "target_temp": 14.0,
+                    "current_mode": null,
+                    "target_min": 5,
+                    "target_max": 35
+                },
+                {
+                    "id": 8232,
+                    "name": "Гардероб",
+                    "status": "ok",
+                    "active": false,
+                    "actual_temp": 15.2,
+                    "is_off": false,
+                    "target_temp": 14.0,
+                    "current_mode": null,
+                    "target_min": 5,
+                    "target_max": 35
+                },
+                {
+                    "id": 8264,
+                    "name": "Игровая",
+                    "status": "ok",
+                    "active": false,
+                    "actual_temp": 13.7,
+                    "is_off": false,
+                    "target_temp": 14.0,
+                    "current_mode": null,
+                    "target_min": 5,
+                    "target_max": 35
+                },
+                {
+                    "id": 8234,
+                    "name": "Спальня 2 этаж",
+                    "status": "ok",
+                    "active": true,
+                    "actual_temp": 18.8,
+                    "is_off": false,
+                    "target_temp": 20.0,
+                    "current_mode": 9042,
+                    "target_min": 10.0,
+                    "target_max": 30.0
+                },
+                {
+                    "id": 8261,
+                    "name": "Санузел",
+                    "status": "ok",
+                    "active": true,
+                    "actual_temp": 18.4,
+                    "is_off": false,
+                    "target_temp": 20.0,
+                    "current_mode": 9042,
+                    "target_min": 10.0,
+                    "target_max": 30.0
+                },
+                {
+                    "id": 8256,
+                    "name": "Бассейн",
+                    "status": "ok",
+                    "active": true,
+                    "actual_temp": 18.8,
+                    "is_off": false,
+                    "target_temp": 20.0,
+                    "current_mode": null,
+                    "target_min": 10.0,
+                    "target_max": 30.0
+                },
+                {
+                    "id": 8259,
+                    "name": "Коридор",
+                    "status": "ok",
+                    "active": true,
+                    "actual_temp": 18.8,
+                    "is_off": false,
+                    "target_temp": 21.5,
+                    "current_mode": null,
+                    "target_min": 10.0,
+                    "target_max": 30.0
+                },
+                {
+                    "id": 8260,
+                    "name": "Спортзал",
+                    "status": "ok",
+                    "active": true,
+                    "actual_temp": 18.6,
+                    "is_off": false,
+                    "target_temp": 20.0,
+                    "current_mode": 9042,
+                    "target_min": 10.0,
+                    "target_max": 30.0
+                },
+                {
+                    "id": 8262,
+                    "name": "Теплица",
+                    "status": "ok",
+                    "active": true,
+                    "actual_temp": 18.1,
+                    "is_off": false,
+                    "target_temp": 20.0,
+                    "current_mode": 9042,
+                    "target_min": 10.0,
+                    "target_max": 30.0
+                },
+                {
+                    "id": 8227,
+                    "name": "Гараж",
+                    "status": "ok",
+                    "active": false,
+                    "actual_temp": 16.7,
+                    "is_off": false,
+                    "target_temp": 15.0,
+                    "current_mode": 9042,
+                    "target_min": 5,
+                    "target_max": 35
+                }
+            ],
+            "boiler_circuits": [
+                {
+                    "id": 8223,
+                    "name": "Котел 1",
+                    "active": false,
+                    "status": "ok",
+                    "target_temp": 20.0,
+                    "water_min_temp": 30.0,
+                    "water_max_temp": 70.0,
+                    "water_temp": 40,
+                    "dhw_temp": 32.0,
+                    "modulation_level": 0.0,
+                    "dhw_speed": 0.0,
+                    "outside": 7.0
+                },
+                {
+                    "id": 8224,
+                    "name": "Котел 2",
+                    "active": false,
+                    "status": "ok",
+                    "target_temp": 20.0,
+                    "water_min_temp": 30.0,
+                    "water_max_temp": 70.0,
+                    "water_temp": 25,
+                    "modulation_level": 0.0,
+                    "pressure": 1.69921875,
+                    "outside": 7.125
+                }
+            ],
+            "heating_modes": [
+                {
+                    "id": 9040,
+                    "name": "комфорт",
+                    "can_be_applied": true,
+                    "color": "#91b200"
+                },
+                {
+                    "id": 9041,
+                    "name": "лето",
+                    "can_be_applied": true,
+                    "color": "#f2c30b"
+                },
+                {
+                    "id": 9042,
+                    "name": "тишина",
+                    "can_be_applied": true,
+                    "color": "#127fb6"
+                }
+            ],
+            "boiler_modes": [
+                {
+                    "id": 10204,
+                    "name": "BAXI",
+                    "can_be_applied": true,
+                    "color": "#f2c30b"
+                },
+                {
+                    "id": 10205,
+                    "name": "Protherm",
+                    "can_be_applied": true,
+                    "color": "#b20000"
+                },
+                {
+                    "id": 11524,
+                    "name": "Baxi_Protherm",
+                    "can_be_applied": true,
+                    "color": "#862fde"
+                }
+            ],
+            "sensors": [
+                {
+                    "id": 0,
+                    "name": "Напряжение питания",
+                    "type": "voltage",
+                    "status": "ok",
+                    "value": 13.7,
+                    "unit": "В"
+                },
+                {
+                    "id": 4276,
+                    "name": "улица",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 6.4,
+                    "unit": "°"
+                },
+                {
+                    "id": 4264,
+                    "name": "стрелка",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 53.3,
+                    "unit": "°"
+                },
+                {
+                    "id": 4263,
+                    "name": "1контур(1эт.бат.)",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 17.1,
+                    "unit": "°"
+                },
+                {
+                    "id": 4265,
+                    "name": "2контур(пол)",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 22.6,
+                    "unit": "°"
+                },
+                {
+                    "id": 4266,
+                    "name": "3контур(2эт.бат.)",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 52.3,
+                    "unit": "°"
+                },
+                {
+                    "id": 4281,
+                    "name": "4 контур",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 29.4,
+                    "unit": "°"
+                },
+                {
+                    "id": 4288,
+                    "name": "1эт.кухня",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 16.6,
+                    "unit": "°"
+                },
+                {
+                    "id": 4290,
+                    "name": "1эт.зал",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 16.8,
+                    "unit": "°"
+                },
+                {
+                    "id": 4278,
+                    "name": "1эт.гостевая",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 15.9,
+                    "unit": "°"
+                },
+                {
+                    "id": 4269,
+                    "name": "1эт.гардероб",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 15.2,
+                    "unit": "°"
+                },
+                {
+                    "id": 4293,
+                    "name": "1эт. прихожая",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 16.0,
+                    "unit": "°"
+                },
+                {
+                    "id": 4273,
+                    "name": "2эт.1комн.",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 13.6,
+                    "unit": "°"
+                },
+                {
+                    "id": 4272,
+                    "name": "2эт.2комн.",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 13.7,
+                    "unit": "°"
+                },
+                {
+                    "id": 4268,
+                    "name": "2эт. 3комн.",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 13.9,
+                    "unit": "°"
+                },
+                {
+                    "id": 4270,
+                    "name": "2эт.ванная",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 14.0,
+                    "unit": "°"
+                },
+                {
+                    "id": 4274,
+                    "name": "2эт.коридор",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 13.7,
+                    "unit": "°"
+                },
+                {
+                    "id": 4291,
+                    "name": "1эт.пол кухня",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 18.8,
+                    "unit": "°"
+                },
+                {
+                    "id": 4292,
+                    "name": "1эт.пол зал",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 18.8,
+                    "unit": "°"
+                },
+                {
+                    "id": 4279,
+                    "name": "1эт.пол душ",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 18.9,
+                    "unit": "°"
+                },
+                {
+                    "id": 4275,
+                    "name": "1эт.пол гостевая",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 18.4,
+                    "unit": "°"
+                },
+                {
+                    "id": 4267,
+                    "name": "1эт.пол гардероб",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 18.6,
+                    "unit": "°"
+                },
+                {
+                    "id": 4289,
+                    "name": "1эт.пол прихожая",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 18.8,
+                    "unit": "°"
+                },
+                {
+                    "id": 4271,
+                    "name": "2эт.пол ванная",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 18.1,
+                    "unit": "°"
+                },
+                {
+                    "id": 4280,
+                    "name": "котельная",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 16.7,
+                    "unit": "°"
+                },
+                {
+                    "id": 9976,
+                    "name": "Работа АБ",
+                    "type": "boiler_failure",
+                    "status": "failure",
+                    "value": 0.1,
+                    "unit": "В"
+                },
+                {
+                    "id": 9633,
+                    "name": "протечка ДОМ",
+                    "type": "leakage",
+                    "status": "failure",
+                    "value": 6.6,
+                    "unit": "В"
+                },
+                {
+                    "id": 9973,
+                    "name": "Давление системы",
+                    "type": "pressure",
+                    "status": "failure",
+                    "value": 1.8,
+                    "unit": "В"
+                }
+            ],
+            "guard_zones": [],
+            "custom_controls": [
+                {
+                    "id": 8682,
+                    "type": "button",
+                    "name": "открыть нептун"
+                },
+                {
+                    "id": 9270,
+                    "type": "button",
+                    "name": "закрыть нептун"
+                },
+                {
+                    "id": 8742,
+                    "type": "button",
+                    "name": "баня вода открыть"
+                },
+                {
+                    "id": 9367,
+                    "type": "button",
+                    "name": "вода баня закрыть"
+                },
+                {
+                    "id": 9478,
+                    "type": "button",
+                    "name": "сброс "
+                },
+                {
+                    "id": 9807,
+                    "type": "status",
+                    "name": {
+                        "when_active": "насос №1 работа",
+                        "when_inactive": "насос №1 останов"
+                    },
+                    "status": false
+                },
+                {
+                    "id": 9866,
+                    "type": "status",
+                    "name": {
+                        "when_active": "насос №2 работа",
+                        "when_inactive": "насос №2 останов"
+                    },
+                    "status": true
+                },
+                {
+                    "id": 9867,
+                    "type": "status",
+                    "name": {
+                        "when_active": "насос №3 работа",
+                        "when_inactive": "насос №3 останов"
+                    },
+                    "status": true
+                },
+                {
+                    "id": 9868,
+                    "type": "status",
+                    "name": {
+                        "when_active": "насос №4 работа",
+                        "when_inactive": "насос №4 останов"
+                    },
+                    "status": false
+                }
+            ],
+            "scenarios": [],
+            "ot_sensors": [
+                {
+                    "id": "8192:ot",
+                    "boiler_adapter_id": 8192,
+                    "name": "BAXI t° снаружи",
+                    "type": "temperature",
+                    "status": "unknown",
+                    "value": 7.0,
+                    "unit": "°",
+                    "limits": {
+                        "high": 40,
+                        "low": -40
+                    }
+                },
+                {
+                    "id": "8192:fr",
+                    "boiler_adapter_id": 8192,
+                    "name": "BAXI Скорость потока ГВС",
+                    "type": "dhw_speed",
+                    "status": "unknown",
+                    "value": 0.0,
+                    "unit": "л/мин",
+                    "limits": {
+                        "high": 0,
+                        "low": 35
+                    }
+                },
+                {
+                    "id": "8192:bt",
+                    "boiler_adapter_id": 8192,
+                    "name": "BAXI t° ТН",
+                    "type": "temperature",
+                    "status": "unknown",
+                    "value": 40.0,
+                    "unit": "°",
+                    "limits": {
+                        "high": 70.0,
+                        "low": 30.0
+                    }
+                },
+                {
+                    "id": "8192:dt",
+                    "boiler_adapter_id": 8192,
+                    "name": "BAXI t° ГВС",
+                    "type": "temperature",
+                    "status": "unknown",
+                    "value": 32.0,
+                    "unit": "°",
+                    "limits": {
+                        "high": 70.0,
+                        "low": 30.0
+                    }
+                },
+                {
+                    "id": "8192:rml",
+                    "boiler_adapter_id": 8192,
+                    "name": "BAXI Модуляция",
+                    "type": "modulation",
+                    "status": "unknown",
+                    "value": 0.0,
+                    "unit": "%",
+                    "limits": {
+                        "high": 0,
+                        "low": 100
+                    }
+                },
+                {
+                    "id": "8193:ot",
+                    "boiler_adapter_id": 8193,
+                    "name": "Protherm t° снаружи",
+                    "type": "temperature",
+                    "status": "unknown",
+                    "value": 7.125,
+                    "unit": "°",
+                    "limits": {
+                        "high": 40,
+                        "low": -40
+                    }
+                },
+                {
+                    "id": "8193:bt",
+                    "boiler_adapter_id": 8193,
+                    "name": "Protherm t° ТН",
+                    "type": "temperature",
+                    "status": "unknown",
+                    "value": 25.0,
+                    "unit": "°",
+                    "limits": {
+                        "high": 70.0,
+                        "low": 30.0
+                    }
+                },
+                {
+                    "id": "8193:wp",
+                    "boiler_adapter_id": 8193,
+                    "name": "Protherm Давление ТН",
+                    "type": "pressure",
+                    "status": "unknown",
+                    "value": 1.69921875,
+                    "unit": "бар",
+                    "limits": {
+                        "high": 0,
+                        "low": 3
+                    }
+                },
+                {
+                    "id": "8193:dt",
+                    "boiler_adapter_id": 8193,
+                    "name": "Protherm t° ГВС",
+                    "type": "temperature",
+                    "status": "unknown",
+                    "unit": "°",
+                    "limits": {
+                        "high": 70.0,
+                        "low": 30.0
+                    }
+                },
+                {
+                    "id": "8193:rml",
+                    "boiler_adapter_id": 8193,
+                    "name": "Protherm Модуляция",
+                    "type": "modulation",
+                    "status": "unknown",
+                    "value": 0.0,
+                    "unit": "%",
+                    "limits": {
+                        "high": 0,
+                        "low": 100
+                    }
+                }
+            ]
+        },
+        {
+            "id": 18945,
+            "name": "GSM-сигнализация Mega SX",
+            "model": "SX350",
+            "online": true,
+            "widget_type": "zth",
+            "heating_circuits": [],
+            "heating_modes": [
+                {
+                    "id": "comfort",
+                    "name": "comfort",
+                    "can_be_applied": true
+                },
+                {
+                    "id": "econom",
+                    "name": "econom",
+                    "can_be_applied": true
+                },
+                {
+                    "id": "idle",
+                    "name": "idle",
+                    "can_be_applied": true
+                },
+                {
+                    "id": "full_off",
+                    "name": "full_off",
+                    "can_be_applied": true
+                }
+            ],
+            "sensors": [
+                {
+                    "id": 0,
+                    "name": "Напряжение питания",
+                    "type": "voltage",
+                    "status": "unknown",
+                    "unit": "B"
+                },
+                {
+                    "id": 1,
+                    "name": "датчик",
+                    "type": "temperature",
+                    "status": "unknown",
+                    "value": 21.1,
+                    "unit": "°C"
+                }
+            ],
+            "guard_zones": {
+                "id": 0,
+                "name": "Охрана",
+                "state": "disabled",
+                "alarm": false
+            },
+            "custom_controls": [
+                {
+                    "id": 0,
+                    "type": "button",
+                    "name": "Включить насос"
+                },
+                {
+                    "id": 1,
+                    "type": "button",
+                    "name": "Выключить насос"
+                },
+                {
+                    "id": 0,
+                    "type": "status",
+                    "name": {
+                        "when_active": "выключен",
+                        "when_inactive": "включен"
+                    },
+                    "status": false
+                },
+                {
+                    "id": 2,
+                    "type": "button",
+                    "name": "Включить полив"
+                },
+                {
+                    "id": 3,
+                    "type": "button",
+                    "name": "Выключить полив"
+                },
+                {
+                    "id": 1,
+                    "type": "status",
+                    "name": {
+                        "when_active": "работает",
+                        "when_inactive": "не работает"
+                    },
+                    "status": null
+                },
+                {
+                    "id": 2,
+                    "type": "status",
+                    "name": {
+                        "when_active": "открыта",
+                        "when_inactive": "закрыта"
+                    },
+                    "status": null
+                }
+            ]
+        },
+        {
+            "id": 9829,
+            "name": "Поисковый модуль ZTC-100",
+            "model": "ZTC-100",
+            "online": true,
+            "widget_type": null
+        },
+        {
+            "id": 1580,
+            "name": "Термостат H-1",
+            "model": "T100",
+            "online": true,
+            "widget_type": "zth",
+            "heating_circuits": [
+                {
+                    "id": 1,
+                    "name": "датчик",
+                    "status": "ok",
+                    "active": true,
+                    "actual_temp": 21.4,
+                    "is_off": false,
+                    "target_temp": 21.0,
+                    "current_mode": 1
+                }
+            ],
+            "boiler_circuits": [],
+            "heating_modes": [
+                {
+                    "id": 0,
+                    "name": "Эконом",
+                    "can_be_applied": true
+                },
+                {
+                    "id": 1,
+                    "name": "Комфорт",
+                    "can_be_applied": true
+                },
+                {
+                    "id": 2,
+                    "name": "Расписание",
+                    "can_be_applied": true
+                },
+                {
+                    "id": 3,
+                    "name": "Выключен",
+                    "can_be_applied": true
+                }
+            ],
+            "sensors": [
+                {
+                    "id": 0,
+                    "name": "датчик",
+                    "type": "temperature",
+                    "status": "ok",
+                    "value": 21.4,
+                    "unit": "°C"
+                }
+            ]
+        },
+        {
+            "id": 1210,
+            "name": "Поисковый модуль ZTC-110",
+            "model": "ZTC-110",
+            "online": true,
+            "widget_type": "ztc",
+            "sensors": [
+                {
+                    "id": 0,
+                    "name": "Напряжение питания",
+                    "type": "voltage",
+                    "status": "ok",
+                    "value": 12.5,
+                    "unit": "В"
+                }
+            ],
+            "guard_zones": [
+                {
+                    "id": 0,
+                    "name": "Охрана",
+                    "state": "enabled",
+                    "alarm": false
+                }
+            ],
+            "custom_controls": [],
+            "car_state": {
+                "engine_on": false,
+                "autostart": {
+                    "available": true,
+                    "status": "disabled",
+                    "until": null
+                },
+                "engine_block": false,
+                "siren": false,
+                "door_front_left": false,
+                "door_front_right": false,
+                "door_rear_left": false,
+                "door_rear_right": false,
+                "trunk": false,
+                "hood": false,
+                "power_source": "main",
+                "car_view": {
+                    "model": "car",
+                    "color": {
+                        "glass": null,
+                        "body": "#16a0e5",
+                        "font": null
+                    }
+                },
+                "position": {
+                    "time": 1707389218,
+                    "x": 43.91401666666667,
+                    "y": 56.339166666666664
+                },
+                "address": "Народная, 26"
+            }
+        },
+        {
+            "id": 1209,
+            "name": "Автосигнализация ZTC-7xx",
+            "model": "ZTC-720",
+            "online": true,
+            "widget_type": "ztc",
+            "sensors": [
+                {
+                    "id": 0,
+                    "name": "Напряжение питания",
+                    "type": "voltage",
+                    "status": "ok",
+                    "value": 14.3,
+                    "unit": "В"
+                }
+            ],
+            "guard_zones": [
+                {
+                    "id": 0,
+                    "name": "Охрана",
+                    "state": "enabled",
+                    "alarm": false
+                }
+            ],
+            "custom_controls": [],
+            "car_state": {
+                "engine_on": true,
+                "autostart": {
+                    "available": true,
+                    "status": "disabled",
+                    "until": null
+                },
+                "engine_block": false,
+                "siren": false,
+                "door_front_left": false,
+                "door_front_right": false,
+                "door_rear_left": false,
+                "door_rear_right": false,
+                "trunk": false,
+                "hood": false,
+                "power_source": "main",
+                "car_view": {
+                    "model": "prado",
+                    "color": {
+                        "glass": "#050101",
+                        "body": "#088208",
+                        "font": "#c5c5c5"
+                    }
+                },
+                "position": {
+                    "time": 1707385243,
+                    "x": 43.4102,
+                    "y": 56.23426666666667
+                },
+                "address": "Будённого, 23"
+            }
+        }
+    ],
+    "ok": true
+}
