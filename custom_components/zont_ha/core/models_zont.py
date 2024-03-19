@@ -49,7 +49,7 @@ class SensorZONT(BaseEntityZONT):
     type: str
     status: str
     value: float | None = None
-    unit: str
+    unit: str | None
 
 
 class OTSensorZONT(SensorZONT):
