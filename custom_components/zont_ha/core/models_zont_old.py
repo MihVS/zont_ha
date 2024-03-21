@@ -35,7 +35,7 @@ class DeviceZontOld(BaseModel):
     id: int
     serial: str
     name: str
-    widget_type: str
+    widget_type: str | None
     appliance_type: str
     tempstep: float = 0.1
     firmware_version: list | None
