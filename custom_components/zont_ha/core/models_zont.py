@@ -25,8 +25,8 @@ class HeatingCircuitZONT(ControlEntityZONT):
     target_temp: float | None
     current_mode: int | None
     # current_mode_name: int | None = None
-    target_min: float | None
-    target_max: float | None
+    target_min: float | str | None
+    target_max: float | str | None
 
 
 class HeatingModeZONT(ControlEntityZONT):

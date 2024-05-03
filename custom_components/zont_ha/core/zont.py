@@ -9,7 +9,7 @@ from homeassistant.const import (
     STATE_ALARM_DISARMING, STATE_ALARM_ARMING, STATE_ALARM_ARMED_AWAY
 )
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.helpers.typing import HomeAssistantType
+from homeassistant.core import HomeAssistant
 from .exceptions import StateGuardError
 from .models_zont import (
     AccountZont, ErrorZont, SensorZONT, DeviceZONT, HeatingCircuitZONT,
@@ -49,7 +49,7 @@ class Zont:
     data_old: AccountZontOld
     error: ErrorZont = None
 
-    def __init__(self, hass: HomeAssistantType, mail: str, token: str):
+    def __init__(self, hass: HomeAssistant, mail: str, token: str):
         self.headers = {
             'X-ZONT-Token': token,
             'X-ZONT-Client': mail,
