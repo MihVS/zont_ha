@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, root_validator
 
 
 class BaseEntityZONT(BaseModel):
@@ -42,23 +42,22 @@ class BoilerModeZONT(ControlEntityZONT):
     color: str | None
 
 
-class SensorZONT(BaseModel):
+class SensorZONT(BaseEntityZONT):
     """Сенсоры"""
 
-    status: str
-    id: int | str
-    name: str
     type: str
+    status: str
     value: float | None
     triggered: bool | None
     unit: str | None
     battery: float | None
     rssi: float | None
 
-    @validator('id')
-    def create_unique_id(cls, v, values):
-        print('@@', values)
-        return f'{v}_{values.get('type', 'unknown')}'
+    @root_validator
+    def create_unique_id(cls, values):
+        values['id'] = (f'{values.get('id', 'unknown_id')}_'
+                        f'{values.get('type', 'unknown_type')}')
+        return values
 
 
 class OTSensorZONT(SensorZONT):

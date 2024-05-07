@@ -1,5 +1,6 @@
 from homeassistant.const import (
-    UnitOfTemperature, UnitOfElectricPotential, PERCENTAGE, UnitOfPressure
+    UnitOfTemperature, UnitOfElectricPotential, PERCENTAGE, UnitOfPressure,
+    SIGNAL_STRENGTH_DECIBELS_MILLIWATT
 )
 
 DOMAIN = 'zont_ha'
@@ -35,7 +36,8 @@ VALID_UNITS = {
     'boiler_failure': UnitOfElectricPotential.VOLT,
     'power_source': UnitOfElectricPotential.VOLT,
     'discrete': UnitOfElectricPotential.VOLT,
-    'dhw_speed': 'л/мин'
+    'dhw_speed': 'л/мин',
+    'rssi': SIGNAL_STRENGTH_DECIBELS_MILLIWATT
 }
 BINARY_SENSOR_TYPES = ('leakage', 'smoke', 'opening', 'motion')
 
