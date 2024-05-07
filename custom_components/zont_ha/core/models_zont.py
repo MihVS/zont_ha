@@ -24,7 +24,6 @@ class HeatingCircuitZONT(ControlEntityZONT):
     is_off: bool
     target_temp: float | None
     current_mode: int | None
-    # current_mode_name: int | None = None
     target_min: float | str | None
     target_max: float | str | None
 
@@ -43,20 +42,30 @@ class BoilerModeZONT(ControlEntityZONT):
     color: str | None
 
 
-class SensorZONT(BaseEntityZONT):
+class SensorZONT(BaseModel):
     """Сенсоры"""
 
-    type: str
     status: str
-    value: float | None = None
+    id: int | str
+    name: str
+    type: str
+    value: float | None
+    triggered: bool | None
     unit: str | None
+    battery: float | None
+    rssi: float | None
+
+    @validator('id')
+    def create_unique_id(cls, v, values):
+        print('@@', values)
+        return f'{v}_{values.get('type', 'unknown')}'
 
 
 class OTSensorZONT(SensorZONT):
     """Сенсоры котлов"""
 
     boiler_adapter_id: int
-    id: str
+    # id: str
 
 
 class GuardZoneZONT(ControlEntityZONT):
