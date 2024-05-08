@@ -85,8 +85,41 @@ class Zont:
             self.data_old = account.parse_raw(text)
         else:
             self.data = account.parse_raw(text)
+            self._create_radio_sensors()
         _LOGGER.debug(f'Данные аккаунта {self.mail} обновлены. ver: {version}')
         return status_code
+
+    def _create_radio_sensors(self):
+        """
+        Создает дополнительные сенсоры
+        уровня батареи и связи для радио датчиков
+        """
+        for device in self.data.devices:
+            for i in range(len(device.sensors)):
+                sensor = device.sensors[i]
+                if sensor.rssi and sensor.type == 'temperature':
+                    device.sensors.append(SensorZONT(
+                        id=f'{sensor.id}_rssi',
+                        name=f'{sensor.name}_rssi',
+                        type='rssi',
+                        status='ok',
+                        value=sensor.rssi
+                    ))
+                    _LOGGER.debug(
+                        f'Создан сенсор уровня сигнала '
+                        f'радио датчика {device.name}-{sensor.name}'
+                    )
+                    device.sensors.append(SensorZONT(
+                        id=f'{sensor.id}_battery',
+                        name=f'{sensor.name}_battery',
+                        type='voltage',
+                        status='ok',
+                        value=sensor.battery
+                    ))
+                    _LOGGER.debug(
+                        f'Создан сенсор напряжения батарейки '
+                        f'радио датчика {device.name}-{sensor.name}'
+                    )
 
     def get_device(self, device_id: int) -> DeviceZONT | None:
         """Получить устройство по его id"""
