@@ -73,7 +73,7 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
         self._attr_target_temperature_step = self._device_old.tempstep
         self._heating_modes: list[HeatingModeZONT] = self._device.heating_modes
         self._attr_min_temp, self._attr_max_temp = (
-            self._zont.get_min_max_values_temp(self._heating_circuit.name))
+            self._zont.get_min_max_values_temp(self._heating_circuit))
         self._attr_device_info = coordinator.devices_info(device_id)
 
     @property

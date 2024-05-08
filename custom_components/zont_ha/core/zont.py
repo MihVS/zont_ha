@@ -260,11 +260,27 @@ class Zont:
         return [heating_mode.name for heating_mode in heating_modes]
 
     @staticmethod
-    def get_min_max_values_temp(circuit_name: str) -> tuple[int, int]:
+    def _validate_min_max_values_temp(min_temp, max_temp) -> bool:
+        if not (isinstance(min_temp, int) and isinstance(max_temp, int)):
+            return False
+        if min_temp < 0 and max_temp > 80:
+            return False
+        return True
+
+    def get_min_max_values_temp(
+           self, heating_circuit: HeatingCircuitZONT) -> tuple[int, int]:
         """
         Функция для получения максимальной и минимальной температур
-        по имени контура отопления.
+        по контуру отопления.
         """
+        val_min = heating_circuit.target_min
+        val_max = heating_circuit.target_max
+        if self._validate_min_max_values_temp(val_min, val_max):
+            return val_min, val_max
+        _LOGGER.warning(f'Не удалось получить пределы регулировки температуры'
+                        f' для контура: {heating_circuit.id}. Значения взяты'
+                        f' исходя из названия контура.')
+        circuit_name = heating_circuit.name
         val_min, val_max = MIN_TEMP_AIR, MAX_TEMP_AIR
         circuit_name = circuit_name.lower().strip()
         matches_gvs = MATCHES_GVS
