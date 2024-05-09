@@ -1,6 +1,8 @@
 from datetime import datetime
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, root_validator
+
+from config.custom_components.zont_ha.const import NO_ERROR
 
 
 class BaseEntityZONT(BaseModel):
@@ -24,9 +26,8 @@ class HeatingCircuitZONT(ControlEntityZONT):
     is_off: bool
     target_temp: float | None
     current_mode: int | None
-    # current_mode_name: int | None = None
-    target_min: float | str | None
-    target_max: float | str | None
+    target_min: int | str | None
+    target_max: int | str | None
 
 
 class HeatingModeZONT(ControlEntityZONT):
@@ -34,6 +35,26 @@ class HeatingModeZONT(ControlEntityZONT):
 
     can_be_applied: bool
     color: str | None
+
+
+class BoilerCircuitZONT(BaseEntityZONT):
+    """Котловые контура"""
+
+    active: bool
+    status: str | None
+    target_temp: float | None
+    water_min_temp: float | None
+    water_max_temp: float | None
+    water_temp: float | None
+    air_temp: float | None
+    dhw_temp: float | None
+    rwt_temp: float | None
+    modulation_level: float | None
+    pressure: float | None
+    dhw_speed: float | None
+    outside: float | None
+    error_oem: str = NO_ERROR
+    error_text: str = ''
 
 
 class BoilerModeZONT(ControlEntityZONT):
@@ -48,15 +69,23 @@ class SensorZONT(BaseEntityZONT):
 
     type: str
     status: str
-    value: float | None = None
+    value: float | str | None
+    triggered: bool | None
     unit: str | None
+    battery: float | None
+    rssi: float | None
+
+    @root_validator
+    def create_unique_id(cls, values):
+        values['id'] = (f'{values.get('id', 'unknown_id')}_'
+                        f'{values.get('type', 'unknown_type')}')
+        return values
 
 
 class OTSensorZONT(SensorZONT):
     """Сенсоры котлов"""
 
     boiler_adapter_id: int
-    id: str
 
 
 class GuardZoneZONT(ControlEntityZONT):
@@ -129,6 +158,7 @@ class DeviceZONT(BaseEntityZONT):
     widget_type: str | None
     heating_circuits: list[HeatingCircuitZONT] = []
     heating_modes: list[HeatingModeZONT] | None
+    boiler_circuits: list[BoilerCircuitZONT] = []
     boiler_modes: list[BoilerModeZONT] = []
     sensors: list[SensorZONT] = []
     ot_sensors: list[OTSensorZONT] = []
