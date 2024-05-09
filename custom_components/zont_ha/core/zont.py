@@ -8,8 +8,8 @@ from homeassistant.const import (
     STATE_ALARM_TRIGGERED, STATE_UNAVAILABLE, STATE_ALARM_DISARMED,
     STATE_ALARM_DISARMING, STATE_ALARM_ARMING, STATE_ALARM_ARMED_AWAY
 )
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .exceptions import StateGuardError
 from .models_zont import (
     AccountZont, ErrorZont, SensorZONT, DeviceZONT, HeatingCircuitZONT,
@@ -22,7 +22,7 @@ from ..const import (
     MIN_TEMP_AIR, MAX_TEMP_AIR, MIN_TEMP_GVS, MAX_TEMP_GVS, MIN_TEMP_FLOOR,
     MAX_TEMP_FLOOR, MATCHES_GVS, MATCHES_FLOOR, URL_TRIGGER_CUSTOM_BUTTON,
     URL_SET_GUARD, BINARY_SENSOR_TYPES, URL_SEND_COMMAND_ZONT,
-    URL_GET_DEVICES_OLD,
+    URL_GET_DEVICES_OLD, NO_ERROR,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -85,41 +85,56 @@ class Zont:
             self.data_old = account.parse_raw(text)
         else:
             self.data = account.parse_raw(text)
-            self._create_radio_sensors()
+            self._create_sensors()
         _LOGGER.debug(f'Данные аккаунта {self.mail} обновлены. ver: {version}')
         return status_code
 
-    def _create_radio_sensors(self):
+    def _create_sensors(self):
+        """Создает дополнительные сенсоры"""
+        for device in self.data.devices:
+            self._create_radio_sensors(device)
+            self._create_error_boiler_sensors(device)
+
+    @staticmethod
+    def _create_radio_sensors(device: DeviceZONT):
         """
         Создает дополнительные сенсоры
         уровня батареи и связи для радио датчиков
         """
-        for device in self.data.devices:
-            for i in range(len(device.sensors)):
-                sensor = device.sensors[i]
-                if sensor.rssi and sensor.type == 'temperature':
-                    device.sensors.append(SensorZONT(
-                        id=f'{sensor.id}_rssi',
-                        name=f'{sensor.name}_rssi',
-                        type='rssi',
-                        status='ok',
-                        value=sensor.rssi
-                    ))
-                    _LOGGER.debug(
-                        f'Создан сенсор уровня сигнала '
-                        f'радио датчика {device.name}-{sensor.name}'
-                    )
-                    device.sensors.append(SensorZONT(
-                        id=f'{sensor.id}_battery',
-                        name=f'{sensor.name}_battery',
-                        type='voltage',
-                        status='ok',
-                        value=sensor.battery
-                    ))
-                    _LOGGER.debug(
-                        f'Создан сенсор напряжения батарейки '
-                        f'радио датчика {device.name}-{sensor.name}'
-                    )
+        for i in range(len(device.sensors)):
+            sensor = device.sensors[i]
+            if sensor.rssi and sensor.type == 'temperature':
+                device.sensors.append(SensorZONT(
+                    id=f'{sensor.id}_rssi',
+                    name=f'{sensor.name}_rssi',
+                    type='rssi',
+                    status='ok',
+                    value=sensor.rssi
+                ))
+                device.sensors.append(SensorZONT(
+                    id=f'{sensor.id}_battery',
+                    name=f'{sensor.name}_battery',
+                    type='voltage',
+                    status='ok',
+                    value=sensor.battery
+                ))
+
+    @staticmethod
+    def _create_error_boiler_sensors(device: DeviceZONT):
+        """Создаёт дополнительные сенсоры ошибок котла"""
+        for boiler in device.boiler_circuits:
+            code_err = boiler.error_oem
+            text = boiler.error_text
+            if code_err != NO_ERROR:
+                code_err = code_err[11:]
+                text = f': {boiler.error_text}'
+            device.sensors.append(SensorZONT(
+                id=f'{boiler.id}_boiler',
+                name=f'{boiler.name}_ошибка',
+                type='txt',
+                status='ok',
+                value=code_err + text
+            ))
 
     def get_device(self, device_id: int) -> DeviceZONT | None:
         """Получить устройство по его id"""

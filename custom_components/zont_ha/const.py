@@ -37,6 +37,7 @@ VALID_UNITS = {
     'power_source': UnitOfElectricPotential.VOLT,
     'discrete': UnitOfElectricPotential.VOLT,
     'dhw_speed': 'л/мин',
+    'txt': None,
     'rssi': SIGNAL_STRENGTH_DECIBELS_MILLIWATT
 }
 BINARY_SENSOR_TYPES = ('leakage', 'smoke', 'opening', 'motion')
@@ -83,3 +84,5 @@ STATES_CAR = {
     'trunk': 'Багажник открыт',
     'hood': 'Капот открыт'
 }
+
+NO_ERROR = 'Ошибок нет'
