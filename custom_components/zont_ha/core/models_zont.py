@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, validator, root_validator
 
-from config.custom_components.zont_ha.const import NO_ERROR
+from ..const import NO_ERROR
 
 
 class BaseEntityZONT(BaseModel):
