@@ -22,7 +22,7 @@ from ..const import (
     MIN_TEMP_AIR, MAX_TEMP_AIR, MIN_TEMP_GVS, MAX_TEMP_GVS, MIN_TEMP_FLOOR,
     MAX_TEMP_FLOOR, MATCHES_GVS, MATCHES_FLOOR, URL_TRIGGER_CUSTOM_BUTTON,
     URL_SET_GUARD, BINARY_SENSOR_TYPES, URL_SEND_COMMAND_ZONT,
-    URL_GET_DEVICES_OLD, NO_ERROR,
+    URL_GET_DEVICES_OLD, NO_ERROR, URL_ACTIVATE_HEATING_MODE,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -330,6 +330,21 @@ class Zont:
             },
             headers=self.headers
         )
+
+    async def set_heating_mode_all_circuit(
+            self, device: DeviceZONT, heating_mode_id: int
+    ) -> ClientResponse:
+        """Отправка команды на установку нужного режима для всех контуров."""
+        response = await self.session.post(
+            url=URL_ACTIVATE_HEATING_MODE,
+            json={
+                'device_id': device.id,
+                'mode_id': heating_mode_id
+            },
+            headers=self.headers
+        )
+        _LOGGER.debug(await response.text())
+        return response
 
     async def set_heating_mode(
             self, device: DeviceZONT, heating_circuit: HeatingCircuitZONT,

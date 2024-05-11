@@ -86,3 +86,15 @@ STATES_CAR = {
 }
 
 NO_ERROR = 'Ошибок нет'
+
+HEATING_MODES = {
+    'комфорт': 'mdi:emoticon-happy-outline',
+    'эконом': 'mdi:leaf-circle-outline',
+    'лето': 'mdi:weather-sunny',
+    'расписание': 'mdi:clock-outline',
+    'выкл': 'mdi:power',
+    'тишина': 'mdi:sleep',
+    'дома': 'mdi:home-outline',
+    'не дома': 'mdi:home-off-outline',
+    'гвс': 'mdi:water-boiler',
+}

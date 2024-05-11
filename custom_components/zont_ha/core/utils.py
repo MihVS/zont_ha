@@ -4,6 +4,7 @@ from http import HTTPStatus
 from aiohttp import ClientResponse
 
 from .exceptions import ResponseZontError
+from ..const import HEATING_MODES
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -56,3 +57,10 @@ def check_send_command(func):
             raise ResponseZontError(f'Ошибка запроса к API zont: {status}')
 
     return check_response
+
+
+def get_icon(name_mode: str) -> str:
+    for mode, icon in HEATING_MODES.items():
+        if mode.lower() in name_mode.lower():
+            return icon
+    return 'mdi:refresh-circle'
