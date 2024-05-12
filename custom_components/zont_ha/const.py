@@ -38,8 +38,13 @@ VALID_UNITS = {
     'discrete': UnitOfElectricPotential.VOLT,
     'dhw_speed': 'л/мин',
     'txt': None,
-    'rssi': SIGNAL_STRENGTH_DECIBELS_MILLIWATT
+    'rssi': SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
+    'бар': UnitOfPressure.BAR,
+    '°': UnitOfTemperature.CELSIUS,
+    '%': PERCENTAGE,
+    'В': UnitOfElectricPotential.VOLT,
 }
+
 BINARY_SENSOR_TYPES = ('leakage', 'smoke', 'opening', 'motion')
 
 MIN_TEMP_AIR = 5

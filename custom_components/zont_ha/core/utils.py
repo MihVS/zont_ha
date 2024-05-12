@@ -4,7 +4,7 @@ from http import HTTPStatus
 from aiohttp import ClientResponse
 
 from .exceptions import ResponseZontError
-from ..const import HEATING_MODES
+from ..const import HEATING_MODES, VALID_UNITS
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -64,3 +64,10 @@ def get_icon(name_mode: str) -> str:
         if mode.lower() in name_mode.lower():
             return icon
     return 'mdi:refresh-circle'
+
+
+def get_unit_sensor(type_sensor, unit_sensor):
+    try:
+        return VALID_UNITS[unit_sensor]
+    except KeyError:
+        return VALID_UNITS[type_sensor]

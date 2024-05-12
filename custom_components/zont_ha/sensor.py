@@ -8,9 +8,10 @@ from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
 )
 from . import ZontCoordinator
-from .const import DOMAIN, VALID_UNITS, BINARY_SENSOR_TYPES
+from .const import DOMAIN, BINARY_SENSOR_TYPES
 from .core.exceptions import SensorNotFoundError
 from .core.models_zont import SensorZONT, DeviceZONT, OTSensorZONT
+from .core.utils import get_unit_sensor
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -63,7 +64,7 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
     @property
     def native_unit_of_measurement(self) -> str | None:
         """Возвращает единицу измерения сенсора из API zont"""
-        return VALID_UNITS[self._sensor.type]
+        return get_unit_sensor(self._sensor.type, self._sensor.unit)
 
     @property
     def unique_id(self) -> str:
