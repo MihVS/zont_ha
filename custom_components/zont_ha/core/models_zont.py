@@ -157,7 +157,7 @@ class DeviceZONT(BaseEntityZONT):
     online: bool
     widget_type: str | None
     heating_circuits: list[HeatingCircuitZONT] = []
-    heating_modes: list[HeatingModeZONT] | None
+    heating_modes: list[HeatingModeZONT] = []
     boiler_circuits: list[BoilerCircuitZONT] = []
     boiler_modes: list[BoilerModeZONT] = []
     sensors: list[SensorZONT] = []

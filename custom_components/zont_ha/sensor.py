@@ -11,7 +11,7 @@ from . import ZontCoordinator
 from .const import DOMAIN, BINARY_SENSOR_TYPES
 from .core.exceptions import SensorNotFoundError
 from .core.models_zont import SensorZONT, DeviceZONT, OTSensorZONT
-from .core.utils import get_unit_sensor
+from .core.utils import get_unit_sensor, get_devise_class_sensor
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -51,6 +51,8 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
         self._sensor = sensor
         self._unique_id = unique_id
         self._attr_device_info = coordinator.devices_info(device.id)
+        if sensor.type == 'err':
+            self._attr_icon = 'mdi:wrench-outline'
 
     @property
     def name(self) -> str:
@@ -59,6 +61,8 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
     @property
     def native_value(self) -> float | str:
         """Возвращает состояние сенсора"""
+        if self._sensor.type == 'battery':
+            return int(self._sensor.value)
         return self._sensor.value
 
     @property
@@ -72,7 +76,7 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def device_class(self) -> str | None:
-        return self._sensor.type
+        return get_devise_class_sensor(self._sensor)
 
     def __repr__(self) -> str:
         if not self.hass:

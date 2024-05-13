@@ -22,7 +22,7 @@ from ..const import (
     MIN_TEMP_AIR, MAX_TEMP_AIR, MIN_TEMP_GVS, MAX_TEMP_GVS, MIN_TEMP_FLOOR,
     MAX_TEMP_FLOOR, MATCHES_GVS, MATCHES_FLOOR, URL_TRIGGER_CUSTOM_BUTTON,
     URL_SET_GUARD, BINARY_SENSOR_TYPES, URL_SEND_COMMAND_ZONT,
-    URL_GET_DEVICES_OLD, NO_ERROR, URL_ACTIVATE_HEATING_MODE,
+    URL_GET_DEVICES_OLD, NO_ERROR, URL_ACTIVATE_HEATING_MODE, PERCENT_BATTERY,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -36,7 +36,7 @@ state_zont = StateZont(
 )
 
 TypeBinarySensorZont = namedtuple('TypeBinarySensorZont', [
-    'leakage', 'smoke', 'opening', 'motion'
+    'leakage', 'smoke', 'opening', 'motion', 'discrete'
 ])
 
 type_binary_sensor = TypeBinarySensorZont(*BINARY_SENSOR_TYPES)
@@ -95,8 +95,7 @@ class Zont:
             self._create_radio_sensors(device)
             self._create_error_boiler_sensors(device)
 
-    @staticmethod
-    def _create_radio_sensors(device: DeviceZONT):
+    def _create_radio_sensors(self, device: DeviceZONT):
         """
         Создает дополнительные сенсоры
         уровня батареи и связи для радио датчиков
@@ -107,17 +106,28 @@ class Zont:
                 device.sensors.append(SensorZONT(
                     id=f'{sensor.id}_rssi',
                     name=f'{sensor.name}_rssi',
-                    type='rssi',
+                    type='signal_strength',
                     status='ok',
                     value=sensor.rssi
                 ))
                 device.sensors.append(SensorZONT(
                     id=f'{sensor.id}_battery',
                     name=f'{sensor.name}_battery',
-                    type='voltage',
+                    type='battery',
                     status='ok',
-                    value=sensor.battery
+                    value=self._convert_value_battery(sensor.battery)
                 ))
+
+    @staticmethod
+    def _convert_value_battery(value: float) -> int:
+        """Преобразовывает напряжение батарейки в уровень заряда в %"""
+        value = round(value, 1)
+        if value > 3.0:
+            return 100
+        elif value < 2.5:
+            return 0
+        else:
+            return PERCENT_BATTERY[value]
 
     @staticmethod
     def _create_error_boiler_sensors(device: DeviceZONT):
@@ -131,7 +141,7 @@ class Zont:
             device.sensors.append(SensorZONT(
                 id=f'{boiler.id}_boiler',
                 name=f'{boiler.name}_ошибка',
-                type='txt',
+                type='err',
                 status='ok',
                 value=code_err + text
             ))
@@ -243,6 +253,8 @@ class Zont:
                 return self._is_on_smoke(voltage, current_value)
             case type_binary_sensor.opening | type_binary_sensor.motion:
                 return self._is_on_contact(voltage, current_value)
+            case type_binary_sensor.discrete:
+                return bool(sensor.value)
             case _:
                 _LOGGER.warning(f"Unknown sensor type: {sensor.type}")
                 return False

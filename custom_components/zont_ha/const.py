@@ -37,15 +37,29 @@ VALID_UNITS = {
     'power_source': UnitOfElectricPotential.VOLT,
     'discrete': UnitOfElectricPotential.VOLT,
     'dhw_speed': 'л/мин',
-    'txt': None,
-    'rssi': SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
+    'err': None,
+    'signal_strength': SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
     'бар': UnitOfPressure.BAR,
     '°': UnitOfTemperature.CELSIUS,
     '%': PERCENTAGE,
     'В': UnitOfElectricPotential.VOLT,
+    'battery': PERCENTAGE
 }
 
-BINARY_SENSOR_TYPES = ('leakage', 'smoke', 'opening', 'motion')
+VALID_TYPE_SENSOR = {
+    'pressure': 'бар',
+    'temperature': '°',
+    'speed': 'км/ч',
+    'volume': 'л',
+    'volume_flow_rate': ('л/ч', 'м³/ч'),
+    'frequency': ('Гц', 'об/мин'),
+    'power': ('Вт', 'ВА'),
+    'reactive_power': 'ВАР',
+    'volatile_organic_compounds_parts': 'ppm',
+    'energy': 'кВт•ч'
+}
+
+BINARY_SENSOR_TYPES = ('leakage', 'smoke', 'opening', 'motion', 'discrete')
 
 MIN_TEMP_AIR = 5
 MAX_TEMP_AIR = 35
@@ -94,7 +108,7 @@ NO_ERROR = 'Ошибок нет'
 
 HEATING_MODES = {
     'комфорт': 'mdi:emoticon-happy-outline',
-    'эконом': 'mdi:leaf-circle-outline',
+    'эко': 'mdi:leaf-circle-outline',
     'лето': 'mdi:weather-sunny',
     'расписание': 'mdi:clock-outline',
     'выкл': 'mdi:power',
@@ -102,4 +116,13 @@ HEATING_MODES = {
     'дома': 'mdi:home-outline',
     'не дома': 'mdi:home-off-outline',
     'гвс': 'mdi:water-boiler',
+}
+
+PERCENT_BATTERY = {
+    3.0: 90,
+    2.9: 80,
+    2.8: 70,
+    2.7: 60,
+    2.6: 50,
+    2.5: 40
 }
