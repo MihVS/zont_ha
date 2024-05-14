@@ -4,8 +4,11 @@ from http import HTTPStatus
 from aiohttp import ClientResponse
 
 from .exceptions import ResponseZontError
-from ..const import HEATING_MODES, VALID_UNITS, VALID_TYPE_SENSOR
 from .models_zont import SensorZONT
+from ..const import (
+    HEATING_MODES, VALID_TYPE_SENSOR, ZONT_SENSOR_TYPE, UNIT_BY_TYPE,
+    VALID_UNITS
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -67,11 +70,19 @@ def get_icon(name_mode: str) -> str:
     return 'mdi:refresh-circle'
 
 
-def get_unit_sensor(type_sensor, unit_sensor) -> str:
-    try:
-        return VALID_UNITS[unit_sensor]
-    except KeyError:
-        return VALID_UNITS[type_sensor]
+def get_unit_sensor(sensor: SensorZONT) -> str:
+    """Фильтр для получения правильной единицы измерения сенсора"""
+    type_sensor = sensor.type
+    unit_by_type = UNIT_BY_TYPE.get(sensor.type)
+    unit = VALID_UNITS.get(sensor.unit)
+    if type_sensor == 'voltage':
+        return unit
+    elif isinstance(
+        unit, type(unit_by_type)
+    ):
+        return unit
+    else:
+        return UNIT_BY_TYPE.get(type_sensor, unit)
 
 
 def get_devise_class_by_name(name: str) -> str | None:
@@ -91,4 +102,4 @@ def get_devise_class_sensor(sensor: SensorZONT) -> str:
             if sensor.unit in unit:
                 return device_class
     else:
-        return sensor.type
+        return ZONT_SENSOR_TYPE.get(sensor.type, sensor.type)

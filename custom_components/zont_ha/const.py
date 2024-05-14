@@ -1,6 +1,8 @@
 from homeassistant.const import (
     UnitOfTemperature, UnitOfElectricPotential, PERCENTAGE, UnitOfPressure,
-    SIGNAL_STRENGTH_DECIBELS_MILLIWATT
+    SIGNAL_STRENGTH_DECIBELS_MILLIWATT, UnitOfVolumeFlowRate, UnitOfSpeed,
+    UnitOfVolume, UnitOfFrequency, UnitOfPower, UnitOfApparentPower,
+    POWER_VOLT_AMPERE_REACTIVE, CONCENTRATION_PARTS_PER_MILLION, UnitOfEnergy
 )
 
 DOMAIN = 'zont_ha'
@@ -22,7 +24,7 @@ URL_TRIGGER_CUSTOM_BUTTON = ZONT_API_URL + 'trigger_custom_button'
 
 URL_GET_TOKEN = ZONT_API_URL_ROOT + 'authtoken/get'
 
-VALID_UNITS = {
+UNIT_BY_TYPE = {
     'temperature': UnitOfTemperature.CELSIUS,
     'humidity': PERCENTAGE,
     'voltage': UnitOfElectricPotential.VOLT,
@@ -33,17 +35,40 @@ VALID_UNITS = {
     'smoke': UnitOfElectricPotential.VOLT,
     'opening': UnitOfElectricPotential.VOLT,
     'room_thermostat': UnitOfElectricPotential.VOLT,
-    'boiler_failure': UnitOfElectricPotential.VOLT,
-    'power_source': UnitOfElectricPotential.VOLT,
+    'power_source': UnitOfEnergy.KILO_WATT_HOUR,
     'discrete': UnitOfElectricPotential.VOLT,
-    'dhw_speed': 'л/мин',
-    'err': None,
     'signal_strength': SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
+    'battery': PERCENTAGE
+}
+
+VALID_UNITS = {
+    'л/мин': UnitOfVolumeFlowRate.LITERS_PER_MINUTE,
+    'л': UnitOfVolume.LITERS,
+    'м³/ч': UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR,
+    'txt': None,
+    'дБм': SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
     'бар': UnitOfPressure.BAR,
     '°': UnitOfTemperature.CELSIUS,
     '%': PERCENTAGE,
     'В': UnitOfElectricPotential.VOLT,
+    'км/ч': UnitOfSpeed.KILOMETERS_PER_HOUR,
+    'Гц': UnitOfFrequency.HERTZ,
+    'Вт': UnitOfPower.WATT,
+    'ВА': UnitOfApparentPower.VOLT_AMPERE,
+    'ВАР': POWER_VOLT_AMPERE_REACTIVE,
+    'кВт•ч': UnitOfEnergy.KILO_WATT_HOUR,
+    'ppm': CONCENTRATION_PARTS_PER_MILLION,
     'battery': PERCENTAGE
+}
+
+ZONT_SENSOR_TYPE = {
+    'dhw_speed': 'volume_flow_rate'
+}
+
+SENSOR_TYPE_ICON = {
+    'boiler_failure': 'mdi:wrench-outline',
+    'dhw_speed': 'mdi:waves-arrow-right',
+    'modulation': 'mdi:fire'
 }
 
 VALID_TYPE_SENSOR = {

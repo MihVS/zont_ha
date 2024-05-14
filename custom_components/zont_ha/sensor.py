@@ -8,10 +8,10 @@ from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
 )
 from . import ZontCoordinator
-from .const import DOMAIN, BINARY_SENSOR_TYPES
+from .const import DOMAIN, BINARY_SENSOR_TYPES, VALID_UNITS, SENSOR_TYPE_ICON
 from .core.exceptions import SensorNotFoundError
 from .core.models_zont import SensorZONT, DeviceZONT, OTSensorZONT
-from .core.utils import get_unit_sensor, get_devise_class_sensor
+from .core.utils import get_devise_class_sensor, get_unit_sensor
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -51,8 +51,7 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
         self._sensor = sensor
         self._unique_id = unique_id
         self._attr_device_info = coordinator.devices_info(device.id)
-        if sensor.type == 'err':
-            self._attr_icon = 'mdi:wrench-outline'
+        self._attr_icon = SENSOR_TYPE_ICON.get(sensor.type)
 
     @property
     def name(self) -> str:
@@ -61,14 +60,14 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
     @property
     def native_value(self) -> float | str:
         """Возвращает состояние сенсора"""
-        if self._sensor.type == 'battery':
+        if self._sensor.type == 'battery' and isinstance(self._sensor.value, float):
             return int(self._sensor.value)
         return self._sensor.value
 
     @property
     def native_unit_of_measurement(self) -> str | None:
         """Возвращает единицу измерения сенсора из API zont"""
-        return get_unit_sensor(self._sensor.type, self._sensor.unit)
+        return get_unit_sensor(self._sensor)
 
     @property
     def unique_id(self) -> str:

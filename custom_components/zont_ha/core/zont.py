@@ -108,14 +108,16 @@ class Zont:
                     name=f'{sensor.name}_rssi',
                     type='signal_strength',
                     status='ok',
-                    value=sensor.rssi
+                    value=sensor.rssi,
+                    unit='дБм'
                 ))
                 device.sensors.append(SensorZONT(
                     id=f'{sensor.id}_battery',
                     name=f'{sensor.name}_battery',
                     type='battery',
                     status='ok',
-                    value=self._convert_value_battery(sensor.battery)
+                    value=self._convert_value_battery(sensor.battery),
+                    unit='%'
                 ))
 
     @staticmethod
@@ -141,9 +143,10 @@ class Zont:
             device.sensors.append(SensorZONT(
                 id=f'{boiler.id}_boiler',
                 name=f'{boiler.name}_ошибка',
-                type='err',
+                type='boiler_failure',
                 status='ok',
-                value=code_err + text
+                value=code_err + text,
+                unit='txt'
             ))
 
     def get_device(self, device_id: int) -> DeviceZONT | None:
