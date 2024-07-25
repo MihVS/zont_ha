@@ -53,8 +53,8 @@ class BoilerCircuitZONT(BaseEntityZONT):
     pressure: float | None
     dhw_speed: float | None
     outside: float | None
-    error_oem: str = NO_ERROR
-    error_text: str = ''
+    error_oem: str | None = NO_ERROR
+    error_text: str | None = ''
 
 
 class BoilerModeZONT(ControlEntityZONT):
