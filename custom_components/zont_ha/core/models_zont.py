@@ -150,6 +150,22 @@ class CarStateZONT(BaseModel):
     address: str
 
 
+class VersionZONT(BaseModel):
+    """Модель версии прошивки и железа устройств"""
+
+    hardware: str
+    software: str
+
+
+class DeviceInfoZONT(BaseModel):
+    """Модель информации девайса"""
+
+    id: str
+    model: str
+    widget_type: str
+    version: VersionZONT
+
+
 class DeviceZONT(BaseEntityZONT):
     """Модель контроллера"""
 
@@ -166,6 +182,7 @@ class DeviceZONT(BaseEntityZONT):
     custom_controls: list[CustomControlZONT] = []
     scenarios: list[ScenarioZONT] = []
     car_state: CarStateZONT = []
+    device_info: DeviceInfoZONT = []
 
     @validator('guard_zones')
     def guard_zones_should_be_list(
