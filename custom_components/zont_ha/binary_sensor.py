@@ -46,7 +46,9 @@ async def async_setup_entry(
         for custom_control in device.custom_controls:
             unique_id = f'{entry_id}{device.id}{custom_control.id}'
             if custom_control.type == 'status':
-                binary_sensors.append(ZontBinarySensor())
+                binary_sensors.append(ZontBinarySensorCustomControl(
+                    coordinator, device, custom_control, unique_id
+                ))
         if binary_sensors:
             async_add_entities(binary_sensors)
             _LOGGER.debug(f'Добавлены бинарные сенсоры: {binary_sensors}')
