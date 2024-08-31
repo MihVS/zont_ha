@@ -2,7 +2,7 @@ from homeassistant.const import (
     UnitOfTemperature, UnitOfElectricPotential, PERCENTAGE, UnitOfPressure,
     SIGNAL_STRENGTH_DECIBELS_MILLIWATT, UnitOfVolumeFlowRate, UnitOfSpeed,
     UnitOfVolume, UnitOfFrequency, UnitOfPower, UnitOfApparentPower,
-    POWER_VOLT_AMPERE_REACTIVE, CONCENTRATION_PARTS_PER_MILLION, UnitOfEnergy
+    UnitOfReactivePower, CONCENTRATION_PARTS_PER_MILLION, UnitOfEnergy
 )
 
 DOMAIN = 'zont_ha'
@@ -55,7 +55,7 @@ VALID_UNITS = {
     'Гц': UnitOfFrequency.HERTZ,
     'Вт': UnitOfPower.WATT,
     'ВА': UnitOfApparentPower.VOLT_AMPERE,
-    'ВАР': POWER_VOLT_AMPERE_REACTIVE,
+    'ВАР': UnitOfReactivePower.VOLT_AMPERE_REACTIVE,
     'кВт•ч': UnitOfEnergy.KILO_WATT_HOUR,
     'ppm': CONCENTRATION_PARTS_PER_MILLION,
     'battery': PERCENTAGE
