@@ -8,7 +8,7 @@ from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
 )
 from . import ZontCoordinator
-from .const import DOMAIN, BINARY_SENSOR_TYPES, VALID_UNITS, SENSOR_TYPE_ICON
+from .const import DOMAIN, BINARY_SENSOR_TYPES, SENSOR_TYPE_ICON
 from .core.exceptions import SensorNotFoundError
 from .core.models_zont import SensorZONT, DeviceZONT, OTSensorZONT
 from .core.utils import get_devise_class_sensor, get_unit_sensor

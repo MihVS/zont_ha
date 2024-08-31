@@ -163,7 +163,7 @@ class DeviceInfoZONT(BaseModel):
     id: str
     model: str
     widget_type: str
-    version: VersionZONT
+    version: VersionZONT | None
 
 
 class DeviceZONT(BaseEntityZONT):

@@ -9,7 +9,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator
 from .const import DOMAIN, BINARY_SENSOR_TYPES, STATES_CAR
-from .core.models_zont import SensorZONT, DeviceZONT
+from .core.models_zont import SensorZONT, DeviceZONT, CustomControlZONT
 from .core.zont import type_binary_sensor, Zont
 
 _LOGGER = logging.getLogger(__name__)
@@ -37,13 +37,16 @@ async def async_setup_entry(
                 binary_sensors.append(CarBinarySensor(
                     coordinator, device, name_state, unique_id
                 ))
-
         for sensor in device.sensors:
             unique_id = f'{entry_id}{device.id}{sensor.id}'
             if sensor.type in BINARY_SENSOR_TYPES:
                 binary_sensors.append(ZontBinarySensor(
                     coordinator, device, sensor, unique_id
                 ))
+        for custom_control in device.custom_controls:
+            unique_id = f'{entry_id}{device.id}{custom_control.id}'
+            if custom_control.type == 'status':
+                binary_sensors.append(ZontBinarySensor())
         if binary_sensors:
             async_add_entities(binary_sensors)
             _LOGGER.debug(f'Добавлены бинарные сенсоры: {binary_sensors}')
@@ -142,4 +145,45 @@ class ZontBinarySensor(CoordinatorEntity, BinarySensorEntity):
             self._sensor.id
         )
         self._sensor.value = sensor.value
+        self.async_write_ha_state()
+
+
+class ZontBinarySensorCustomControl(CoordinatorEntity, BinarySensorEntity):
+
+    def __init__(
+            self, coordinator: ZontCoordinator, device: DeviceZONT,
+            custom_control: CustomControlZONT, unique_id: str
+    ) -> None:
+        super().__init__(coordinator)
+        self._zont: Zont = coordinator.zont
+        self._device: DeviceZONT = device
+        self._custom_control: CustomControlZONT = custom_control
+        self._unique_id: str = unique_id
+
+    @property
+    def name(self) -> str:
+        name_custom_control = self._custom_control.name
+        if isinstance(name_custom_control, dict):
+            name_custom_control = name_custom_control['name']
+        return f'{self._device.name}_{name_custom_control}'
+
+    @property
+    def unique_id(self) -> str:
+        return self._unique_id
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if the binary sensor is on."""
+        return self._custom_control.status
+
+    def __repr__(self) -> str:
+        if not self.hass:
+            return f"<Binary sensor entity {self.name}>"
+        return super().__repr__()
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Обработка обновлённых данных от координатора"""
+
+        self._device = self.coordinator.data.get_device(self._device.id)
         self.async_write_ha_state()
