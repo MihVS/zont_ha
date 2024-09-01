@@ -1,6 +1,7 @@
 import logging
+from functools import cached_property
 
-from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor import SensorEntity, SensorStateClass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -52,6 +53,11 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
         self._unique_id = unique_id
         self._attr_device_info = coordinator.devices_info(device.id)
         self._attr_icon = SENSOR_TYPE_ICON.get(sensor.type)
+
+    @cached_property
+    def state_class(self) -> SensorStateClass | str | None:
+        """Return the state class of this entity, if any."""
+        return 'measurement'
 
     @property
     def name(self) -> str:
