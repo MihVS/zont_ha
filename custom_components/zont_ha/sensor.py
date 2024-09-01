@@ -9,7 +9,7 @@ from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
 )
 from . import ZontCoordinator
-from .const import DOMAIN, BINARY_SENSOR_TYPES, SENSOR_TYPE_ICON
+from .const import DOMAIN, BINARY_SENSOR_TYPES, SENSOR_TYPE_ICON, UNIT_BY_TYPE
 from .core.exceptions import SensorNotFoundError
 from .core.models_zont import SensorZONT, DeviceZONT, OTSensorZONT
 from .core.utils import get_devise_class_sensor, get_unit_sensor
@@ -57,29 +57,31 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
     @cached_property
     def state_class(self) -> SensorStateClass | str | None:
         """Return the state class of this entity, if any."""
-        return 'measurement'
+        if self._sensor.type in UNIT_BY_TYPE:
+            return SensorStateClass.MEASUREMENT
+        return None
 
-    @property
+    @cached_property
     def name(self) -> str:
         return f'{self._device.name}_{self._sensor.name}'
 
-    @property
+    @cached_property
     def native_value(self) -> float | str:
         """Возвращает состояние сенсора"""
         if self._sensor.type == 'battery' and isinstance(self._sensor.value, float):
             return int(self._sensor.value)
         return self._sensor.value
 
-    @property
+    @cached_property
     def native_unit_of_measurement(self) -> str | None:
         """Возвращает единицу измерения сенсора из API zont"""
         return get_unit_sensor(self._sensor)
 
-    @property
+    @cached_property
     def unique_id(self) -> str:
         return self._unique_id
 
-    @property
+    @cached_property
     def device_class(self) -> str | None:
         return get_devise_class_sensor(self._sensor)
 
