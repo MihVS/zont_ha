@@ -8,7 +8,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator
-from .const import DOMAIN, BINARY_SENSOR_TYPES, STATES_CAR
+from .const import DOMAIN, BINARY_SENSOR_TYPES, STATES_CAR, MANUFACTURER
 from .core.models_zont import SensorZONT, DeviceZONT, CustomControlZONT
 from .core.zont import type_binary_sensor, Zont
 
@@ -104,6 +104,7 @@ class ZontBinarySensor(CoordinatorEntity, BinarySensorEntity):
         self._device: DeviceZONT = device
         self._sensor: SensorZONT = sensor
         self._unique_id: str = unique_id
+        self._attr_device_info = coordinator.devices_info(device.id)
 
     @property
     def name(self) -> str:
@@ -161,6 +162,7 @@ class ZontBinarySensorCustomControl(CoordinatorEntity, BinarySensorEntity):
         self._device: DeviceZONT = device
         self._custom_control: CustomControlZONT = custom_control
         self._unique_id: str = unique_id
+        self._attr_device_info = coordinator.devices_info(device.id)
 
     @property
     def name(self) -> str:

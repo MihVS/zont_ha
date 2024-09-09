@@ -30,7 +30,6 @@ async def async_setup_entry(
 
     coordinator = hass.data[DOMAIN][entry_id]
     zont = coordinator.zont
-
     for device in zont.data.devices:
         thermostat = []
         heating_circuits = device.heating_circuits
