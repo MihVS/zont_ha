@@ -12,7 +12,8 @@ from . import ZontCoordinator
 from .const import DOMAIN, BINARY_SENSOR_TYPES, SENSOR_TYPE_ICON, UNIT_BY_TYPE
 from .core.exceptions import SensorNotFoundError
 from .core.models_zont import SensorZONT, DeviceZONT, OTSensorZONT
-from .core.utils import get_devise_class_sensor, get_unit_sensor
+from .core.utils import get_devise_class_sensor, get_unit_sensor, \
+    validate_value_sensor
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -65,12 +66,15 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
     def name(self) -> str:
         return f'{self._device.name}_{self._sensor.name}'
 
-    @cached_property
+    @property
     def native_value(self) -> float | str:
         """Возвращает состояние сенсора"""
         if self._sensor.type == 'battery' and isinstance(self._sensor.value, float):
             return int(self._sensor.value)
-        return self._sensor.value
+        elif isinstance(self._sensor.value, float):
+            return round(self._sensor.value, 2)
+        else:
+            return self._sensor.value
 
     @cached_property
     def native_unit_of_measurement(self) -> str | None:
@@ -105,5 +109,6 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
             _LOGGER.debug(
                 f'Сенсор "{self._device.name}_{self._sensor.name}" обновился '
                 f'с {self._sensor.value} на {sensor.value}')
-        self._sensor.value = sensor.value
+        self._sensor.value = validate_value_sensor(
+            sensor.value, self._sensor.value)
         self.async_write_ha_state()

@@ -103,3 +103,15 @@ def get_devise_class_sensor(sensor: SensorZONT) -> str:
                 return device_class
     else:
         return ZONT_SENSOR_TYPE.get(sensor.type, sensor.type)
+
+
+def validate_value_sensor(
+        value_new: str | float, value_old: str | float
+) -> str | float:
+    try:
+        if abs(value_new) < (abs(value_old) + 1) * 100:
+            return value_new
+        else:
+            return value_old
+    except TypeError:
+        return value_new
