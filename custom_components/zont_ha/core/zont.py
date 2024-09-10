@@ -224,49 +224,6 @@ class Zont:
                 )
 
     @staticmethod
-    def get_voltage(device: DeviceZONT, sensor_id: int = 0) -> int | None:
-        return next(
-            (sensor.value for sensor in device.sensors
-             if sensor.id == sensor_id), None
-        )
-
-    @staticmethod
-    def _is_on_leakage(voltage: float, current_value: float) -> bool:
-        return not 0.25 * voltage < current_value < 0.75 * voltage
-
-    @staticmethod
-    def _is_on_smoke(voltage: float, current_value: float) -> bool:
-        return not 0.52 * voltage < current_value < 0.85 * voltage
-
-    @staticmethod
-    def _is_on_contact(voltage: float, current_value: float) -> bool:
-        return current_value > 0.6 * voltage
-
-    @staticmethod
-    def _is_on_discrete(current_value: float) -> bool:
-        return current_value > 2 or current_value < 1
-
-    def is_on_binary(self, device: DeviceZONT, sensor: SensorZONT) -> bool:
-        current_value = sensor.value
-        if current_value is None:
-            return False
-        voltage = self.get_voltage(device)
-        if voltage is None:
-            return False
-        match sensor.type:
-            case type_binary_sensor.leakage:
-                return self._is_on_leakage(voltage, current_value)
-            case type_binary_sensor.smoke:
-                return self._is_on_smoke(voltage, current_value)
-            case type_binary_sensor.opening | type_binary_sensor.motion:
-                return self._is_on_contact(voltage, current_value)
-            case type_binary_sensor.discrete:
-                return self._is_on_discrete(current_value)
-            case _:
-                _LOGGER.warning(f"Unknown sensor type: {sensor.type}")
-                return False
-
-    @staticmethod
     def get_heating_mode_by_id(
             device: DeviceZONT, heating_mode_id: int
     ) -> HeatingModeZONT | None:
