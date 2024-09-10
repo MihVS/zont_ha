@@ -132,7 +132,7 @@ class ZontBinarySensor(CoordinatorEntity, BinarySensorEntity):
     @property
     def is_on(self) -> bool | None:
         """Return true if the binary sensor is on."""
-        return self._zont.is_on_binary(self._device, self._sensor)
+        return self._sensor.triggered
 
     def __repr__(self) -> str:
         if not self.hass:

@@ -242,6 +242,10 @@ class Zont:
     def _is_on_contact(voltage: float, current_value: float) -> bool:
         return current_value > 0.6 * voltage
 
+    @staticmethod
+    def _is_on_discrete(current_value: float) -> bool:
+        return current_value > 2 or current_value < 1
+
     def is_on_binary(self, device: DeviceZONT, sensor: SensorZONT) -> bool:
         current_value = sensor.value
         if current_value is None:
@@ -257,7 +261,7 @@ class Zont:
             case type_binary_sensor.opening | type_binary_sensor.motion:
                 return self._is_on_contact(voltage, current_value)
             case type_binary_sensor.discrete:
-                return bool(sensor.value)
+                return self._is_on_discrete(current_value)
             case _:
                 _LOGGER.warning(f"Unknown sensor type: {sensor.type}")
                 return False
