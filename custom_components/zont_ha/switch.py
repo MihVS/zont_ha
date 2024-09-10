@@ -56,7 +56,7 @@ class ZontSwitch(CoordinatorEntity, SwitchEntity):
 
     @property
     def name(self) -> str:
-        name = self._control.name.get('when_active')
+        name = self._control.name.get('name')
         return f'{self._device.name}_{name}'
 
     @property
