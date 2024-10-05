@@ -43,6 +43,7 @@ async def async_setup_entry(
 class ZontAlarm(CoordinatorEntity, AlarmControlPanelEntity):
 
     _attr_code_format = None
+    _attr_code_arm_required = False
     _attr_supported_features = (
         AlarmControlPanelEntityFeature.ARM_AWAY |
         AlarmControlPanelEntityFeature.TRIGGER

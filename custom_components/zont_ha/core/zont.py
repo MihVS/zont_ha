@@ -283,13 +283,22 @@ class Zont:
 
         return val_min, val_max
 
-    def get_custom_control(self, device_id: int, control_id: int
+    def get_custom_control(
+            self, device_id: int, control_id: int, status: bool = False
                            ) -> CustomControlZONT:
         device = self.get_device(device_id)
-        return next(
-            (control for control in device.custom_controls
-             if control.id == control_id), None
-        )
+        if status:
+            return next(
+                (control for control in device.custom_controls
+                 if (control.id == control_id and control.type == 'status')
+                 ), None
+            )
+        else:
+            return next(
+                (control for control in device.custom_controls
+                 if (control.id == control_id and control.type != 'status')
+                 ), None
+            )
 
     @check_send_command
     async def set_target_temperature(
