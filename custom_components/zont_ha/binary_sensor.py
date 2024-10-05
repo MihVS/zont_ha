@@ -8,7 +8,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator
-from .const import DOMAIN, BINARY_SENSOR_TYPES, STATES_CAR, MANUFACTURER
+from .const import DOMAIN, BINARY_SENSOR_TYPES, STATES_CAR
 from .core.models_zont import SensorZONT, DeviceZONT, CustomControlZONT
 from .core.zont import type_binary_sensor, Zont
 
@@ -189,5 +189,8 @@ class ZontBinarySensorCustomControl(CoordinatorEntity, BinarySensorEntity):
     def _handle_coordinator_update(self) -> None:
         """Обработка обновлённых данных от координатора"""
 
-        self._device = self.coordinator.data.get_device(self._device.id)
+        self._custom_control: CustomControlZONT = (
+            self.coordinator.zont.get_custom_control(
+                self._device.id, self._custom_control.id, status=True)
+        )
         self.async_write_ha_state()

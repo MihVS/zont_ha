@@ -119,3 +119,5 @@ class ZontControlButton(ButtonZont):
         await self._zont.toggle_switch(
             device=self._device, control=self._control, command=True
         )
+        await asyncio.sleep(TIME_OUT_REQUEST)
+        await self.coordinator.async_config_entry_first_refresh()
