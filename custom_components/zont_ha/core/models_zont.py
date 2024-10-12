@@ -182,7 +182,7 @@ class DeviceZONT(BaseEntityZONT):
     custom_controls: list[CustomControlZONT] = []
     scenarios: list[ScenarioZONT] = []
     car_state: CarStateZONT = []
-    device_info: DeviceInfoZONT = []
+    device_info: DeviceInfoZONT | None = []
 
     @validator('guard_zones')
     def guard_zones_should_be_list(
