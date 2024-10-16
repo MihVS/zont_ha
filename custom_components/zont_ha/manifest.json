@@ -7,5 +7,5 @@
   "integration_type": "hub",
   "dependencies": ["http", "zeroconf"],
   "requirements": [],
-  "version": "2024.10.2_beta"
+  "version": "2024.10.2-beta"
 }
