@@ -4,10 +4,10 @@ from http import HTTPStatus
 
 from aiohttp import ClientResponse
 
-from homeassistant.const import (
-    STATE_ALARM_TRIGGERED, STATE_UNAVAILABLE, STATE_ALARM_DISARMED,
-    STATE_ALARM_DISARMING, STATE_ALARM_ARMING, STATE_ALARM_ARMED_AWAY
+from homeassistant.components.alarm_control_panel.const import (
+    AlarmControlPanelState
 )
+from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .exceptions import StateGuardError
@@ -203,21 +203,23 @@ class Zont:
         return False
 
     @staticmethod
-    def get_state_guard_zone_for_ha(guard_zone: GuardZoneZONT) -> str:
+    def get_state_guard_zone_for_ha(
+            guard_zone: GuardZoneZONT
+    ) -> AlarmControlPanelState:
         """Получить статус охранной зоны"""
         if guard_zone.alarm:
-            return STATE_ALARM_TRIGGERED
+            return AlarmControlPanelState.TRIGGERED
         match guard_zone.state:
             case state_zont.unknown:
                 return STATE_UNAVAILABLE
             case state_zont.disabled:
-                return STATE_ALARM_DISARMED
+                return AlarmControlPanelState.DISARMED
             case state_zont.enabled:
-                return STATE_ALARM_ARMED_AWAY
+                return AlarmControlPanelState.ARMED_AWAY
             case state_zont.disabling:
-                return STATE_ALARM_DISARMING
+                return AlarmControlPanelState.DISARMING
             case state_zont.enabling:
-                return STATE_ALARM_ARMING
+                return AlarmControlPanelState.ARMING
             case _:
                 raise StateGuardError(
                     f'Неизвестный статус охранной зоны: {guard_zone.state}'
