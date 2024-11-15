@@ -2,12 +2,12 @@ import asyncio
 import logging
 
 from homeassistant.components.alarm_control_panel import (
-    AlarmControlPanelEntity, AlarmControlPanelEntityFeature
+    AlarmControlPanelEntity, AlarmControlPanelEntityFeature,
+    AlarmControlPanelState
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import StateType
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator, DOMAIN
 from .const import (
@@ -69,8 +69,7 @@ class ZontAlarm(CoordinatorEntity, AlarmControlPanelEntity):
         return f'{self._device.name}_{self._guard_zone.name}'
 
     @property
-    def state(self) -> StateType:
-        """Return the state of the entity."""
+    def alarm_state(self) -> AlarmControlPanelState | None:
         return self._zont.get_state_guard_zone_for_ha(self._guard_zone)
 
     @property
@@ -96,7 +95,7 @@ class ZontAlarm(CoordinatorEntity, AlarmControlPanelEntity):
         while self._zont.need_repeat_update(
                 self._guard_zone.state) and counter > 0:
             counter -= 1
-            await self.coordinator.async_config_entry_first_refresh()
+            await self.coordinator.async_request_refresh()
             _LOGGER.debug(f'Обновляю статус охраны ещё {counter} раз.')
             await asyncio.sleep(TIME_OUT_REPEAT)
 
@@ -106,7 +105,7 @@ class ZontAlarm(CoordinatorEntity, AlarmControlPanelEntity):
             device=self._device, guard_zone=self._guard_zone, command=False
         )
         await asyncio.sleep(TIME_OUT_REQUEST)
-        await self.coordinator.async_config_entry_first_refresh()
+        await self.coordinator.async_request_refresh()
         await self._repeat_check_state()
 
     async def async_alarm_arm_away(self, code: str | None = None) -> None:
@@ -115,7 +114,7 @@ class ZontAlarm(CoordinatorEntity, AlarmControlPanelEntity):
             device=self._device, guard_zone=self._guard_zone, command=True
         )
         await asyncio.sleep(TIME_OUT_REQUEST)
-        await self.coordinator.async_config_entry_first_refresh()
+        await self.coordinator.async_request_refresh()
         await self._repeat_check_state()
 
     @callback

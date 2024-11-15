@@ -137,7 +137,7 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
                 target_temp=set_temp
             )
             await asyncio.sleep(TIME_OUT_REQUEST)
-            await self.coordinator.async_config_entry_first_refresh()
+            await self.coordinator.async_request_refresh()
         else:
             raise TemperatureOutOfRangeError(
                 f'Недопустимое значение температуры: {set_temp}. '
@@ -170,7 +170,7 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
             )
             self._heating_circuit.current_mode = None
         await asyncio.sleep(TIME_OUT_REQUEST)
-        await self.coordinator.async_config_entry_first_refresh()
+        await self.coordinator.async_request_refresh()
 
     def __repr__(self) -> str:
         if not self.hass:

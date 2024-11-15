@@ -153,8 +153,8 @@ class CarStateZONT(BaseModel):
 class VersionZONT(BaseModel):
     """Модель версии прошивки и железа устройств"""
 
-    hardware: str
-    software: str
+    hardware: str | None
+    software: str | None
 
 
 class DeviceInfoZONT(BaseModel):
