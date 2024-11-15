@@ -98,7 +98,7 @@ class HeatingModeButton(ButtonZont):
             device=self._device, heating_mode_id=self._heating_mode.id
         )
         await asyncio.sleep(TIME_OUT_REQUEST)
-        await self.coordinator.async_config_entry_first_refresh()
+        await self.coordinator.async_request_refresh()
 
 
 class ZontControlButton(ButtonZont):
@@ -120,4 +120,4 @@ class ZontControlButton(ButtonZont):
             device=self._device, control=self._control, command=True
         )
         await asyncio.sleep(TIME_OUT_REQUEST)
-        await self.coordinator.async_config_entry_first_refresh()
+        await self.coordinator.async_request_refresh()

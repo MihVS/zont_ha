@@ -1,8 +1,6 @@
 import asyncio
 import logging
 
-from propcache._helpers_c import cached_property
-
 from homeassistant.components.alarm_control_panel import (
     AlarmControlPanelEntity, AlarmControlPanelEntityFeature,
     AlarmControlPanelState
@@ -10,7 +8,6 @@ from homeassistant.components.alarm_control_panel import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import StateType
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator, DOMAIN
 from .const import (
@@ -71,7 +68,7 @@ class ZontAlarm(CoordinatorEntity, AlarmControlPanelEntity):
     def name(self) -> str:
         return f'{self._device.name}_{self._guard_zone.name}'
 
-    @cached_property
+    @property
     def alarm_state(self) -> AlarmControlPanelState | None:
         return self._zont.get_state_guard_zone_for_ha(self._guard_zone)
 
