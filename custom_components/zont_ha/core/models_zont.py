@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, validator, root_validator
+from pydantic.v1 import BaseModel, validator, root_validator
 
 from ..const import NO_ERROR
 

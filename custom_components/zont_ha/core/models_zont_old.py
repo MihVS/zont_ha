@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator, root_validator
+from pydantic.v1 import BaseModel, validator, root_validator
 
 
 class StationaryLocationZontOld(BaseModel):
