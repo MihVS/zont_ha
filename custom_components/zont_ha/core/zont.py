@@ -126,7 +126,7 @@ class Zont:
         value = round(value, 1)
         if value > 3.0:
             return 100
-        elif value < 2.5:
+        elif value < 2.2:
             return 0
         else:
             return PERCENT_BATTERY[value]
