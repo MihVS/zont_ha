@@ -10,10 +10,10 @@ from homeassistant.helpers.update_coordinator import (
 )
 from . import ZontCoordinator
 from .const import DOMAIN, BINARY_SENSOR_TYPES, SENSOR_TYPE_ICON, UNIT_BY_TYPE
-from .core.exceptions import SensorNotFoundError
 from .core.models_zont import SensorZONT, DeviceZONT, OTSensorZONT
-from .core.utils import get_devise_class_sensor, get_unit_sensor, \
-    validate_value_sensor
+from .core.utils import (
+    get_devise_class_sensor, get_unit_sensor, validate_value_sensor
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -104,7 +104,7 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
         )
         if sensor is None:
             _LOGGER.error(f'Сенсор по id={self._sensor.id} не найден')
-            raise SensorNotFoundError
+            return
         if sensor.value != self._sensor.value:
             _LOGGER.debug(
                 f'Сенсор "{self._device.name}_{self._sensor.name}" обновился '
