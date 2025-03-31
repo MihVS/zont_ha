@@ -7,7 +7,10 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator
-from .const import DOMAIN, BUTTON_ZONT, MANUFACTURER, TIME_OUT_REQUEST
+from .const import (
+    DOMAIN, BUTTON_ZONT, MANUFACTURER, TIME_OUT_REQUEST, ENTRIES,
+    CURRENT_ENTITY_IDS
+)
 from .core.models_zont import DeviceZONT, CustomControlZONT, HeatingModeZONT
 from .core.utils import get_icon
 from .core.zont import Zont
@@ -22,7 +25,7 @@ async def async_setup_entry(
 ) -> None:
     entry_id = config_entry.entry_id
 
-    coordinator = hass.data[DOMAIN][entry_id]
+    coordinator = hass.data[DOMAIN][ENTRIES][entry_id]
     zont = coordinator.zont
 
     for device in zont.data.devices:
@@ -33,6 +36,9 @@ async def async_setup_entry(
                 buttons.append(ZontControlButton(
                     coordinator, zont, device, control, unique_id
                 ))
+        for button in buttons:
+            hass.data[DOMAIN][CURRENT_ENTITY_IDS][entry_id].append(
+                button.unique_id)
         if buttons:
             async_add_entities(buttons)
             _LOGGER.debug(f'Добавлены кнопки: {buttons}')
@@ -43,6 +49,9 @@ async def async_setup_entry(
             mode_buttons.append(HeatingModeButton(
                 coordinator, zont, device, mode, unique_id, get_icon(mode.name)
             ))
+        for button in mode_buttons:
+            hass.data[DOMAIN][CURRENT_ENTITY_IDS][entry_id].append(
+                button.unique_id)
         if mode_buttons:
             async_add_entities(mode_buttons)
             _LOGGER.debug(f'Добавлены кнопки: {mode_buttons}')

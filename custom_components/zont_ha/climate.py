@@ -11,7 +11,8 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator, DOMAIN
 from .const import (
-    TIME_OUT_REQUEST, MAX_TEMP_AIR, MIN_TEMP_AIR, MODELS_THERMOSTAT_ZONT
+    TIME_OUT_REQUEST, MAX_TEMP_AIR, MIN_TEMP_AIR, MODELS_THERMOSTAT_ZONT,
+    ENTRIES, CURRENT_ENTITY_IDS
 )
 from .core.exceptions import TemperatureOutOfRangeError, SetHvacModeError
 from .core.models_zont import DeviceZONT, HeatingModeZONT
@@ -28,19 +29,22 @@ async def async_setup_entry(
 ) -> None:
     entry_id = config_entry.entry_id
 
-    coordinator = hass.data[DOMAIN][entry_id]
+    coordinator = hass.data[DOMAIN][ENTRIES][entry_id]
     zont = coordinator.zont
     for device in zont.data.devices:
-        thermostat = []
+        thermostats = []
         heating_circuits = device.heating_circuits
         for heating_circuit in heating_circuits:
             unique_id = f'{entry_id}{device.id}{heating_circuit.id}'
-            thermostat.append(ZontClimateEntity(
+            thermostats.append(ZontClimateEntity(
                 coordinator, device.id, heating_circuit.id, unique_id)
             )
-        if thermostat:
-            async_add_entities(thermostat)
-            _LOGGER.debug(f'Добавлены термостаты: {thermostat}')
+        for thermostat in thermostats:
+            hass.data[DOMAIN][CURRENT_ENTITY_IDS][entry_id].append(
+                thermostat.unique_id)
+        if thermostats:
+            async_add_entities(thermostats)
+            _LOGGER.debug(f'Добавлены термостаты: {thermostats}')
 
 
 class ZontClimateEntity(CoordinatorEntity, ClimateEntity):

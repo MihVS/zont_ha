@@ -6,16 +6,32 @@ import async_timeout
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.entity_registry import async_get
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator, UpdateFailed
 )
 from .const import (
     DOMAIN, PLATFORMS, TIME_UPDATE, MANUFACTURER,
-    CONFIGURATION_URL, COUNTER_CONNECT, TIME_OUT_UPDATE_DATA
+    CONFIGURATION_URL, COUNTER_CONNECT, TIME_OUT_UPDATE_DATA, ENTRIES,
+    CURRENT_ENTITY_IDS
 )
 from .core.zont import Zont
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def remove_entity(hass: HomeAssistant, current_entries_id: list,
+                  config_entry: ConfigEntry):
+    """Удаление неиспользуемых сущностей"""
+    entity_registry = async_get(hass)
+    remove_entities = []
+    for entity_id, entity in entity_registry.entities.items():
+        if entity.config_entry_id == config_entry.entry_id:
+            if entity.unique_id not in current_entries_id:
+                remove_entities.append(entity_id)
+    for entity_id in remove_entities:
+        entity_registry.async_remove(entity_id)
+        _LOGGER.info(f'Удалена устаревшая сущность {entity_id}')
 
 
 async def async_setup_entry(
@@ -29,10 +45,20 @@ async def async_setup_entry(
     await coordinator.async_config_entry_first_refresh()
 
     hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][entry_id] = coordinator
+    hass.data[DOMAIN].setdefault(ENTRIES, {})
+    hass.data[DOMAIN].setdefault(CURRENT_ENTITY_IDS, {})
+    hass.data[DOMAIN][CURRENT_ENTITY_IDS][entry_id] = []
+    hass.data[DOMAIN][ENTRIES][entry_id] = coordinator
+
     await hass.config_entries.async_forward_entry_setups(
         config_entry, PLATFORMS
     )
+    current_entries_id = hass.data[DOMAIN][CURRENT_ENTITY_IDS][entry_id]
+    remove_entity(hass, current_entries_id, config_entry)
+    _LOGGER.debug(f'Unique_id актуальных сущностей аккаунта {zont.mail}: '
+                  f'{current_entries_id}')
+    _LOGGER.debug(f'Количество актуальных сущностей: '
+                  f'{len(current_entries_id)}')
     return True
 
 

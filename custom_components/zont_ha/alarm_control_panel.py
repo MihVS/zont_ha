@@ -11,7 +11,8 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator, DOMAIN
 from .const import (
-    COUNTER_REPEAT, TIME_OUT_REPEAT, TIME_OUT_REQUEST
+    COUNTER_REPEAT, TIME_OUT_REPEAT, TIME_OUT_REQUEST, CURRENT_ENTITY_IDS,
+    ENTRIES
 )
 from .core.models_zont import DeviceZONT
 from .core.zont import Zont
@@ -26,7 +27,7 @@ async def async_setup_entry(
 ) -> None:
     entry_id = config_entry.entry_id
 
-    coordinator = hass.data[DOMAIN][entry_id]
+    coordinator = hass.data[DOMAIN][ENTRIES][entry_id]
     zont: Zont = coordinator.zont
     for device in zont.data.devices:
         alarms = []
@@ -35,6 +36,9 @@ async def async_setup_entry(
             alarms.append(ZontAlarm(
                 coordinator, device.id, guard_zone.id, unique_id)
             )
+        for alarm in alarms:
+            hass.data[DOMAIN][CURRENT_ENTITY_IDS][entry_id].append(
+                alarm.unique_id)
         if alarms:
             async_add_entities(alarms)
             _LOGGER.debug(f'Добавлены охранные зоны: {alarms}')
