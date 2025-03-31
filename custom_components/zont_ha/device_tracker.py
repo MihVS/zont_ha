@@ -6,7 +6,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator
-from .const import DOMAIN
+from .const import DOMAIN, ENTRIES, CURRENT_ENTITY_IDS
 from .core.models_zont import DeviceZONT
 from .core.models_zont_old import DeviceZontOld
 from .core.zont import Zont
@@ -21,7 +21,7 @@ async def async_setup_entry(
 ) -> None:
     entry_id = config_entry.entry_id
 
-    coordinator = hass.data[DOMAIN][entry_id]
+    coordinator = hass.data[DOMAIN][ENTRIES][entry_id]
     zont = coordinator.zont
 
     for device in zont.data.devices:
@@ -36,6 +36,9 @@ async def async_setup_entry(
             _LOGGER.debug(
                 f'Добавлено устройство отслеживания: {device_tracker}'
             )
+        for state in states:
+            hass.data[DOMAIN][CURRENT_ENTITY_IDS][entry_id].append(
+                state.unique_id)
         if states:
             unique_id = f'{entry_id}{device.id}{device_old.serial}'
             device_tracker = CarPosition(coordinator, device, unique_id)

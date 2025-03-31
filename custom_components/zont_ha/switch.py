@@ -6,7 +6,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator
-from .const import DOMAIN, SWITCH_ZONT
+from .const import DOMAIN, SWITCH_ZONT, ENTRIES, CURRENT_ENTITY_IDS
 from .core.models_zont import DeviceZONT, CustomControlZONT
 from .core.zont import Zont
 
@@ -20,20 +20,23 @@ async def async_setup_entry(
 ) -> None:
     entry_id = config_entry.entry_id
 
-    coordinator = hass.data[DOMAIN][entry_id]
+    coordinator = hass.data[DOMAIN][ENTRIES][entry_id]
     zont = coordinator.zont
 
     for device in zont.data.devices:
-        switch = []
+        switches = []
         for control in device.custom_controls:
             if control.type == SWITCH_ZONT:
                 unique_id = f'{entry_id}{device.id}{control.id}'
-                switch.append(
+                switches.append(
                     ZontSwitch(coordinator, device, control, unique_id)
                 )
-        if switch:
-            async_add_entities(switch)
-            _LOGGER.debug(f'Добавлены выключатели: {switch}')
+        for switch in switches:
+            hass.data[DOMAIN][CURRENT_ENTITY_IDS][entry_id].append(
+                switch.unique_id)
+        if switches:
+            async_add_entities(switches)
+            _LOGGER.debug(f'Добавлены выключатели: {switches}')
 
 
 class ZontSwitch(CoordinatorEntity, SwitchEntity):

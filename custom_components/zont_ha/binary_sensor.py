@@ -8,7 +8,9 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator
-from .const import DOMAIN, BINARY_SENSOR_TYPES, STATES_CAR
+from .const import (
+    DOMAIN, BINARY_SENSOR_TYPES, STATES_CAR, CURRENT_ENTITY_IDS, ENTRIES
+)
 from .core.models_zont import SensorZONT, DeviceZONT, CustomControlZONT
 from .core.zont import type_binary_sensor, Zont
 
@@ -22,7 +24,7 @@ async def async_setup_entry(
 ) -> None:
     entry_id = config_entry.entry_id
 
-    coordinator = hass.data[DOMAIN][entry_id]
+    coordinator = hass.data[DOMAIN][ENTRIES][entry_id]
     zont = coordinator.zont
 
     for device in zont.data.devices:
@@ -49,6 +51,9 @@ async def async_setup_entry(
                 binary_sensors.append(ZontBinarySensorCustomControl(
                     coordinator, device, custom_control, unique_id
                 ))
+        for binary_sensor in binary_sensors:
+            hass.data[DOMAIN][CURRENT_ENTITY_IDS][entry_id].append(
+                binary_sensor.unique_id)
         if binary_sensors:
             async_add_entities(binary_sensors)
             _LOGGER.debug(f'Добавлены бинарные сенсоры: {binary_sensors}')
