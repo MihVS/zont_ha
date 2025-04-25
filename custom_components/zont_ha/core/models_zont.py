@@ -144,7 +144,7 @@ class CarStateZONT(BaseModel):
     door_rear_right: bool
     trunk: bool
     hood: bool
-    power_source: str
+    power_source: str | None
     car_view: CarView
     position: Position
     address: str

@@ -1,4 +1,5 @@
 import logging
+from functools import cached_property
 
 from homeassistant.components.device_tracker import TrackerEntity, SourceType
 from homeassistant.config_entries import ConfigEntry
@@ -33,16 +34,18 @@ async def async_setup_entry(
             unique_id = f'{entry_id}{device.id}{device_old.serial}'
             device_tracker = StationaryPosition(coordinator, device, unique_id)
             async_add_entities([device_tracker])
+            hass.data[DOMAIN][CURRENT_ENTITY_IDS][entry_id].append(
+                device_tracker.unique_id)
             _LOGGER.debug(
                 f'Добавлено устройство отслеживания: {device_tracker}'
             )
-        for state in states:
-            hass.data[DOMAIN][CURRENT_ENTITY_IDS][entry_id].append(
-                state.unique_id)
+
         if states:
             unique_id = f'{entry_id}{device.id}{device_old.serial}'
             device_tracker = CarPosition(coordinator, device, unique_id)
             async_add_entities([device_tracker])
+            hass.data[DOMAIN][CURRENT_ENTITY_IDS][entry_id].append(
+                device_tracker.unique_id)
             _LOGGER.debug(
                 f'Добавлено устройство отслеживания: {device_tracker}'
             )
@@ -121,6 +124,7 @@ class StationaryPosition(Position):
     ) -> None:
         super().__init__(coordinator, device, unique_id)
         self._device_old: DeviceZontOld = self._zont.get_device_old(device.id)
+        self._unique_id = unique_id
 
     @property
     def latitude(self) -> float | None:
@@ -131,3 +135,7 @@ class StationaryPosition(Position):
     def longitude(self) -> float | None:
         """Return longitude value of the device."""
         return self._device_old.stationary_location.longitude
+
+    @cached_property
+    def unique_id(self) -> str:
+        return self._unique_id
