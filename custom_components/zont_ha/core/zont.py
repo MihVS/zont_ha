@@ -140,6 +140,8 @@ class Zont:
             if code_err != NO_ERROR:
                 code_err = code_err[11:]
                 text = f': {boiler.error_text}'
+            if code_err == NO_ERROR and boiler.status == 'failure':
+                code_err = 'Ошибка'
             device.sensors.append(SensorZONT(
                 id=f'{boiler.id}_boiler',
                 name=f'{boiler.name}_ошибка',
