@@ -310,6 +310,7 @@ class Zont:
             target_temp: float
     ) -> ClientResponse:
         """Отправка команды на установку нужной температуры в контуре."""
+        _LOGGER.info(f'Отправлена уставка температуры на {target_temp}')
         return await self.session.post(
             url=URL_SET_TARGET_TEMP,
             json={

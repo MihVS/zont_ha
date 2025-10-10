@@ -49,8 +49,14 @@ def check_send_command(func):
             _LOGGER.debug(f'Успешный запрос к API zont: {status}')
             if data.get('ok'):
                 _LOGGER.info(
-                    f'На устройстве {device.model}-{device.name} '
-                    f'Изменено состояние {control.name}: {set_value}'
+                    f'На устройстве "{device.model}-{device.name}" '
+                    f'изменено состояние "{control.name}": "{set_value}"'
+                )
+            elif data.get('error') == 'timeout':
+                _LOGGER.info(
+                    f'Timeout. Уставка температуры возможно не изменилась'
+                    f'на устройстве {device.model}-{device.name} '
+                    f'состояние {control.name}: {set_value}'
                 )
             else:
                 raise ResponseZontError(
