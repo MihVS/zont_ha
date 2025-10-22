@@ -8,9 +8,10 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from .const import DOMAIN, URL_GET_TOKEN
+from .const import DOMAIN, URL_TOKEN
 from .core.exceptions import RequestAPIZONTError, InvalidMail
-from .core.models_zont import ErrorZont, TokenZont
+from .core.models_zont import ErrorZont
+from .core.models_zont_v3 import TokenZont
 from .core.zont import Zont
 
 _LOGGER = logging.getLogger(__name__)
@@ -28,7 +29,7 @@ async def get_token(
         'Content-Type': 'application/json'
     }
     response = await session.post(
-        url=URL_GET_TOKEN,
+        url=URL_TOKEN,
         json={'client_name': 'Home Assistant'},
         headers=headers
     )
@@ -38,7 +39,7 @@ async def get_token(
         error = ErrorZont.parse_raw(text)
         hass.data['error'] = error.error_ui
         raise RequestAPIZONTError(error)
-    data = TokenZont.parse_raw(text)
+    data = TokenZont.model_validate_json(text)
     return data.token
 
 

@@ -12,7 +12,7 @@ CURRENT_ENTITY_IDS = 'current_entity_ids'
 CONFIGURATION_URL = 'https://my.zont.online/'
 
 ZONT_API_URL_ROOT = 'https://my.zont.online/api/'
-ZONT_API_URL = ZONT_API_URL_ROOT + 'widget/v2/'
+ZONT_API_URL = ZONT_API_URL_ROOT + 'widget/v3/'
 
 URL_GET_DEVICES_OLD = ZONT_API_URL_ROOT + 'devices'
 URL_SEND_COMMAND_ZONT_OLD = ZONT_API_URL_ROOT + 'send_z3k_command'
@@ -24,7 +24,7 @@ URL_SET_GUARD = ZONT_API_URL + 'set_guard'
 URL_ACTIVATE_HEATING_MODE = ZONT_API_URL + 'activate_heating_mode'
 URL_TRIGGER_CUSTOM_BUTTON = ZONT_API_URL + 'trigger_custom_button'
 
-URL_GET_TOKEN = ZONT_API_URL_ROOT + 'authtoken/get'
+URL_TOKEN = ZONT_API_URL + 'authtokens'
 
 UNIT_BY_TYPE = {
     'temperature': UnitOfTemperature.CELSIUS,

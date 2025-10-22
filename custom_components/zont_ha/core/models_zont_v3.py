@@ -163,6 +163,55 @@ class SimZONT(BaseModel):
     ussd: str | None = None
 
 
+class ScenarioZONT(ControlEntityZONT):
+    """Сценарий"""
+
+    pass
+
+
+class RelayZONT(ControlEntityZONT):
+    """Релейный выход."""
+
+    on: bool
+    failed: bool
+
+
+class PumpZONT(ControlEntityZONT):
+    """Насос."""
+
+    on: bool
+    summer_mode: bool
+
+
+class TapZONT(ControlEntityZONT):
+    """Смеситель."""
+
+    opened: bool
+    opening: bool
+    idle: bool
+    closing: bool
+    closed: bool
+    failed: bool
+
+
+class AdapterZONT(ControlEntityZONT):
+    """Адаптер."""
+
+    no_connection: bool
+    failed: bool
+    heating: list[dict]
+    dhw: list[dict]
+
+
+class ActuatorsZONT(BaseModel):
+    """Исполнительные устройства."""
+
+    relays: list[RelayZONT] = []
+    pumps: list[PumpZONT] = []
+    taps: list[TapZONT] = []
+    adapters: list[AdapterZONT] = []
+
+
 class DeviceZONT(BaseEntityZONT):
     """Модель контроллера"""
 
@@ -174,7 +223,8 @@ class DeviceZONT(BaseEntityZONT):
     guard_zones: list[GuardZoneZONT] = []
     controls: ControlsZONT | None = None
     sim_info: SimZONT = None
-    scenarios: #создать класс и ещё поле
+    scenarios: list[ScenarioZONT] = []
+    actuators: ActuatorsZONT = None
 
     # car_state: CarStateZONT = []
 
@@ -183,4 +233,12 @@ class AccountZont(BaseModel):
     """Общий класс всех устройств"""
 
     devices: list[DeviceZONT]
+    ok: bool
+
+
+class TokenZont(BaseModel):
+    """Клас ответа получения токена"""
+
+    token: str
+    token_id: str
     ok: bool
