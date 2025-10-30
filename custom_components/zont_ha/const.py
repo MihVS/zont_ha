@@ -18,7 +18,7 @@ URL_GET_DEVICES_OLD = ZONT_API_URL_ROOT + 'devices'
 URL_SEND_COMMAND_ZONT_OLD = ZONT_API_URL_ROOT + 'send_z3k_command'
 
 URL_SEND_COMMAND_ZONT = ZONT_API_URL + 'activate_heating_mode'
-URL_GET_DEVICES = ZONT_API_URL + 'get_devices'
+URL_GET_DEVICES = ZONT_API_URL + 'devices'
 URL_SET_TARGET_TEMP = ZONT_API_URL + 'set_target_temp'
 URL_SET_GUARD = ZONT_API_URL + 'set_guard'
 URL_ACTIVATE_HEATING_MODE = ZONT_API_URL + 'activate_heating_mode'
@@ -102,12 +102,12 @@ SWITCH_ZONT = 'toggle_button'
 
 PLATFORMS = [
     'sensor',
-    'climate',
-    'button',
-    'switch',
-    'alarm_control_panel',
-    'binary_sensor',
-    'device_tracker'
+    # 'climate',
+    # 'button',
+    # 'switch',
+    # 'alarm_control_panel',
+    # 'binary_sensor',
+    # 'device_tracker'
 ]
 
 COUNTER_REPEAT = 18
@@ -115,7 +115,7 @@ COUNTER_CONNECT = 10
 TIME_OUT_UPDATE_DATA = 10
 TIME_OUT_REPEAT = 10
 TIME_OUT_REQUEST = 2
-TIME_UPDATE = 60
+TIME_UPDATE = 30
 
 MODELS_THERMOSTAT_ZONT = ('T100', 'T102')
 

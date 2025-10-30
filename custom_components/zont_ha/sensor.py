@@ -13,7 +13,7 @@ from .const import (
     DOMAIN, BINARY_SENSOR_TYPES, SENSOR_TYPE_ICON, UNIT_BY_TYPE,
     CURRENT_ENTITY_IDS, ENTRIES
 )
-from .core.models_zont import SensorZONT, DeviceZONT, OTSensorZONT
+from .core.models_zont_v3 import SensorZONT, DeviceZONT
 from .core.utils import (
     get_devise_class_sensor, get_unit_sensor, validate_value_sensor
 )
@@ -31,6 +31,8 @@ async def async_setup_entry(
     coordinator = hass.data[DOMAIN][ENTRIES][entry_id]
     zont = coordinator.zont
 
+    if not zont.data.devices:
+        return
     for device in zont.data.devices:
         sens = []
         for sensor in device.sensors:
@@ -49,7 +51,7 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
 
     def __init__(
             self, coordinator: ZontCoordinator, device: DeviceZONT,
-            sensor: SensorZONT | OTSensorZONT, unique_id: str
+            sensor: SensorZONT, unique_id: str
     ) -> None:
         super().__init__(coordinator)
         self._device = device
@@ -82,7 +84,8 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
     @cached_property
     def native_unit_of_measurement(self) -> str | None:
         """Возвращает единицу измерения сенсора из API zont"""
-        return get_unit_sensor(self._sensor)
+        # return get_unit_sensor(self._sensor)
+        return self._sensor.unit
 
     @cached_property
     def unique_id(self) -> str:
@@ -90,7 +93,7 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
 
     @cached_property
     def device_class(self) -> str | None:
-        return get_devise_class_sensor(self._sensor)
+        return self._sensor.type.value
 
     def __repr__(self) -> str:
         if not self.hass:

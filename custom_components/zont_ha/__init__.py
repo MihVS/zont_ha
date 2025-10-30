@@ -15,6 +15,7 @@ from .const import (
     CONFIGURATION_URL, COUNTER_CONNECT, TIME_OUT_UPDATE_DATA, ENTRIES,
     CURRENT_ENTITY_IDS
 )
+from .core.models_zont_v3 import DeviceZONT
 from .core.zont import Zont
 
 _LOGGER = logging.getLogger(__name__)
@@ -37,10 +38,11 @@ def remove_entity(hass: HomeAssistant, current_entries_id: list,
 async def async_setup_entry(
         hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     entry_id = config_entry.entry_id
-    email = config_entry.data.get("mail")
-    token = config_entry.data.get("token")
-    zont = Zont(hass, email, token)
-    await zont.get_update(old_api=True)
+    email = config_entry.data.get('mail')
+    token = config_entry.data.get('token')
+    selected_devices = config_entry.data.get('devices_selected')
+    zont = Zont(hass, email, token, selected_devices)
+    # await zont.get_update(old_api=True)
     coordinator = ZontCoordinator(hass, zont)
     await coordinator.async_config_entry_first_refresh()
 
@@ -77,20 +79,15 @@ class ZontCoordinator(DataUpdateCoordinator):
         self.zont: Zont = zont
 
     def devices_info(self, device_id: int):
-        device_old = self.zont.get_device_old(device_id)
-        device = self.zont.get_device(device_id)
-        hardware_type = device_old.hardware_type
-        hw_version = None
-        if hardware_type is not None:
-            hw_version = hardware_type.code
+        device: DeviceZONT = self.zont.get_device(device_id)
         device_info = DeviceInfo(**{
             "identifiers": {(DOMAIN, device.id)},
             "name": device.name,
-            "sw_version": device_old.firmware_version,
-            "hw_version": hw_version,
-            "serial_number": device_old.serial,
+            "sw_version": device.device_info.version.software,
+            "hw_version": device.device_info.version.hardware,
+            "serial_number": device.device_info.serial,
             "configuration_url": CONFIGURATION_URL,
-            "model": device.model,
+            "model": device.device_info.model,
             "manufacturer": MANUFACTURER,
         })
         return device_info
@@ -105,6 +102,7 @@ class ZontCoordinator(DataUpdateCoordinator):
         except Exception as err:
             if self._count_connect < COUNTER_CONNECT:
                 self._count_connect += 1
+                _LOGGER.warning(err)
                 _LOGGER.warning(
                     f'Неудачная попытка обновления данных ZONT. '
                     f'Осталось попыток: {COUNTER_CONNECT - self._count_connect}'

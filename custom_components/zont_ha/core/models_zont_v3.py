@@ -242,3 +242,11 @@ class TokenZont(BaseModel):
     token: str
     token_id: str
     ok: bool
+
+
+class ErrorZont(BaseModel):
+    """Клас ответа об ошибке"""
+
+    ok: bool
+    error: str
+    error_ui: str
