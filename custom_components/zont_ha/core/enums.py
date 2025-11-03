@@ -28,6 +28,8 @@ class TypeOfSensor(Enum):
     DISCRETE = 'discrete'
     DHW_SPEED = 'dhw_speed'
     GAS = 'gas'
+    SIGNAL_STRENGTH = 'signal_strength'
+    BATTERY = 'battery'
     OTHER = 'other'
 
 

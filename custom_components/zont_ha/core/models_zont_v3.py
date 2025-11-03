@@ -10,7 +10,7 @@ from .enums import (
 class BaseEntityZONT(BaseModel):
     """Базовая модель сущностей контроллера"""
 
-    id: int
+    id: int | str
     name: str
 
 
@@ -135,9 +135,10 @@ class RegulatorZONT(ControlEntityZONT):
     icon: str | None = None
 
 
-class StatusesZONT(ControlEntityZONT):
+class StatusZONT(ControlEntityZONT):
     """Статус входа\выхода."""
 
+    name: ButtonNameZONT
     active: bool | None
     view: str | None = None
     icon: str | None = None
@@ -148,7 +149,7 @@ class ControlsZONT(BaseModel):
 
     buttons: list[ButtonZONT] = []
     regulators: list[RegulatorZONT] = []
-    statuses: list[StatusesZONT] = []
+    status: list[StatusZONT] = []
     toggle_buttons: list[ToggleButtonsZONT] = []
 
 
@@ -199,8 +200,8 @@ class AdapterZONT(ControlEntityZONT):
 
     no_connection: bool
     failed: bool
-    heating: list[dict]
-    dhw: list[dict]
+    heating: list[dict] | None = None
+    dhw: list[dict] | None = None
 
 
 class ActuatorsZONT(BaseModel):

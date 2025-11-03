@@ -37,8 +37,10 @@ async def async_setup_entry(
         sens = []
         for sensor in device.sensors:
             unique_id = f'{entry_id}{device.id}{sensor.id}'
-            if sensor.type not in BINARY_SENSOR_TYPES:
+            if not sensor.value is None:
                 sens.append(ZontSensor(coordinator, device, sensor, unique_id))
+            # if sensor.type.value not in BINARY_SENSOR_TYPES:
+            #     sens.append(ZontSensor(coordinator, device, sensor, unique_id))
         for sensor in sens:
             hass.data[DOMAIN][CURRENT_ENTITY_IDS][entry_id].append(
                 sensor.unique_id)
@@ -58,7 +60,7 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
         self._sensor = sensor
         self._unique_id = unique_id
         self._attr_device_info = coordinator.devices_info(device.id)
-        self._attr_icon = SENSOR_TYPE_ICON.get(sensor.type)
+        self._attr_icon = SENSOR_TYPE_ICON.get(sensor.type.value)
 
     @cached_property
     def state_class(self) -> SensorStateClass | str | None:
@@ -84,8 +86,7 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
     @cached_property
     def native_unit_of_measurement(self) -> str | None:
         """Возвращает единицу измерения сенсора из API zont"""
-        # return get_unit_sensor(self._sensor)
-        return self._sensor.unit
+        return get_unit_sensor(self._sensor)
 
     @cached_property
     def unique_id(self) -> str:

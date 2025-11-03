@@ -70,7 +70,8 @@ ZONT_SENSOR_TYPE = {
 SENSOR_TYPE_ICON = {
     'boiler_failure': 'mdi:wrench-outline',
     'dhw_speed': 'mdi:waves-arrow-right',
-    'modulation': 'mdi:fire'
+    'modulation': 'mdi:fire',
+    'signal_strength': 'mdi:wifi-arrow-up-down'
 }
 
 VALID_TYPE_SENSOR = {
@@ -86,7 +87,9 @@ VALID_TYPE_SENSOR = {
     'energy': 'кВт•ч'
 }
 
-BINARY_SENSOR_TYPES = ('leakage', 'smoke', 'opening', 'motion', 'discrete')
+BINARY_SENSOR_TYPES = (
+    'leakage', 'smoke', 'opening', 'motion', 'discrete', 'boiler_failure',
+)
 
 MIN_TEMP_AIR = 5
 MAX_TEMP_AIR = 35

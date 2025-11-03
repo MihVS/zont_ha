@@ -4,7 +4,7 @@ from http import HTTPStatus
 from aiohttp import ClientResponse
 
 from .exceptions import ResponseZontError
-from .models_zont import SensorZONT
+from .models_zont_v3 import SensorZONT
 from ..const import (
     HEATING_MODES, VALID_TYPE_SENSOR, ZONT_SENSOR_TYPE, UNIT_BY_TYPE,
     VALID_UNITS
@@ -78,12 +78,12 @@ def get_icon(name_mode: str) -> str:
 
 def get_unit_sensor(sensor: SensorZONT) -> str:
     """Фильтр для получения правильной единицы измерения сенсора"""
-    type_sensor = sensor.type
-    unit_by_type = UNIT_BY_TYPE.get(sensor.type)
+    type_sensor = sensor.type.value
+    unit_by_type = UNIT_BY_TYPE.get(sensor.type.value)
     unit = VALID_UNITS.get(sensor.unit)
     if type_sensor == 'voltage':
         return unit
-    elif isinstance(
+    if isinstance(
         unit, type(unit_by_type)
     ):
         return unit

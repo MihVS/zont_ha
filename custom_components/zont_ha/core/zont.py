@@ -11,6 +11,7 @@ from homeassistant.components.alarm_control_panel.const import (
 from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from .enums import TypeOfSensor, StateOfSensor
 from .exceptions import StateGuardError
 from .models_zont_v3 import (
     AccountZont, ErrorZont, SensorZONT, DeviceZONT, CircuitZONT,
@@ -37,7 +38,7 @@ state_zont = StateZont(
 )
 
 TypeBinarySensorZont = namedtuple('TypeBinarySensorZont', [
-    'leakage', 'smoke', 'opening', 'motion', 'discrete'
+    'leakage', 'smoke', 'opening', 'motion', 'discrete', 'boiler_failure'
 ])
 
 type_binary_sensor = TypeBinarySensorZont(*BINARY_SENSOR_TYPES)
@@ -87,14 +88,24 @@ class Zont:
             self.error = ErrorZont.model_validate_json(text)
             _LOGGER.error(self.error.error_ui)
             return status_code
-        if old_api:
-            self.data_old = account.parse_raw(text)
-        else:
-            data_json = json.loads(text)
-            devices = data_json.get('devices')
-            actual_devices = list(filter(self._is_selected, devices))
-            data_json.update({'devices': actual_devices})
-            self.data = account.model_validate(data_json)
+
+        data_json = json.loads(text)
+        devices = data_json.get('devices')
+        if not self.selected_devices:
+            for device in devices:
+                self.selected_devices.append(str(device.get('id')))
+        actual_devices = list(filter(self._is_selected, devices))
+        data_json.update({'devices': actual_devices})
+        self.data = account.model_validate(data_json)
+        self._create_sensors()
+        # if old_api:
+        #     self.data_old = account.parse_raw(text)
+        # else:
+        #     data_json = json.loads(text)
+        #     devices = data_json.get('devices')
+        #     actual_devices = list(filter(self._is_selected, devices))
+        #     data_json.update({'devices': actual_devices})
+        #     self.data = account.model_validate(data_json)
 
             # self._create_sensors()
         _LOGGER.debug(f'Данные аккаунта {self.mail} обновлены. ver: {version}')
@@ -103,36 +114,36 @@ class Zont:
     def _is_selected(self, device: dict) -> bool:
         return str(device.get('id')) in self.selected_devices
 
-    # def _create_sensors(self):
-    #     """Создает дополнительные сенсоры"""
-    #     for device in self.data.devices:
-    #         self._create_radio_sensors(device)
-    #         self._create_error_boiler_sensors(device)
+    def _create_sensors(self):
+        """Создает дополнительные сенсоры"""
+        for device in self.data.devices:
+            self._create_radio_sensors(device)
 
-    # def _create_radio_sensors(self, device: DeviceZONT):
-    #     """
-    #     Создает дополнительные сенсоры
-    #     уровня батареи и связи для радио датчиков
-    #     """
-    #     for i in range(len(device.sensors)):
-    #         sensor = device.sensors[i]
-    #         if sensor.rssi and sensor.type == 'temperature':
-    #             device.sensors.append(SensorZONT(
-    #                 id=f'{sensor.id}_rssi',
-    #                 name=f'{sensor.name}_rssi',
-    #                 type='signal_strength',
-    #                 status='ok',
-    #                 value=sensor.rssi,
-    #                 unit='дБм'
-    #             ))
-    #             device.sensors.append(SensorZONT(
-    #                 id=f'{sensor.id}_battery',
-    #                 name=f'{sensor.name}_battery',
-    #                 type='battery',
-    #                 status='ok',
-    #                 value=self._convert_value_battery(sensor.battery),
-    #                 unit='%'
-    #             ))
+    @staticmethod
+    def _create_radio_sensors(device: DeviceZONT):
+        """
+        Создает дополнительные сенсоры
+        уровня батареи и связи для радио датчиков
+        """
+        for i in range(len(device.sensors)):
+            sensor = device.sensors[i]
+            if sensor.battery:
+                device.sensors.append(SensorZONT(
+                    id=f'{sensor.id}_rssi',
+                    name=f'{sensor.name}_rssi',
+                    type=TypeOfSensor.SIGNAL_STRENGTH,
+                    status=StateOfSensor.OK,
+                    value=sensor.rssi,
+                    unit='дБм'
+                ))
+                device.sensors.append(SensorZONT(
+                    id=f'{sensor.id}_battery',
+                    name=f'{sensor.name}_battery',
+                    type=TypeOfSensor.BATTERY,
+                    status=StateOfSensor.OK,
+                    value=sensor.battery,
+                    unit='%'
+                ))
 
     # @staticmethod
     # def _convert_value_battery(value: float) -> int:
