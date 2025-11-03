@@ -89,6 +89,7 @@ VALID_TYPE_SENSOR = {
 
 BINARY_SENSOR_TYPES = (
     'leakage', 'smoke', 'opening', 'motion', 'discrete', 'boiler_failure',
+    'room_thermostat',
 )
 
 MIN_TEMP_AIR = 5

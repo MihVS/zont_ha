@@ -38,7 +38,8 @@ state_zont = StateZont(
 )
 
 TypeBinarySensorZont = namedtuple('TypeBinarySensorZont', [
-    'leakage', 'smoke', 'opening', 'motion', 'discrete', 'boiler_failure'
+    'leakage', 'smoke', 'opening', 'motion', 'discrete', 'boiler_failure',
+    'room_thermostat'
 ])
 
 type_binary_sensor = TypeBinarySensorZont(*BINARY_SENSOR_TYPES)

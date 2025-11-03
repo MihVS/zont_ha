@@ -10,12 +10,13 @@ from homeassistant.helpers.update_coordinator import (
 )
 from . import ZontCoordinator
 from .const import (
-    DOMAIN, BINARY_SENSOR_TYPES, SENSOR_TYPE_ICON, UNIT_BY_TYPE,
+    DOMAIN, SENSOR_TYPE_ICON, UNIT_BY_TYPE,
     CURRENT_ENTITY_IDS, ENTRIES
 )
 from .core.models_zont_v3 import SensorZONT, DeviceZONT
 from .core.utils import (
-    get_devise_class_sensor, get_unit_sensor, validate_value_sensor
+    get_devise_class_sensor, get_unit_sensor, validate_value_sensor,
+    is_binary_sensor
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -37,10 +38,8 @@ async def async_setup_entry(
         sens = []
         for sensor in device.sensors:
             unique_id = f'{entry_id}{device.id}{sensor.id}'
-            if not sensor.value is None:
+            if not is_binary_sensor(sensor):
                 sens.append(ZontSensor(coordinator, device, sensor, unique_id))
-            # if sensor.type.value not in BINARY_SENSOR_TYPES:
-            #     sens.append(ZontSensor(coordinator, device, sensor, unique_id))
         for sensor in sens:
             hass.data[DOMAIN][CURRENT_ENTITY_IDS][entry_id].append(
                 sensor.unique_id)
@@ -94,7 +93,7 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
 
     @cached_property
     def device_class(self) -> str | None:
-        return self._sensor.type.value
+        return get_devise_class_sensor(self._sensor)
 
     def __repr__(self) -> str:
         if not self.hass:
@@ -105,7 +104,7 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
     def _handle_coordinator_update(self) -> None:
         """Обработка обновлённых данных от координатора"""
 
-        sensor = self.coordinator.data.get_sensor(
+        sensor = self.coordinator.zont.get_sensor(
             self._device.id,
             self._sensor.id
         )
