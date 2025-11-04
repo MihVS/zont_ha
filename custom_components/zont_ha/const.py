@@ -108,7 +108,7 @@ PLATFORMS = [
     'sensor',
     'binary_sensor',
     'switch',
-    # 'button',
+    'button',
     # 'climate',
     # 'alarm_control_panel',
     # 'device_tracker'

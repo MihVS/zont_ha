@@ -15,7 +15,8 @@ from .enums import TypeOfSensor, StateOfSensor
 from .exceptions import StateGuardError
 from .models_zont_v3 import (
     AccountZont, ErrorZont, SensorZONT, DeviceZONT, CircuitZONT,
-    HeatingModeZONT, ControlsZONT, GuardZoneZONT, StatusZONT, ToggleButtonsZONT
+    HeatingModeZONT, ControlsZONT, GuardZoneZONT, StatusZONT,
+    ToggleButtonsZONT, ButtonZONT
 )
 from .models_zont_old import AccountZontOld, DeviceZontOld
 from .utils import check_send_command
@@ -395,7 +396,7 @@ class Zont:
     @check_send_command
     async def switch_button(
             self, device: DeviceZONT,
-            button: ToggleButtonsZONT,
+            button: ToggleButtonsZONT | ButtonZONT,
             command: bool,
     ) -> ClientResponse:
         """Отправка команды на установку нужной температуры в контуре."""

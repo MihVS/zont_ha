@@ -5,7 +5,7 @@ from aiohttp import ClientResponse
 
 from .enums import TypeOfSensor
 from .exceptions import ResponseZontError
-from .models_zont_v3 import SensorZONT, DeviceZONT, ToggleButtonsZONT
+from .models_zont_v3 import SensorZONT, DeviceZONT
 from ..const import (
     HEATING_MODES, VALID_TYPE_SENSOR, ZONT_SENSOR_TYPE, UNIT_BY_TYPE,
     VALID_UNITS, BINARY_SENSOR_TYPES
@@ -42,7 +42,10 @@ def check_send_command(func):
             control = heating_mode
             set_value = 'Установлен во всех контурах'
         else:
-            return func
+            keys = list(kwargs.keys())
+            control = kwargs[keys[1]]
+            set_value = kwargs[keys[2]]
+            _LOGGER.warning(f'Параметр "{control}" не найдет. Отправлен общий запрос.')
 
         if isinstance(control.name, str):
             name = control.name
