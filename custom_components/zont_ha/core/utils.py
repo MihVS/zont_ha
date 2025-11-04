@@ -5,7 +5,7 @@ from aiohttp import ClientResponse
 
 from .enums import TypeOfSensor
 from .exceptions import ResponseZontError
-from .models_zont_v3 import SensorZONT
+from .models_zont_v3 import SensorZONT, DeviceZONT, ToggleButtonsZONT
 from ..const import (
     HEATING_MODES, VALID_TYPE_SENSOR, ZONT_SENSOR_TYPE, UNIT_BY_TYPE,
     VALID_UNITS, BINARY_SENSOR_TYPES
@@ -20,19 +20,20 @@ def check_send_command(func):
     управления параметрами контроллера zont.
     """
     async def check_response(*args, **kwargs):
-        device = kwargs.get('device')
+        device: DeviceZONT = kwargs.get('device')
         heating_circuit = kwargs.get('heating_circuit')
         heating_mode = kwargs.get('heating_mode')
         target_temp = kwargs.get('target_temp')
         guard_zone = kwargs.get('guard_zone')
-        custom_control = kwargs.get('control')
+        button = kwargs.get('button')
+
         command = kwargs.get('command')
 
         if target_temp is not None:
             control = heating_circuit
             set_value = target_temp
-        elif custom_control is not None:
-            control = custom_control
+        elif button is not None:
+            control = button
             set_value = command
         elif guard_zone is not None:
             control = guard_zone
@@ -43,6 +44,11 @@ def check_send_command(func):
         else:
             return func
 
+        if isinstance(control.name, str):
+            name = control.name
+        else:
+            name = control.name.name
+
         response: ClientResponse = await func(*args, **kwargs)
         status = response.status
         data = await response.json()
@@ -50,14 +56,14 @@ def check_send_command(func):
             _LOGGER.debug(f'Успешный запрос к API zont: {status}')
             if data.get('ok'):
                 _LOGGER.info(
-                    f'На устройстве "{device.model}-{device.name}" '
-                    f'изменено состояние "{control.name}": "{set_value}"'
+                    f'На устройстве "{device.device_info.model}-{device.name}" '
+                    f'изменено состояние "{name}": "{set_value}"'
                 )
             elif data.get('error') == 'timeout':
                 _LOGGER.info(
-                    f'Timeout. Уставка температуры возможно не изменилась'
-                    f'на устройстве {device.model}-{device.name} '
-                    f'состояние {control.name}: {set_value}'
+                    f'Timeout. На устройстве {device.model}-{device.name} '
+                    f'установка параметра ({name}: {set_value}) '
+                    f'возможно не прошла.'
                 )
             else:
                 raise ResponseZontError(

@@ -15,16 +15,17 @@ from .enums import TypeOfSensor, StateOfSensor
 from .exceptions import StateGuardError
 from .models_zont_v3 import (
     AccountZont, ErrorZont, SensorZONT, DeviceZONT, CircuitZONT,
-    HeatingModeZONT, ControlsZONT, GuardZoneZONT, StatusZONT
+    HeatingModeZONT, ControlsZONT, GuardZoneZONT, StatusZONT, ToggleButtonsZONT
 )
 from .models_zont_old import AccountZontOld, DeviceZontOld
 from .utils import check_send_command
 from ..const import (
     URL_GET_DEVICES, URL_SET_TARGET_TEMP, URL_SEND_COMMAND_ZONT_OLD,
     MIN_TEMP_AIR, MAX_TEMP_AIR, MIN_TEMP_GVS, MAX_TEMP_GVS, MIN_TEMP_FLOOR,
-    MAX_TEMP_FLOOR, MATCHES_GVS, MATCHES_FLOOR, URL_TRIGGER_CUSTOM_BUTTON,
+    MAX_TEMP_FLOOR, MATCHES_GVS, MATCHES_FLOOR,
     URL_SET_GUARD, BINARY_SENSOR_TYPES, URL_SEND_COMMAND_ZONT,
     URL_GET_DEVICES_OLD, NO_ERROR, URL_ACTIVATE_HEATING_MODE, PERCENT_BATTERY,
+    ZONT_API_URL,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -318,6 +319,13 @@ class Zont:
         return next((status for status in device.controls.statuses if
                      (status.id == status_id)), None)
 
+    def get_toggle_button(
+            self, device_id: int, toggle_button_id: int) -> ToggleButtonsZONT:
+        device = self.get_device(device_id)
+        return next(
+            (toggle_button for toggle_button in device.controls.toggle_buttons
+             if (toggle_button.id == toggle_button_id)), None)
+
     # @check_send_command
     # async def set_target_temperature(
     #         self, device: DeviceZONT, heating_circuit: CircuitZONT,
@@ -383,23 +391,22 @@ class Zont:
     #         },
     #         headers=self.headers
     #     )
-    #
-    # @check_send_command
-    # async def toggle_switch(
-    #         self, device: DeviceZONT, control: ControlsZONT,
-    #         command: bool
-    # ) -> ClientResponse:
-    #     """Отправка команды на установку нужной температуры в контуре."""
-    #     return await self.session.post(
-    #         url=URL_TRIGGER_CUSTOM_BUTTON,
-    #         json={
-    #             'device_id': device.id,
-    #             'control_id': control.id,
-    #             'target_state': command
-    #         },
-    #         headers=self.headers
-    #     )
-    #
+
+    @check_send_command
+    async def switch_button(
+            self, device: DeviceZONT,
+            button: ToggleButtonsZONT,
+            command: bool,
+    ) -> ClientResponse:
+        """Отправка команды на установку нужной температуры в контуре."""
+        return await self.session.post(
+            url=f'{ZONT_API_URL}devices/{device.id}/controls/{button.id}/actions/trigger',
+            json={
+                'target_state': command
+            },
+            headers=self.headers
+        )
+
     # @check_send_command
     # async def toggle_alarm(
     #         self, device: DeviceZONT, guard_zone: GuardZoneZONT,

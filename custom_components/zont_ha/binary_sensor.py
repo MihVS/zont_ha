@@ -9,10 +9,9 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator
 from .const import (
-    DOMAIN, STATES_CAR, CURRENT_ENTITY_IDS, ENTRIES
+    DOMAIN, CURRENT_ENTITY_IDS, ENTRIES
 )
-from .core.models_zont_v3 import SensorZONT, DeviceZONT, ControlsZONT, \
-    StatusZONT
+from .core.models_zont_v3 import (SensorZONT, DeviceZONT, StatusZONT)
 from .core.utils import is_binary_sensor
 from .core.zont import type_binary_sensor, Zont
 
