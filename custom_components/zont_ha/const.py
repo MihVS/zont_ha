@@ -106,11 +106,11 @@ SWITCH_ZONT = 'toggle_button'
 
 PLATFORMS = [
     'sensor',
+    'binary_sensor',
+    # 'switch',
     # 'climate',
     # 'button',
-    # 'switch',
     # 'alarm_control_panel',
-    # 'binary_sensor',
     # 'device_tracker'
 ]
 

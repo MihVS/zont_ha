@@ -15,7 +15,7 @@ from .enums import TypeOfSensor, StateOfSensor
 from .exceptions import StateGuardError
 from .models_zont_v3 import (
     AccountZont, ErrorZont, SensorZONT, DeviceZONT, CircuitZONT,
-    HeatingModeZONT, ControlsZONT, GuardZoneZONT
+    HeatingModeZONT, ControlsZONT, GuardZoneZONT, StatusZONT
 )
 from .models_zont_old import AccountZontOld, DeviceZontOld
 from .utils import check_send_command
@@ -311,24 +311,13 @@ class Zont:
     #         val_min, val_max = MIN_TEMP_FLOOR, MAX_TEMP_FLOOR
     #
     #     return val_min, val_max
-    #
-    # def get_custom_control(
-    #         self, device_id: int, control_id: int, status: bool = False
-    #                        ) -> ControlsZONT:
-    #     device = self.get_device(device_id)
-    #     if status:
-    #         return next(
-    #             (control for control in device.custom_controls
-    #              if (control.id == control_id and control.type == 'status')
-    #              ), None
-    #         )
-    #     else:
-    #         return next(
-    #             (control for control in device.custom_controls
-    #              if (control.id == control_id and control.type != 'status')
-    #              ), None
-    #         )
-    #
+
+    def get_status_control(
+            self, device_id: int, status_id: int) -> StatusZONT:
+        device = self.get_device(device_id)
+        return next((status for status in device.controls.statuses if
+                     (status.id == status_id)), None)
+
     # @check_send_command
     # async def set_target_temperature(
     #         self, device: DeviceZONT, heating_circuit: CircuitZONT,

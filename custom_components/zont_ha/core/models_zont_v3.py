@@ -149,7 +149,7 @@ class ControlsZONT(BaseModel):
 
     buttons: list[ButtonZONT] = []
     regulators: list[RegulatorZONT] = []
-    status: list[StatusZONT] = []
+    statuses: list[StatusZONT] = []
     toggle_buttons: list[ToggleButtonsZONT] = []
 
 

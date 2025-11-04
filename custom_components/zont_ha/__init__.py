@@ -98,6 +98,7 @@ class ZontCoordinator(DataUpdateCoordinator):
             async with async_timeout.timeout(TIME_OUT_UPDATE_DATA):
                 await self.zont.get_update()
                 self._count_connect = 0
+                # self.hass.loop.call_soon(self.async_update_listeners)
                 return self.zont
         except Exception as err:
             if self._count_connect < COUNTER_CONNECT:
