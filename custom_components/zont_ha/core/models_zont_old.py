@@ -1,19 +1,23 @@
-from pydantic.v1 import BaseModel, validator, root_validator
+from pydantic import BaseModel, field_validator, model_validator
+from typing import Optional
 
 
 class StationaryLocationZontOld(BaseModel):
     """Модель локации устройства"""
 
     loc: list
-    latitude: float | None
-    longitude: float | None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
-    @root_validator
-    def add_fild_latitude_longitude(cls, values):
-        return {
-            'longitude': values['loc'][0],
-            'latitude': values['loc'][1]
-        }
+    @model_validator(mode='after')
+    def set_coordinates_from_loc(self):
+        """Устанавливает latitude и longitude из loc при создании объекта"""
+        if self.loc and len(self.loc) >= 2:
+            if self.longitude is None:
+                self.longitude = self.loc[0]
+            if self.latitude is None:
+                self.latitude = self.loc[1]
+        return self
 
 
 class HardwareType(BaseModel):
@@ -38,20 +42,12 @@ class DeviceZontOld(BaseModel):
     widget_type: str | None
     appliance_type: str | None
     tempstep: float = 0.1
-    firmware_version: list | None
-    hardware_type: HardwareType | None
-    serial: str
     stationary_location: StationaryLocationZontOld | None
-    z3k_config: Z3kZontOld | None
-
-    @validator('firmware_version')
-    def firmware_version_get_first_element(cls, v: list[int]) -> int | None:
-        if v is not None:
-            return v[0] if len(v) else None
+    z3k_config: Z3kZontOld | None = None
 
 
 class AccountZontOld(BaseModel):
     """Общий класс всех устройств"""
 
-    devices: list[DeviceZontOld]
-    ok: bool
+    devices: list[DeviceZontOld] = []
+    ok: bool = False

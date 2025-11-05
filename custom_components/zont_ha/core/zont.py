@@ -21,10 +21,10 @@ from .models_zont_v3 import (
 from .models_zont_old import AccountZontOld, DeviceZontOld
 from .utils import check_send_command
 from ..const import (
-    URL_GET_DEVICES, URL_SET_TARGET_TEMP, URL_SEND_COMMAND_ZONT_OLD,
+    URL_GET_DEVICES, URL_SEND_COMMAND_ZONT_OLD,
     MIN_TEMP_AIR, MAX_TEMP_AIR, MIN_TEMP_GVS, MAX_TEMP_GVS, MIN_TEMP_FLOOR,
     MAX_TEMP_FLOOR, MATCHES_GVS, MATCHES_FLOOR,
-    URL_SET_GUARD, BINARY_SENSOR_TYPES, URL_SEND_COMMAND_ZONT,
+    URL_SET_GUARD, BINARY_SENSOR_TYPES,
     URL_GET_DEVICES_OLD, NO_ERROR, URL_ACTIVATE_HEATING_MODE, PERCENT_BATTERY,
     ZONT_API_URL,
 )
@@ -51,7 +51,7 @@ class Zont:
     """Класс контроллера zont"""
 
     data: AccountZont = None
-    data_old: AccountZontOld
+    data_old: AccountZontOld = AccountZontOld()
     error: ErrorZont = None
 
     def __init__(self,
@@ -69,20 +69,27 @@ class Zont:
         self.session = async_get_clientsession(hass)
         _LOGGER.debug(f'Создан объект Zont')
 
-    async def get_update(self, old_api=False):
-        """Получаем обновление данных Zont"""
-        if old_api:
-            url = URL_GET_DEVICES_OLD
-            version = 'old'
-            account = AccountZontOld
-        else:
-            url = URL_GET_DEVICES
-            version = 'v3'
-            account = AccountZont
+    async def init_old_data(self):
+        """Инициализирует данные из API V1"""
+        headers = self.headers
+        response = await self.session.post(
+            url=URL_GET_DEVICES_OLD,
+            headers=headers
+        )
+        text = await response.text()
+        status_code = response.status
+        if status_code != HTTPStatus.OK:
+            _LOGGER.error(f'Не удалось получить данные из API V1. '
+                          f'Status code: {status_code}. Text: {text}')
+            return
+        self.data_old = AccountZontOld.model_validate_json(text)
+        _LOGGER.debug(f'For {self.mail} initialized old_data from API V1.')
 
+    async def get_update(self):
+        """Получаем обновление данных Zont"""
         headers = self.headers
         response = await self.session.get(
-            url=url,
+            url=URL_GET_DEVICES,
             headers=headers
         )
         text = await response.text()
@@ -90,7 +97,7 @@ class Zont:
         if status_code != HTTPStatus.OK:
             self.error = ErrorZont.model_validate_json(text)
             _LOGGER.error(self.error.error_ui)
-            return status_code
+            return
 
         data_json = json.loads(text)
         devices = data_json.get('devices')
@@ -99,19 +106,9 @@ class Zont:
                 self.selected_devices.append(str(device.get('id')))
         actual_devices = list(filter(self._is_selected, devices))
         data_json.update({'devices': actual_devices})
-        self.data = account.model_validate(data_json)
+        self.data = AccountZont.model_validate(data_json)
         self._create_sensors()
-        # if old_api:
-        #     self.data_old = account.parse_raw(text)
-        # else:
-        #     data_json = json.loads(text)
-        #     devices = data_json.get('devices')
-        #     actual_devices = list(filter(self._is_selected, devices))
-        #     data_json.update({'devices': actual_devices})
-        #     self.data = account.model_validate(data_json)
-
-            # self._create_sensors()
-        _LOGGER.debug(f'Данные аккаунта {self.mail} обновлены. ver: {version}')
+        _LOGGER.debug(f'Данные аккаунта {self.mail} обновлены. API V3')
         return status_code
 
     def _is_selected(self, device: dict) -> bool:
@@ -148,17 +145,6 @@ class Zont:
                     unit='%'
                 ))
 
-    # @staticmethod
-    # def _convert_value_battery(value: float) -> int:
-    #     """Преобразовывает напряжение батарейки в уровень заряда в %"""
-    #     value = round(value, 1)
-    #     if value > 3.0:
-    #         return 100
-    #     elif value < 2.2:
-    #         return 0
-    #     else:
-    #         return PERCENT_BATTERY[value]
-    #
     # @staticmethod
     # def _create_error_boiler_sensors(device: DeviceZONT):
     #     """Создаёт дополнительные сенсоры ошибок котла"""
@@ -204,15 +190,15 @@ class Zont:
             None
         )
 
-    # @staticmethod
-    # def get_heating_circuit(
-    #         device: DeviceZONT, circuit_id: int
-    # ) -> CircuitZONT | None:
-    #     """Получить сенсор по его id и id устройства"""
-    #     return next(
-    #         (circuit for circuit in device.circuits
-    #          if circuit.id == circuit_id), None
-    #     )
+    @staticmethod
+    def get_circuit(
+            device: DeviceZONT, circuit_id: int
+    ) -> CircuitZONT | None:
+        """Получить контур отопления по его id и id устройства"""
+        return next(
+            (circuit for circuit in device.circuits
+             if circuit.id == circuit_id), None
+        )
 
     # @staticmethod
     # def get_guard_zone(
@@ -253,66 +239,63 @@ class Zont:
     #             raise StateGuardError(
     #                 f'Неизвестный статус охранной зоны: {guard_zone.state}'
     #             )
-    #
-    # @staticmethod
-    # def get_heating_mode_by_id(
-    #         device: DeviceZONT, heating_mode_id: int
-    # ) -> HeatingModeZONT | None:
-    #     """Получить name отопительного режима по его id"""
-    #     return next(
-    #         (heating_mode for heating_mode in device.heating_modes
-    #          if heating_mode.id == heating_mode_id), None
-    #     )
-    #
-    # @staticmethod
-    # def get_heating_mode_by_name(
-    #         device: DeviceZONT, heating_mode_name: str
-    # ) -> HeatingModeZONT | None:
-    #     """Получить id отопительного режима по его name"""
-    #     return next(
-    #         (heating_mode for heating_mode in device.heating_modes
-    #          if heating_mode.name == heating_mode_name), None
-    #     )
-    #
-    # @staticmethod
-    # def get_names_heating_mode(
-    #         heating_modes: list[HeatingModeZONT]
-    # ) -> list[str]:
-    #     """Возвращает список названий отопительных режимов"""
-    #     return [heating_mode.name for heating_mode in heating_modes]
 
-    # @staticmethod
-    # def _validate_min_max_values_temp(min_temp, max_temp) -> bool:
-    #     if not (isinstance(min_temp, int) and isinstance(max_temp, int)):
-    #         return False
-    #     if min_temp < 0 and max_temp > 80:
-    #         return False
-    #     return True
-    #
-    # def get_min_max_values_temp(
-    #        self, heating_circuit: CircuitZONT) -> tuple[int, int]:
-    #     """
-    #     Функция для получения максимальной и минимальной температур
-    #     по контуру отопления.
-    #     """
-    #     val_min = heating_circuit.target_min
-    #     val_max = heating_circuit.target_max
-    #     if self._validate_min_max_values_temp(val_min, val_max):
-    #         return val_min, val_max
-    #     _LOGGER.warning(f'Не удалось получить пределы регулировки температуры'
-    #                     f' для контура: {heating_circuit.id}. Значения взяты'
-    #                     f' исходя из названия контура.')
-    #     circuit_name = heating_circuit.name
-    #     val_min, val_max = MIN_TEMP_AIR, MAX_TEMP_AIR
-    #     circuit_name = circuit_name.lower().strip()
-    #     matches_gvs = MATCHES_GVS
-    #     matches_floor = MATCHES_FLOOR
-    #     if any([x in circuit_name for x in matches_gvs]):
-    #         val_min, val_max = MIN_TEMP_GVS, MAX_TEMP_GVS
-    #     elif any([x in circuit_name for x in matches_floor]):
-    #         val_min, val_max = MIN_TEMP_FLOOR, MAX_TEMP_FLOOR
-    #
-    #     return val_min, val_max
+    @staticmethod
+    def get_heating_mode_by_id(
+            device: DeviceZONT, heating_mode_id: int
+    ) -> HeatingModeZONT | None:
+        """Получить name отопительного режима по его id"""
+        return next(
+            (heating_mode for heating_mode in device.modes
+             if heating_mode.id == heating_mode_id), None
+        )
+
+    @staticmethod
+    def get_heating_mode_by_name(
+            device: DeviceZONT, heating_mode_name: str
+    ) -> HeatingModeZONT | None:
+        """Получить id отопительного режима по его name"""
+        return next(
+            (heating_mode for heating_mode in device.modes
+             if heating_mode.name == heating_mode_name), None
+        )
+
+    @staticmethod
+    def get_names_heating_mode(
+            heating_modes: list[HeatingModeZONT]
+    ) -> list[str]:
+        """Возвращает список названий отопительных режимов"""
+        return [heating_mode.name for heating_mode in heating_modes]
+
+    @staticmethod
+    def _validate_min_max_values_temp(min_temp, max_temp) -> bool:
+        if not (isinstance(min_temp, float) and isinstance(max_temp, float)):
+            return False
+        if min_temp < 0 and max_temp > 90:
+            return False
+        return True
+
+    def get_min_max_values_temp(
+           self, circuit: CircuitZONT) -> tuple[float, float]:
+        """
+        Функция для получения максимальной и минимальной температур
+        по контуру отопления.
+        """
+        val_min = circuit.min
+        val_max = circuit.max
+        if self._validate_min_max_values_temp(val_min, val_max):
+            return val_min, val_max
+        _LOGGER.warning(f'Не удалось получить пределы регулировки температуры'
+                        f' для контура: "{circuit.name}". Значения взяты'
+                        f' исходя из названия контура.')
+        circuit_name = circuit.name
+        val_min, val_max = MIN_TEMP_AIR, MAX_TEMP_AIR
+        circuit_name = circuit_name.lower().strip()
+        if any([x in circuit_name for x in MATCHES_GVS]):
+            val_min, val_max = MIN_TEMP_GVS, MAX_TEMP_GVS
+        elif any([x in circuit_name for x in MATCHES_FLOOR]):
+            val_min, val_max = MIN_TEMP_FLOOR, MAX_TEMP_FLOOR
+        return val_min, val_max
 
     def get_status_control(
             self, device_id: int, status_id: int) -> StatusZONT:
@@ -327,71 +310,43 @@ class Zont:
             (toggle_button for toggle_button in device.controls.toggle_buttons
              if (toggle_button.id == toggle_button_id)), None)
 
-    # @check_send_command
-    # async def set_target_temperature(
-    #         self, device: DeviceZONT, heating_circuit: CircuitZONT,
-    #         target_temp: float
-    # ) -> ClientResponse:
-    #     """Отправка команды на установку нужной температуры в контуре."""
-    #     _LOGGER.info(f'Отправлена уставка температуры на {target_temp}')
-    #     return await self.session.post(
-    #         url=URL_SET_TARGET_TEMP,
-    #         json={
-    #             'device_id': device.id,
-    #             'circuit_id': heating_circuit.id,
-    #             'target_temp': target_temp
-    #         },
-    #         headers=self.headers
-    #     )
-    #
-    # async def set_heating_mode_all_circuit(
-    #         self, device: DeviceZONT, heating_mode_id: int
-    # ) -> ClientResponse:
-    #     """Отправка команды на установку нужного режима для всех контуров."""
-    #     response = await self.session.post(
-    #         url=URL_ACTIVATE_HEATING_MODE,
-    #         json={
-    #             'device_id': device.id,
-    #             'mode_id': heating_mode_id
-    #         },
-    #         headers=self.headers
-    #     )
-    #     _LOGGER.debug(await response.text())
-    #     return response
-    #
-    # async def set_heating_mode(
-    #         self, device: DeviceZONT, heating_circuit: CircuitZONT,
-    #         heating_mode_id: int
-    # ) -> ClientResponse:
-    #     """Отправка команды на установку нужного режима для контура."""
-    #     response = await self.session.post(
-    #         url=URL_SEND_COMMAND_ZONT_OLD,
-    #         json={
-    #             'device_id': device.id,
-    #             'command_name': 'SelectHeatingModeForCircuit',
-    #             'object_id': heating_circuit.id,
-    #             'command_args': {'mode_id': heating_mode_id},
-    #             'request_time': 1000,
-    #             'is_guaranteed': True
-    #         },
-    #         headers=self.headers
-    #     )
-    #     _LOGGER.debug(await response.text())
-    #     return response
-    #
-    # @check_send_command
-    # async def set_heating_mode_all_heating_circuits(
-    #         self, device: DeviceZONT, heating_mode: HeatingModeZONT
-    # ) -> ClientResponse:
-    #     """Отправка команды на установку нужного режима для всех контуров."""
-    #     return await self.session.post(
-    #         url=URL_SEND_COMMAND_ZONT,
-    #         json={
-    #             'device_id': device.id,
-    #             'mode_id': heating_mode.id
-    #         },
-    #         headers=self.headers
-    #     )
+    @check_send_command
+    async def set_target_temperature(
+            self, device: DeviceZONT, circuit: CircuitZONT,
+            target_temp: float
+    ) -> ClientResponse:
+        """Отправка команды на установку нужной температуры в контуре."""
+        _LOGGER.info(f'Отправлена уставка температуры на {target_temp}')
+        return await self.session.post(
+            url=f'{ZONT_API_URL}devices/{device.id}/circuits/'
+                f'{circuit.id}/actions/target-temp',
+            json={'target_temp': target_temp},
+            headers=self.headers
+        )
+
+    @check_send_command
+    async def set_heating_mode(
+            self, device: DeviceZONT, circuit: CircuitZONT,
+            heating_mode_id: int
+    ) -> ClientResponse:
+        """Отправка команды на установку нужного режима для контура."""
+        return await self.session.post(
+            url=f'{ZONT_API_URL}devices/{device.id}/modes/'
+                f'{heating_mode_id}/actions/activate',
+            json={'circuit_id': circuit.id},
+            headers=self.headers
+        )
+
+    @check_send_command
+    async def set_heating_mode_all_circuits(
+            self, device: DeviceZONT, heating_mode: HeatingModeZONT
+    ) -> ClientResponse:
+        """Отправка команды на установку нужного режима для всех контуров."""
+        return await self.session.post(
+            url=f'{ZONT_API_URL}devices/{device.id}/modes/'
+                f'{heating_mode.id}/actions/activate',
+            headers=self.headers
+        )
 
     @check_send_command
     async def switch_button(
@@ -401,10 +356,9 @@ class Zont:
     ) -> ClientResponse:
         """Отправка команды на установку нужной температуры в контуре."""
         return await self.session.post(
-            url=f'{ZONT_API_URL}devices/{device.id}/controls/{button.id}/actions/trigger',
-            json={
-                'target_state': command
-            },
+            url=f'{ZONT_API_URL}devices/{device.id}/controls/'
+                f'{button.id}/actions/trigger',
+            json={'target_state': command},
             headers=self.headers
         )
 

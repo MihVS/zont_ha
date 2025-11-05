@@ -17,12 +17,9 @@ ZONT_API_URL = ZONT_API_URL_ROOT + 'widget/v3/'
 URL_GET_DEVICES_OLD = ZONT_API_URL_ROOT + 'devices'
 URL_SEND_COMMAND_ZONT_OLD = ZONT_API_URL_ROOT + 'send_z3k_command'
 
-URL_SEND_COMMAND_ZONT = ZONT_API_URL + 'activate_heating_mode'
 URL_GET_DEVICES = ZONT_API_URL + 'devices'
-URL_SET_TARGET_TEMP = ZONT_API_URL + 'set_target_temp'
 URL_SET_GUARD = ZONT_API_URL + 'set_guard'
 URL_ACTIVATE_HEATING_MODE = ZONT_API_URL + 'activate_heating_mode'
-# URL_TRIGGER_CUSTOM_BUTTON = ZONT_API_URL + 'trigger_custom_button'
 
 URL_TOKEN = ZONT_API_URL + 'authtokens'
 
@@ -109,7 +106,7 @@ PLATFORMS = [
     'binary_sensor',
     'switch',
     'button',
-    # 'climate',
+    'climate',
     # 'alarm_control_panel',
     # 'device_tracker'
 ]

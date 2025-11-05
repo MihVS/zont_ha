@@ -21,7 +21,7 @@ def check_send_command(func):
     """
     async def check_response(*args, **kwargs):
         device: DeviceZONT = kwargs.get('device')
-        heating_circuit = kwargs.get('heating_circuit')
+        circuit = kwargs.get('circuit')
         heating_mode = kwargs.get('heating_mode')
         target_temp = kwargs.get('target_temp')
         guard_zone = kwargs.get('guard_zone')
@@ -30,7 +30,7 @@ def check_send_command(func):
         command = kwargs.get('command')
 
         if target_temp is not None:
-            control = heating_circuit
+            control = circuit
             set_value = target_temp
         elif button is not None:
             control = button

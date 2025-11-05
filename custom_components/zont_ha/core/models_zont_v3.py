@@ -22,8 +22,8 @@ class ControlEntityZONT(BaseEntityZONT):
 class ErrorBoilerZONT(BaseModel):
     """Ошибка котла."""
 
-    oem: str
-    text: str
+    oem: str | None
+    text: str | None
 
 
 class CircuitZONT(ControlEntityZONT):

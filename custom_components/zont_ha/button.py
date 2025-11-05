@@ -11,7 +11,7 @@ from .const import (
     DOMAIN, BUTTON_ZONT, MANUFACTURER, TIME_OUT_REQUEST, ENTRIES,
     CURRENT_ENTITY_IDS
 )
-from .core.models_zont_v3 import DeviceZONT, HeatingModeZONT, ButtonZONT
+from .core.models_zont_v3 import DeviceZONT, ButtonZONT
 from .core.utils import get_icon
 from .core.zont import Zont
 

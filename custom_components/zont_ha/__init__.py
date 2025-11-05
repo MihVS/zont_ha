@@ -42,7 +42,7 @@ async def async_setup_entry(
     token = config_entry.data.get('token')
     selected_devices = config_entry.data.get('devices_selected')
     zont = Zont(hass, email, token, selected_devices)
-    # await zont.get_update(old_api=True)
+    await zont.init_old_data()
     coordinator = ZontCoordinator(hass, zont)
     await coordinator.async_config_entry_first_refresh()
 
