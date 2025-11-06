@@ -11,7 +11,7 @@ from .const import (
     DOMAIN, BUTTON_ZONT, MANUFACTURER, TIME_OUT_REQUEST, ENTRIES,
     CURRENT_ENTITY_IDS
 )
-from .core.models_zont_v3 import DeviceZONT, ButtonZONT
+from .core.models_zont_v3 import DeviceZONT, ButtonZONT, HeatingModeZONT
 from .core.utils import get_icon
 from .core.zont import Zont
 
@@ -43,18 +43,18 @@ async def async_setup_entry(
             async_add_entities(buttons)
             _LOGGER.debug(f'Добавлены кнопки: {buttons}')
 
-        # mode_buttons = []
-        # for mode in device.heating_modes:
-        #     unique_id = f'{entry_id}{device.id}{mode.id}_button'
-        #     mode_buttons.append(HeatingModeButton(
-        #         coordinator, zont, device, mode, unique_id, get_icon(mode.name)
-        #     ))
-        # for button in mode_buttons:
-        #     hass.data[DOMAIN][CURRENT_ENTITY_IDS][entry_id].append(
-        #         button.unique_id)
-        # if mode_buttons:
-        #     async_add_entities(mode_buttons)
-        #     _LOGGER.debug(f'Добавлены кнопки: {mode_buttons}')
+        mode_buttons = []
+        for mode in device.modes:
+            unique_id = f'{entry_id}{device.id}{mode.id}_button'
+            mode_buttons.append(HeatingModeButton(
+                coordinator, device, mode, unique_id, get_icon(mode.name)
+            ))
+        for button in mode_buttons:
+            hass.data[DOMAIN][CURRENT_ENTITY_IDS][entry_id].append(
+                button.unique_id)
+        if mode_buttons:
+            async_add_entities(mode_buttons)
+            _LOGGER.debug(f'Добавлены кнопки: {mode_buttons}')
 
 
 class ButtonZont(CoordinatorEntity, ButtonEntity):
@@ -79,27 +79,27 @@ class ButtonZont(CoordinatorEntity, ButtonEntity):
         return super().__repr__()
 
 
-# class HeatingModeButton(ButtonZont):
-#
-#     def __init__(
-#             self, coordinator: ZontCoordinator, zont: Zont, device: DeviceZONT,
-#             heating_mode: HeatingModeZONT, unique_id: str, icon: str
-#     ) -> None:
-#         super().__init__(coordinator, zont, device, unique_id)
-#         self._heating_mode = heating_mode
-#         self._attr_icon = icon
-#
-#     @property
-#     def name(self) -> str:
-#         return f'{self._device.name}_{self._heating_mode.name}'
-#
-#     async def async_press(self) -> None:
-#         """Handle the button press."""
-#         await self._zont.set_heating_mode_all_circuit(
-#             device=self._device, heating_mode_id=self._heating_mode.id
-#         )
-#         await asyncio.sleep(TIME_OUT_REQUEST)
-#         await self.coordinator.async_request_refresh()
+class HeatingModeButton(ButtonZont):
+
+    def __init__(
+            self, coordinator: ZontCoordinator, device: DeviceZONT,
+            heating_mode: HeatingModeZONT, unique_id: str, icon: str
+    ) -> None:
+        super().__init__(coordinator, device, unique_id)
+        self._heating_mode = heating_mode
+        self._attr_icon = icon
+
+    @property
+    def name(self) -> str:
+        return f'{self._device.name}_{self._heating_mode.name}'
+
+    async def async_press(self) -> None:
+        """Handle the button press."""
+        await (self._zont.set_heating_mode_all_circuits(
+            device=self._device, heating_mode=self._heating_mode)
+        )
+        await asyncio.sleep(TIME_OUT_REQUEST)
+        await self.coordinator.async_request_refresh()
 
 
 class ZontControlButton(ButtonZont):

@@ -262,10 +262,14 @@ class Zont:
 
     @staticmethod
     def get_names_heating_mode(
-            heating_modes: list[HeatingModeZONT]
+            heating_modes: list[HeatingModeZONT], circuit: CircuitZONT
     ) -> list[str]:
-        """Возвращает список названий отопительных режимов"""
-        return [heating_mode.name for heating_mode in heating_modes]
+        """Возвращает список названий отопительных режимов для контура."""
+        names_heating_mode = []
+        for heating_mode in heating_modes:
+            if circuit.id in heating_mode.can_be_applied:
+                names_heating_mode.append(heating_mode.name)
+        return names_heating_mode
 
     @staticmethod
     def _validate_min_max_values_temp(min_temp, max_temp) -> bool:
@@ -336,6 +340,26 @@ class Zont:
             json={'circuit_id': circuit.id},
             headers=self.headers
         )
+
+    async def set_heating_mode_v1(
+            self, device: DeviceZONT, circuit: CircuitZONT,
+            heating_mode_id: int
+    ) -> ClientResponse:
+        """Отправка команды на установку нужного режима для контура."""
+        response = await self.session.post(
+            url=URL_SEND_COMMAND_ZONT_OLD,
+            json={
+                'device_id': device.id,
+                'command_name': 'SelectHeatingModeForCircuit',
+                'object_id': circuit.id,
+                'command_args': {'mode_id': heating_mode_id},
+                'request_time': 1000,
+                'is_guaranteed': True
+            },
+            headers=self.headers
+        )
+        _LOGGER.debug(await response.text())
+        return response
 
     @check_send_command
     async def set_heating_mode_all_circuits(

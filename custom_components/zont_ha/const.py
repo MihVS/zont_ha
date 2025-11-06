@@ -119,6 +119,8 @@ TIME_OUT_REQUEST = 2
 TIME_UPDATE = 30
 
 MODELS_THERMOSTAT_ZONT = ('T100', 'T102')
+PLUS = '+'
+PRO = 'pro'
 
 STATES_CAR = {
     'engine_on': 'Двигатель заведён',
