@@ -11,7 +11,7 @@ from homeassistant.components.alarm_control_panel.const import (
 from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from .enums import TypeOfSensor, StateOfSensor
+from .enums import TypeOfSensor, StateOfSensor, TypeOfCircuit
 from .exceptions import StateGuardError
 from .models_zont_v3 import (
     AccountZont, ErrorZont, SensorZONT, DeviceZONT, CircuitZONT,
@@ -118,6 +118,7 @@ class Zont:
         """Создает дополнительные сенсоры"""
         for device in self.data.devices:
             self._create_radio_sensors(device)
+            self._create_sensors_of_boiler(device)
 
     @staticmethod
     def _create_radio_sensors(device: DeviceZONT):
@@ -145,25 +146,38 @@ class Zont:
                     unit='%'
                 ))
 
-    # @staticmethod
-    # def _create_error_boiler_sensors(device: DeviceZONT):
-    #     """Создаёт дополнительные сенсоры ошибок котла"""
-    #     for boiler in device.boiler_circuits:
-    #         code_err = boiler.error_oem
-    #         text = boiler.error_text
-    #         if code_err != NO_ERROR:
-    #             code_err = code_err[11:]
-    #             text = f': {boiler.error_text}'
-    #         if code_err == NO_ERROR and boiler.status == 'failure':
-    #             code_err = 'Ошибка'
-    #         device.sensors.append(SensorZONT(
-    #             id=f'{boiler.id}_boiler',
-    #             name=f'{boiler.name}_ошибка',
-    #             type='boiler_failure',
-    #             status='ok',
-    #             value=code_err + text,
-    #             unit='txt'
-    #         ))
+    @staticmethod
+    def _create_boiler_error_sensor(boiler: CircuitZONT, device: DeviceZONT):
+        """Создает сенсор ошибок котла."""
+        text = NO_ERROR
+        if boiler.error is not None:
+            text = f'{boiler.error.oem} | {boiler.error.text}'
+        device.sensors.append(SensorZONT(
+            id=f'{boiler.id}_boiler_error',
+            name=f'{boiler.name}_ошибка',
+            type=TypeOfSensor.BOILER_FAILURE_TEXT,
+            status=StateOfSensor.OK,
+            value=text,
+            unit='txt'
+        ))
+
+    @staticmethod
+    def _create_boiler_active_sensor(boiler: CircuitZONT, device: DeviceZONT):
+        """Создает сенсор работы котла."""
+        device.sensors.append(SensorZONT(
+            id=f'{boiler.id}_boiler',
+            name=f'{boiler.name}_состояние',
+            type=TypeOfSensor.ROOM_THERMOSTAT,
+            status=StateOfSensor.OK,
+            triggered=boiler.active,
+        ))
+
+    def _create_sensors_of_boiler(self, device: DeviceZONT):
+        """Создаёт дополнительные сенсоры котла"""
+        for circuit in device.circuits:
+            if circuit.type == TypeOfCircuit.BOILER:
+                self._create_boiler_error_sensor(circuit, device)
+                self._create_boiler_active_sensor(circuit, device)
 
     def get_device(self, device_id: int) -> DeviceZONT | None:
         """Получить устройство по его id"""

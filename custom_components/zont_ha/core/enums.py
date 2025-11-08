@@ -23,6 +23,7 @@ class TypeOfSensor(Enum):
     SMOKE = 'smoke'
     ROOM_THERMOSTAT = 'room_thermostat'
     BOILER_FAILURE = 'boiler_failure'
+    BOILER_FAILURE_TEXT = 'boiler_failure_text'
     POWER_SOURCE = 'power_source'
     MODULATION = 'modulation'
     DISCRETE = 'discrete'
