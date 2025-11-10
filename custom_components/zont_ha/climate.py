@@ -16,7 +16,7 @@ from .const import (
 )
 from .core.enums import TypeOfCircuit
 from .core.exceptions import TemperatureOutOfRangeError, SetHvacModeError
-from .core.models_zont_old import DeviceZontOld
+from .core.models_zont_v1 import DeviceZontOld
 from .core.models_zont_v3 import CircuitZONT, DeviceZONT
 from .core.zont import Zont
 

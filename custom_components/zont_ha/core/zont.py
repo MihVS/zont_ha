@@ -1,7 +1,7 @@
+import json
 import logging
 from collections import namedtuple
 from http import HTTPStatus
-import json
 
 from aiohttp import ClientResponse
 
@@ -11,22 +11,21 @@ from homeassistant.components.alarm_control_panel.const import (
 from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from .enums import GuardState
 from .enums import TypeOfSensor, StateOfSensor, TypeOfCircuit
 from .exceptions import StateGuardError
+from .models_zont_v1 import AccountZontOld, DeviceZontOld
 from .models_zont_v3 import (
     AccountZont, ErrorZont, SensorZONT, DeviceZONT, CircuitZONT,
-    HeatingModeZONT, ControlsZONT, GuardZoneZONT, StatusZONT,
+    HeatingModeZONT, GuardZoneZONT, StatusZONT,
     ToggleButtonsZONT, ButtonZONT
 )
-from .models_zont_v1 import AccountZontOld, DeviceZontOld
-from .enums import GuardState
 from .utils import check_send_command
 from ..const import (
     URL_GET_DEVICES, URL_SEND_COMMAND_ZONT_OLD,
     MIN_TEMP_AIR, MAX_TEMP_AIR, MIN_TEMP_GVS, MAX_TEMP_GVS, MIN_TEMP_FLOOR,
     MAX_TEMP_FLOOR, MATCHES_GVS, MATCHES_FLOOR,
-    URL_SET_GUARD, BINARY_SENSOR_TYPES,
-    URL_GET_DEVICES_OLD, NO_ERROR, URL_ACTIVATE_HEATING_MODE, PERCENT_BATTERY,
+    BINARY_SENSOR_TYPES, URL_GET_DEVICES_OLD, NO_ERROR,
     ZONT_API_URL,
 )
 
@@ -35,10 +34,6 @@ _LOGGER = logging.getLogger(__name__)
 StateZont = namedtuple('StateZont', [
     'unknown', 'disabled', 'enabled', 'disabling', 'enabling'
 ])
-
-# state_zont = StateZont(
-#     'unknown', 'disabled', 'enabled', 'disabling', 'enabling'
-# )
 
 TypeBinarySensorZont = namedtuple('TypeBinarySensorZont', [
     'leakage', 'smoke', 'opening', 'motion', 'discrete', 'boiler_failure',

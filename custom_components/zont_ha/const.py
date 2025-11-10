@@ -108,7 +108,7 @@ PLATFORMS = [
     'button',
     'climate',
     'alarm_control_panel',
-    # 'device_tracker'
+    'device_tracker'
 ]
 
 COUNTER_REPEAT = 18
