@@ -64,7 +64,7 @@ class ZontSensor(CoordinatorEntity, SensorEntity):
     @cached_property
     def state_class(self) -> SensorStateClass | str | None:
         """Return the state class of this entity, if any."""
-        if self._sensor.type in UNIT_BY_TYPE:
+        if self._sensor.type.value in UNIT_BY_TYPE:
             return SensorStateClass.MEASUREMENT
         return None
 

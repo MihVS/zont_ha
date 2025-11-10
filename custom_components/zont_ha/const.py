@@ -65,7 +65,7 @@ ZONT_SENSOR_TYPE = {
 }
 
 SENSOR_TYPE_ICON = {
-    'boiler_failure': 'mdi:wrench-outline',
+    'boiler_failure_text': 'mdi:wrench-outline',
     'dhw_speed': 'mdi:waves-arrow-right',
     'modulation': 'mdi:fire',
     'signal_strength': 'mdi:wifi-arrow-up-down'
