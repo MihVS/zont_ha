@@ -18,7 +18,8 @@ from .models_zont_v3 import (
     HeatingModeZONT, ControlsZONT, GuardZoneZONT, StatusZONT,
     ToggleButtonsZONT, ButtonZONT
 )
-from .models_zont_old import AccountZontOld, DeviceZontOld
+from .models_zont_v1 import AccountZontOld, DeviceZontOld
+from .enums import GuardState
 from .utils import check_send_command
 from ..const import (
     URL_GET_DEVICES, URL_SEND_COMMAND_ZONT_OLD,
@@ -35,9 +36,9 @@ StateZont = namedtuple('StateZont', [
     'unknown', 'disabled', 'enabled', 'disabling', 'enabling'
 ])
 
-state_zont = StateZont(
-    'unknown', 'disabled', 'enabled', 'disabling', 'enabling'
-)
+# state_zont = StateZont(
+#     'unknown', 'disabled', 'enabled', 'disabling', 'enabling'
+# )
 
 TypeBinarySensorZont = namedtuple('TypeBinarySensorZont', [
     'leakage', 'smoke', 'opening', 'motion', 'discrete', 'boiler_failure',
@@ -214,45 +215,45 @@ class Zont:
              if circuit.id == circuit_id), None
         )
 
-    # @staticmethod
-    # def get_guard_zone(
-    #         device: DeviceZONT, guard_zone_id: int
-    # ) -> GuardZoneZONT | None:
-    #     """Получить охранную зону по её id и id устройства"""
-    #     return next(
-    #         (guard_zone for guard_zone in device.guard_zones
-    #          if guard_zone.id == guard_zone_id), None
-    #     )
-    #
-    # @staticmethod
-    # def need_repeat_update(state_guard_zone: str) -> bool:
-    #     values = (state_zont.enabling, state_zont.disabling)
-    #     if state_guard_zone in values:
-    #         return True
-    #     return False
-    #
-    # @staticmethod
-    # def get_state_guard_zone_for_ha(
-    #         guard_zone: GuardZoneZONT
-    # ) -> AlarmControlPanelState:
-    #     """Получить статус охранной зоны"""
-    #     if guard_zone.alarm:
-    #         return AlarmControlPanelState.TRIGGERED
-    #     match guard_zone.state:
-    #         case state_zont.unknown:
-    #             return STATE_UNAVAILABLE
-    #         case state_zont.disabled:
-    #             return AlarmControlPanelState.DISARMED
-    #         case state_zont.enabled:
-    #             return AlarmControlPanelState.ARMED_AWAY
-    #         case state_zont.disabling:
-    #             return AlarmControlPanelState.DISARMING
-    #         case state_zont.enabling:
-    #             return AlarmControlPanelState.ARMING
-    #         case _:
-    #             raise StateGuardError(
-    #                 f'Неизвестный статус охранной зоны: {guard_zone.state}'
-    #             )
+    @staticmethod
+    def get_guard_zone(
+            device: DeviceZONT, guard_zone_id: int
+    ) -> GuardZoneZONT | None:
+        """Получить охранную зону по её id и id устройства"""
+        return next(
+            (guard_zone for guard_zone in device.guard_zones
+             if guard_zone.id == guard_zone_id), None
+        )
+
+    @staticmethod
+    def need_repeat_update(state_guard_zone: GuardState) -> bool:
+        values = (GuardState.ENABLING, GuardState.DISABLING)
+        if state_guard_zone in values:
+            return True
+        return False
+
+    @staticmethod
+    def get_state_guard_zone_for_ha(
+            guard_zone: GuardZoneZONT
+    ) -> AlarmControlPanelState:
+        """Получить статус охранной зоны"""
+        if guard_zone.alarm:
+            return AlarmControlPanelState.TRIGGERED
+        match guard_zone.state:
+            case GuardState.UNKNOWN:
+                return STATE_UNAVAILABLE
+            case GuardState.DISABLED:
+                return AlarmControlPanelState.DISARMED
+            case GuardState.ENABLED:
+                return AlarmControlPanelState.ARMED_AWAY
+            case GuardState.DISABLING:
+                return AlarmControlPanelState.DISARMING
+            case GuardState.ENABLING:
+                return AlarmControlPanelState.ARMING
+            case _:
+                raise StateGuardError(
+                    f'Неизвестный статус охранной зоны: {guard_zone.state}'
+                )
 
     @staticmethod
     def get_heating_mode_by_id(
@@ -400,18 +401,18 @@ class Zont:
             headers=self.headers
         )
 
-    # @check_send_command
-    # async def toggle_alarm(
-    #         self, device: DeviceZONT, guard_zone: GuardZoneZONT,
-    #         command: bool
-    # ) -> ClientResponse:
-    #     """Отправка команды на изменение состояния охранной зоны."""
-    #     return await self.session.post(
-    #         url=URL_SET_GUARD,
-    #         json={
-    #             'device_id': device.id,
-    #             'zone_id': guard_zone.id,
-    #             'enable': command
-    #         },
-    #         headers=self.headers
-    #     )
+    @check_send_command
+    async def toggle_alarm(
+            self, device: DeviceZONT, guard_zone: GuardZoneZONT,
+            command: bool
+    ) -> ClientResponse:
+        """Отправка команды на изменение состояния охранной зоны."""
+        return await self.session.post(
+            url=f'{ZONT_API_URL}devices/{device.id}/guard-zones/'
+                f'{guard_zone.id}/actions/activate',
+            json={
+                'zone_id': guard_zone.id,
+                'enable': command
+            },
+            headers=self.headers
+        )

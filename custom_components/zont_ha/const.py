@@ -107,7 +107,7 @@ PLATFORMS = [
     'switch',
     'button',
     'climate',
-    # 'alarm_control_panel',
+    'alarm_control_panel',
     # 'device_tracker'
 ]
 
