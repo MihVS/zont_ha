@@ -54,7 +54,7 @@ class Zont:
                  hass: HomeAssistant,
                  mail: str,
                  token: str,
-                 selected_devices: list[str]):
+                 selected_devices: list[str] = []):
         self.headers = {
             'X-ZONT-Token': token,
             'X-ZONT-Client': mail,

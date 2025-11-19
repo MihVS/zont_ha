@@ -1,3 +1,4 @@
+import json
 import logging
 from datetime import timedelta
 
@@ -10,6 +11,7 @@ from homeassistant.helpers.entity_registry import async_get
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator, UpdateFailed
 )
+from homeassistant.components import webhook
 from .const import (
     DOMAIN, PLATFORMS, TIME_UPDATE, MANUFACTURER,
     CONFIGURATION_URL, COUNTER_CONNECT, TIME_OUT_UPDATE_DATA, ENTRIES,
@@ -45,6 +47,21 @@ async def async_setup_entry(
     await zont.init_old_data()
     coordinator = ZontCoordinator(hass, zont)
     await coordinator.async_config_entry_first_refresh()
+    _LOGGER.info(config_entry.data)
+    webhook_id = "zont_webhook"
+
+    webhook.async_unregister(hass, webhook_id)
+
+    webhook.async_register(
+        hass,
+        "zont",
+        "ZONT Webhook",
+        webhook_id,
+        handle_webhook,
+        allowed_methods=['POST']
+    )
+
+    _LOGGER.info("✅ ZONT webhook registered with ID: %s", webhook_id)
 
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN].setdefault(ENTRIES, {})
@@ -62,6 +79,15 @@ async def async_setup_entry(
     _LOGGER.debug(f'Количество актуальных сущностей: '
                   f'{len(current_entries_id)}')
     return True
+
+async def handle_webhook(hass, webhook_id, request):
+    """Обрабатываем входящие webhook от ZONT."""
+    body = await request.text()
+    data = json.loads(body)
+    pretty_json = json.dumps(data, ensure_ascii=False, indent=2,
+                             sort_keys=True)
+    _LOGGER.info(f'📨 Received webhook request. Body: {pretty_json}')
+    return
 
 
 class ZontCoordinator(DataUpdateCoordinator):
