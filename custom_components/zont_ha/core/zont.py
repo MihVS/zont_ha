@@ -54,12 +54,14 @@ class Zont:
                  hass: HomeAssistant,
                  mail: str,
                  token: str,
-                 selected_devices: list[str] = []):
+                 selected_devices: list[str] | None = None):
         self.headers = {
             'X-ZONT-Token': token,
             'X-ZONT-Client': mail,
             'Content-Type': 'application/json'
         }
+        if selected_devices is None:
+            selected_devices = []
         self.selected_devices = selected_devices
         self.mail = mail
         self.session = async_get_clientsession(hass)

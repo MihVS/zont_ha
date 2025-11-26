@@ -47,21 +47,25 @@ async def async_setup_entry(
     await zont.init_old_data()
     coordinator = ZontCoordinator(hass, zont)
     await coordinator.async_config_entry_first_refresh()
-    _LOGGER.info(config_entry.data)
-    webhook_id = "zont_webhook"
+    _LOGGER.debug(config_entry.data)
+    name_email = ''.join(email.split('@'))
+    webhook_id = ''.join(name_email.split('.'))
 
-    webhook.async_unregister(hass, webhook_id)
+    # webhook.async_unregister(hass, webhook_id)
 
     webhook.async_register(
         hass,
-        "zont",
-        "ZONT Webhook",
+        DOMAIN,
+        f'ZONT Webhook {webhook_id}',
         webhook_id,
         handle_webhook,
         allowed_methods=['POST']
     )
 
-    _LOGGER.info("✅ ZONT webhook registered with ID: %s", webhook_id)
+    _LOGGER.info(f'✅ ZONT webhook registered with ID: {webhook_id}')
+    webhooks_after = hass.data.get('webhook', {})
+    registered = list(webhooks_after.keys()) if webhooks_after else 'None'
+    _LOGGER.info(f'Webhooks after registration: {registered}')
 
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN].setdefault(ENTRIES, {})
@@ -82,12 +86,15 @@ async def async_setup_entry(
 
 async def handle_webhook(hass, webhook_id, request):
     """Обрабатываем входящие webhook от ZONT."""
+    remote_ip = request.remote
+    _LOGGER.info(f'📍 Request from IP: {remote_ip}')
+
     body = await request.text()
     data = json.loads(body)
     pretty_json = json.dumps(data, ensure_ascii=False, indent=2,
                              sort_keys=True)
     _LOGGER.info(f'📨 Received webhook request. Body: {pretty_json}')
-    return
+
 
 
 class ZontCoordinator(DataUpdateCoordinator):
