@@ -87,7 +87,7 @@ async def async_setup_entry(
 async def handle_webhook(hass, webhook_id, request):
     """Обрабатываем входящие webhook от ZONT."""
     remote_ip = request.remote
-    _LOGGER.info(f'📍 Request from IP: {remote_ip}')
+    _LOGGER.info(f'Request from IP: {remote_ip}')
 
     body = await request.text()
     data = json.loads(body)
