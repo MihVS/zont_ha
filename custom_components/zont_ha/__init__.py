@@ -18,6 +18,7 @@ from .const import (
     CURRENT_ENTITY_IDS
 )
 from .core.models_zont_v3 import DeviceZONT
+from .core.models_zont_webhook import DeviceEventWebhook
 from .core.zont import Zont
 
 _LOGGER = logging.getLogger(__name__)
@@ -58,7 +59,8 @@ async def async_setup_entry(
         DOMAIN,
         f'ZONT Webhook {webhook_id}',
         webhook_id,
-        handle_webhook,
+        lambda hass, webhook_id, request: handle_webhook(
+            hass, webhook_id, request, entry_id),
         allowed_methods=['POST']
     )
 
@@ -84,16 +86,29 @@ async def async_setup_entry(
                   f'{len(current_entries_id)}')
     return True
 
-async def handle_webhook(hass, webhook_id, request):
+async def handle_webhook(hass, webhook_id, request, entry_id):
     """Обрабатываем входящие webhook от ZONT."""
+    coordinator = hass.data[DOMAIN][ENTRIES][entry_id]
+    zont = coordinator.zont
+
     remote_ip = request.remote
     _LOGGER.info(f'Request from IP: {remote_ip}')
 
     body = await request.text()
-    data = json.loads(body)
-    pretty_json = json.dumps(data, ensure_ascii=False, indent=2,
-                             sort_keys=True)
-    _LOGGER.info(f'📨 Received webhook request. Body: {pretty_json}')
+    try:
+        data = json.loads(body)
+        # pretty_json = json.dumps(data, ensure_ascii=False, indent=2,
+        #                          sort_keys=True)
+        # _LOGGER.info(f'📨 Received webhook request. Body: {pretty_json}')
+        # event = DeviceEventWebhook.model_validate(data)
+        # device_id = event.device_id
+        # _LOGGER.info(f'device_id: {device_id}')
+        await coordinator.zont.get_update()
+        coordinator.async_set_updated_data(data)
+        # await coordinator.async_request_refresh()
+    except ValueError:
+        _LOGGER.warning(f'Wrong webhook request. Webhook id: {webhook_id}. '
+                        f'Body: {body}')
 
 
 

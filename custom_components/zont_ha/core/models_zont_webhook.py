@@ -1,13 +1,11 @@
-import datetime
-
 from pydantic import BaseModel
 
 
 class Coordinates(BaseModel):
     """Коордианты события (для ZTC)."""
 
-    lat: any
-    lng: any
+    lat: str
+    lng: str
 
 
 class AdditionalInfo(BaseModel):
@@ -24,7 +22,7 @@ class DeviceEventWebhook(BaseModel):
     type: str
     title: str
     details: str
-    time: datetime
+    time: str
     important: bool
     source: str
     gps: Coordinates
