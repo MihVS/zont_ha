@@ -25,5 +25,11 @@ class DeviceEventWebhook(BaseModel):
     time: str
     important: bool
     source: str
-    gps: Coordinates
+    gps: Coordinates | None | str
     additional_info: AdditionalInfo
+
+
+class EventZONT(BaseModel):
+    """Событие от ZONT."""
+
+    event: DeviceEventWebhook

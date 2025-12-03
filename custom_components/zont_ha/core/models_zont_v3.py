@@ -1,6 +1,6 @@
 from typing import Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from .enums import (
     TypeOfCircuit, TypeOfSensor, StateOfSensor, SignalOfSensor, GuardState
@@ -63,8 +63,8 @@ class DeviceInfoZONT(BaseModel):
 class HeatingModeZONT(ControlEntityZONT):
     """Отопительные режимы"""
 
-    can_be_applied: list[int] = []
-    applied: list[int] = []
+    can_be_applied: list[int] = Field(default_factory=list)
+    applied: list[int] = Field(default_factory=list)
     color: str | None = None
     icon: str | None = None
 
@@ -147,10 +147,10 @@ class StatusZONT(ControlEntityZONT):
 class ControlsZONT(BaseModel):
     """Пользовательский элемент управления"""
 
-    buttons: list[ButtonZONT] = []
-    regulators: list[RegulatorZONT] = []
-    statuses: list[StatusZONT] = []
-    toggle_buttons: list[ToggleButtonsZONT] = []
+    buttons: list[ButtonZONT] = Field(default_factory=list)
+    regulators: list[RegulatorZONT] = Field(default_factory=list)
+    statuses: list[StatusZONT] = Field(default_factory=list)
+    toggle_buttons: list[ToggleButtonsZONT] = Field(default_factory=list)
 
 
 class SimZONT(BaseModel):
@@ -207,10 +207,10 @@ class AdapterZONT(ControlEntityZONT):
 class ActuatorsZONT(BaseModel):
     """Исполнительные устройства."""
 
-    relays: list[RelayZONT] = []
-    pumps: list[PumpZONT] = []
-    taps: list[TapZONT] = []
-    adapters: list[AdapterZONT] = []
+    relays: list[RelayZONT] = Field(default_factory=list)
+    pumps: list[PumpZONT] = Field(default_factory=list)
+    taps: list[TapZONT] = Field(default_factory=list)
+    adapters: list[AdapterZONT] = Field(default_factory=list)
 
 
 class DeviceZONT(BaseEntityZONT):
@@ -218,16 +218,16 @@ class DeviceZONT(BaseEntityZONT):
 
     online: bool
     device_info: DeviceInfoZONT
-    circuits: list[CircuitZONT] = []
-    modes: list[HeatingModeZONT] = []
-    sensors: list[SensorZONT] = []
-    guard_zones: list[GuardZoneZONT] = []
+    circuits: list[CircuitZONT] = Field(default_factory=list)
+    modes: list[HeatingModeZONT] = Field(default_factory=list)
+    sensors: list[SensorZONT] = Field(default_factory=list)
+    guard_zones: list[GuardZoneZONT] = Field(default_factory=list)
     controls: ControlsZONT | None = None
     sim_info: SimZONT = None
-    scenarios: list[ScenarioZONT] = []
+    scenarios: list[ScenarioZONT] = Field(default_factory=list)
     actuators: ActuatorsZONT = None
 
-    # car_state: CarStateZONT = []
+    # car_state: CarStateZONT = Field(default_factory=list)
 
 
 class AccountZont(BaseModel):

@@ -4,6 +4,7 @@ from datetime import timedelta
 
 import async_timeout
 
+from homeassistant.components import webhook
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
@@ -11,14 +12,13 @@ from homeassistant.helpers.entity_registry import async_get
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator, UpdateFailed
 )
-from homeassistant.components import webhook
 from .const import (
     DOMAIN, PLATFORMS, TIME_UPDATE, MANUFACTURER,
     CONFIGURATION_URL, COUNTER_CONNECT, TIME_OUT_UPDATE_DATA, ENTRIES,
     CURRENT_ENTITY_IDS
 )
 from .core.models_zont_v3 import DeviceZONT
-from .core.models_zont_webhook import DeviceEventWebhook
+from .core.models_zont_webhook import DeviceEventWebhook, EventZONT
 from .core.zont import Zont
 
 _LOGGER = logging.getLogger(__name__)
@@ -52,15 +52,13 @@ async def async_setup_entry(
     name_email = ''.join(email.split('@'))
     webhook_id = ''.join(name_email.split('.'))
 
-    # webhook.async_unregister(hass, webhook_id)
-
     webhook.async_register(
         hass,
         DOMAIN,
         f'ZONT Webhook {webhook_id}',
         webhook_id,
         lambda hass, webhook_id, request: handle_webhook(
-            hass, webhook_id, request, entry_id),
+            hass, webhook_id, request, entry_id, selected_devices),
         allowed_methods=['POST']
     )
 
@@ -86,30 +84,29 @@ async def async_setup_entry(
                   f'{len(current_entries_id)}')
     return True
 
-async def handle_webhook(hass, webhook_id, request, entry_id):
+async def handle_webhook(
+        hass, webhook_id, request, entry_id, selected_devices):
     """Обрабатываем входящие webhook от ZONT."""
     coordinator = hass.data[DOMAIN][ENTRIES][entry_id]
-    zont = coordinator.zont
-
-    remote_ip = request.remote
-    _LOGGER.info(f'Request from IP: {remote_ip}')
 
     body = await request.text()
     try:
-        data = json.loads(body)
-        # pretty_json = json.dumps(data, ensure_ascii=False, indent=2,
-        #                          sort_keys=True)
-        # _LOGGER.info(f'📨 Received webhook request. Body: {pretty_json}')
-        # event = DeviceEventWebhook.model_validate(data)
-        # device_id = event.device_id
-        # _LOGGER.info(f'device_id: {device_id}')
-        await coordinator.zont.get_update()
-        coordinator.async_set_updated_data(data)
-        # await coordinator.async_request_refresh()
+        data_json = json.loads(body)
+        event_zont = EventZONT.model_validate(data_json)
+        data = event_zont.event
+        device_id = data.device_id
+
+        if str(device_id) in selected_devices:
+            pretty_json = json.dumps(data_json, ensure_ascii=False, indent=2,
+                                     sort_keys=True)
+            _LOGGER.debug(f'📨 Received webhook request. '
+                          f'Webhook id: {webhook_id}. '
+                          f'Device id: {webhook_id}. '
+                          f'Body: {pretty_json}')
+            await coordinator.async_request_refresh()
     except ValueError:
         _LOGGER.warning(f'Wrong webhook request. Webhook id: {webhook_id}. '
                         f'Body: {body}')
-
 
 
 class ZontCoordinator(DataUpdateCoordinator):
@@ -146,7 +143,6 @@ class ZontCoordinator(DataUpdateCoordinator):
             async with async_timeout.timeout(TIME_OUT_UPDATE_DATA):
                 await self.zont.get_update()
                 self._count_connect = 0
-                # self.hass.loop.call_soon(self.async_update_listeners)
                 return self.zont
         except Exception as err:
             if self._count_connect < COUNTER_CONNECT:
