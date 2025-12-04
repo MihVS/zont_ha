@@ -27,6 +27,18 @@
         "data": {
           "token": "Токен"
         }
+      },
+      "select": {
+        "title": "Добавление устройств.",
+        "data": {
+          "option": " "
+        }
+      },
+      "devices_selection": {
+        "title": "Выбор устройств",
+        "data": {
+          "devices_selected": "Выберите устройства"
+        }
       }
     }
   }

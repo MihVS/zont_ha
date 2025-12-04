@@ -12,19 +12,16 @@ CURRENT_ENTITY_IDS = 'current_entity_ids'
 CONFIGURATION_URL = 'https://my.zont.online/'
 
 ZONT_API_URL_ROOT = 'https://my.zont.online/api/'
-ZONT_API_URL = ZONT_API_URL_ROOT + 'widget/v2/'
+ZONT_API_URL = ZONT_API_URL_ROOT + 'widget/v3/'
 
 URL_GET_DEVICES_OLD = ZONT_API_URL_ROOT + 'devices'
 URL_SEND_COMMAND_ZONT_OLD = ZONT_API_URL_ROOT + 'send_z3k_command'
 
-URL_SEND_COMMAND_ZONT = ZONT_API_URL + 'activate_heating_mode'
-URL_GET_DEVICES = ZONT_API_URL + 'get_devices'
-URL_SET_TARGET_TEMP = ZONT_API_URL + 'set_target_temp'
+URL_GET_DEVICES = ZONT_API_URL + 'devices'
 URL_SET_GUARD = ZONT_API_URL + 'set_guard'
 URL_ACTIVATE_HEATING_MODE = ZONT_API_URL + 'activate_heating_mode'
-URL_TRIGGER_CUSTOM_BUTTON = ZONT_API_URL + 'trigger_custom_button'
 
-URL_GET_TOKEN = ZONT_API_URL_ROOT + 'authtoken/get'
+URL_TOKEN = ZONT_API_URL + 'authtokens'
 
 UNIT_BY_TYPE = {
     'temperature': UnitOfTemperature.CELSIUS,
@@ -68,9 +65,10 @@ ZONT_SENSOR_TYPE = {
 }
 
 SENSOR_TYPE_ICON = {
-    'boiler_failure': 'mdi:wrench-outline',
+    'boiler_failure_text': 'mdi:wrench-outline',
     'dhw_speed': 'mdi:waves-arrow-right',
-    'modulation': 'mdi:fire'
+    'modulation': 'mdi:fire',
+    'signal_strength': 'mdi:wifi-arrow-up-down'
 }
 
 VALID_TYPE_SENSOR = {
@@ -86,7 +84,10 @@ VALID_TYPE_SENSOR = {
     'energy': 'кВт•ч'
 }
 
-BINARY_SENSOR_TYPES = ('leakage', 'smoke', 'opening', 'motion', 'discrete')
+BINARY_SENSOR_TYPES = (
+    'leakage', 'smoke', 'opening', 'motion', 'discrete', 'boiler_failure',
+    'room_thermostat',
+)
 
 MIN_TEMP_AIR = 5
 MAX_TEMP_AIR = 35
@@ -102,11 +103,11 @@ SWITCH_ZONT = 'toggle_button'
 
 PLATFORMS = [
     'sensor',
-    'climate',
-    'button',
-    'switch',
-    'alarm_control_panel',
     'binary_sensor',
+    'switch',
+    'button',
+    'climate',
+    'alarm_control_panel',
     'device_tracker'
 ]
 
@@ -118,6 +119,8 @@ TIME_OUT_REQUEST = 2
 TIME_UPDATE = 60
 
 MODELS_THERMOSTAT_ZONT = ('T100', 'T102')
+PLUS = '+'
+PRO = 'pro'
 
 STATES_CAR = {
     'engine_on': 'Двигатель заведён',

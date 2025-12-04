@@ -1,8 +1,10 @@
+import json
 import logging
 from datetime import timedelta
 
 import async_timeout
 
+from homeassistant.components import webhook
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
@@ -15,6 +17,8 @@ from .const import (
     CONFIGURATION_URL, COUNTER_CONNECT, TIME_OUT_UPDATE_DATA, ENTRIES,
     CURRENT_ENTITY_IDS
 )
+from .core.models_zont_v3 import DeviceZONT
+from .core.models_zont_webhook import DeviceEventWebhook, EventZONT
 from .core.zont import Zont
 
 _LOGGER = logging.getLogger(__name__)
@@ -37,12 +41,31 @@ def remove_entity(hass: HomeAssistant, current_entries_id: list,
 async def async_setup_entry(
         hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     entry_id = config_entry.entry_id
-    email = config_entry.data.get("mail")
-    token = config_entry.data.get("token")
-    zont = Zont(hass, email, token)
-    await zont.get_update(old_api=True)
+    email = config_entry.data.get('mail')
+    token = config_entry.data.get('token')
+    selected_devices = config_entry.data.get('devices_selected')
+    zont = Zont(hass, email, token, selected_devices)
+    await zont.init_old_data()
     coordinator = ZontCoordinator(hass, zont)
     await coordinator.async_config_entry_first_refresh()
+    _LOGGER.debug(config_entry.data)
+    name_email = ''.join(email.split('@'))
+    webhook_id = ''.join(name_email.split('.'))
+
+    webhook.async_register(
+        hass,
+        DOMAIN,
+        f'ZONT Webhook {webhook_id}',
+        webhook_id,
+        lambda hass, webhook_id, request: handle_webhook(
+            hass, webhook_id, request, entry_id, selected_devices),
+        allowed_methods=['POST']
+    )
+
+    _LOGGER.debug(f'✅ ZONT webhook registered with ID: {webhook_id}')
+    webhooks_after = hass.data.get('webhook', {})
+    registered = list(webhooks_after.keys()) if webhooks_after else 'None'
+    _LOGGER.debug(f'Webhooks after registration: {registered}')
 
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN].setdefault(ENTRIES, {})
@@ -61,6 +84,30 @@ async def async_setup_entry(
                   f'{len(current_entries_id)}')
     return True
 
+async def handle_webhook(
+        hass, webhook_id, request, entry_id, selected_devices):
+    """Обрабатываем входящие webhook от ZONT."""
+    coordinator = hass.data[DOMAIN][ENTRIES][entry_id]
+
+    body = await request.text()
+    try:
+        data_json = json.loads(body)
+        event_zont = EventZONT.model_validate(data_json)
+        data = event_zont.event
+        device_id = data.device_id
+
+        if str(device_id) in selected_devices:
+            pretty_json = json.dumps(data_json, ensure_ascii=False, indent=2,
+                                     sort_keys=True)
+            _LOGGER.debug(f'📨 Received webhook request. '
+                          f'Webhook id: {webhook_id}. '
+                          f'Device id: {webhook_id}. '
+                          f'Body: {pretty_json}')
+            await coordinator.async_request_refresh()
+    except ValueError:
+        _LOGGER.warning(f'Wrong webhook request. Webhook id: {webhook_id}. '
+                        f'Body: {body}')
+
 
 class ZontCoordinator(DataUpdateCoordinator):
     """Координатор для общего обновления данных"""
@@ -77,20 +124,15 @@ class ZontCoordinator(DataUpdateCoordinator):
         self.zont: Zont = zont
 
     def devices_info(self, device_id: int):
-        device_old = self.zont.get_device_old(device_id)
-        device = self.zont.get_device(device_id)
-        hardware_type = device_old.hardware_type
-        hw_version = None
-        if hardware_type is not None:
-            hw_version = hardware_type.code
+        device: DeviceZONT = self.zont.get_device(device_id)
         device_info = DeviceInfo(**{
             "identifiers": {(DOMAIN, device.id)},
             "name": device.name,
-            "sw_version": device_old.firmware_version,
-            "hw_version": hw_version,
-            "serial_number": device_old.serial,
+            "sw_version": device.device_info.version.software,
+            "hw_version": device.device_info.version.hardware,
+            "serial_number": device.device_info.serial,
             "configuration_url": CONFIGURATION_URL,
-            "model": device.model,
+            "model": device.device_info.model,
             "manufacturer": MANUFACTURER,
         })
         return device_info
@@ -105,6 +147,7 @@ class ZontCoordinator(DataUpdateCoordinator):
         except Exception as err:
             if self._count_connect < COUNTER_CONNECT:
                 self._count_connect += 1
+                _LOGGER.warning(err)
                 _LOGGER.warning(
                     f'Неудачная попытка обновления данных ZONT. '
                     f'Осталось попыток: {COUNTER_CONNECT - self._count_connect}'

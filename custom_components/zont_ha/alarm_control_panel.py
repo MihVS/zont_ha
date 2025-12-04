@@ -14,7 +14,7 @@ from .const import (
     COUNTER_REPEAT, TIME_OUT_REPEAT, TIME_OUT_REQUEST, CURRENT_ENTITY_IDS,
     ENTRIES
 )
-from .core.models_zont import DeviceZONT
+from .core.models_zont_v3 import DeviceZONT, GuardZoneZONT
 from .core.zont import Zont
 
 _LOGGER = logging.getLogger(__name__)
@@ -34,7 +34,7 @@ async def async_setup_entry(
         for guard_zone in device.guard_zones:
             unique_id = f'{entry_id}{device.id}{guard_zone.id}'
             alarms.append(ZontAlarm(
-                coordinator, device.id, guard_zone.id, unique_id)
+                coordinator, device, guard_zone, unique_id)
             )
         for alarm in alarms:
             hass.data[DOMAIN][CURRENT_ENTITY_IDS][entry_id].append(
@@ -54,19 +54,15 @@ class ZontAlarm(CoordinatorEntity, AlarmControlPanelEntity):
     )
 
     def __init__(
-            self, coordinator: ZontCoordinator, device_id: int,
-            guard_zone_id: int, unique_id: str
+            self, coordinator: ZontCoordinator, device: DeviceZONT,
+            guard_zone: GuardZoneZONT, unique_id: str
     ) -> None:
         super().__init__(coordinator)
-        self._device_id = device_id
-        self._guard_zone_id = guard_zone_id
+        self._device = device
+        self._guard_zone = guard_zone
         self._unique_id = unique_id
         self._zont: Zont = coordinator.zont
-        self._device: DeviceZONT = self._zont.get_device(device_id)
-        self._guard_zone = self._zont.get_guard_zone(
-            self._device, guard_zone_id
-        )
-        self._attr_device_info = coordinator.devices_info(device_id)
+        self._attr_device_info = coordinator.devices_info(device.id)
 
     @property
     def name(self) -> str:
@@ -125,9 +121,9 @@ class ZontAlarm(CoordinatorEntity, AlarmControlPanelEntity):
     def _handle_coordinator_update(self) -> None:
         """Обработка обновлённых данных от координатора"""
         self._device: DeviceZONT = self.coordinator.zont.get_device(
-            self._device_id
+            self._device.id
         )
         self._guard_zone = self._zont.get_guard_zone(
-            self._device, self._guard_zone_id
+            self._device, self._guard_zone.id
         )
         self.async_write_ha_state()
