@@ -62,10 +62,10 @@ async def async_setup_entry(
         allowed_methods=['POST']
     )
 
-    _LOGGER.info(f'✅ ZONT webhook registered with ID: {webhook_id}')
+    _LOGGER.debug(f'✅ ZONT webhook registered with ID: {webhook_id}')
     webhooks_after = hass.data.get('webhook', {})
     registered = list(webhooks_after.keys()) if webhooks_after else 'None'
-    _LOGGER.info(f'Webhooks after registration: {registered}')
+    _LOGGER.debug(f'Webhooks after registration: {registered}')
 
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN].setdefault(ENTRIES, {})
