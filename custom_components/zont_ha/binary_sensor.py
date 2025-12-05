@@ -103,13 +103,6 @@ class ZontBinarySensor(CoordinatorEntity, BinarySensorEntity):
     def _handle_coordinator_update(self) -> None:
         """Обработка обновлённых данных от координатора"""
 
-<<<<<<< HEAD
-        sensor: SensorZONT = self.coordinator.data.get_sensor(
-            self._device.id,
-            self._sensor.id
-        )
-        self._sensor = sensor
-=======
         sensor = self.coordinator.zont.get_sensor(
             self._device.id,
             self._sensor.id
@@ -119,7 +112,6 @@ class ZontBinarySensor(CoordinatorEntity, BinarySensorEntity):
                 f'Бинарный сенсор "{self._device.name}_{self._sensor.name}" '
                 f'обновился с {self._sensor.triggered} на {sensor.triggered}')
         self._sensor.triggered = sensor.triggered
->>>>>>> dev3
         self.async_write_ha_state()
 
 
