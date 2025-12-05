@@ -52,6 +52,8 @@ async def async_setup_entry(
     name_email = ''.join(email.split('@'))
     webhook_id = ''.join(name_email.split('.'))
 
+    webhook.async_unregister(hass, webhook_id)
+
     webhook.async_register(
         hass,
         DOMAIN,
