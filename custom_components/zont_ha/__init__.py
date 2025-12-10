@@ -164,3 +164,14 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     for platform in PLATFORMS:
         await hass.config_entries.async_forward_entry_unload(entry, platform)
     return True
+
+
+async def async_migrate_entry(hass, config_entry):
+    """Миграция с версии 2 на 3."""
+    if config_entry.version == 2:
+        hass.config_entries.async_update_entry(
+            config_entry,
+            version=3
+        )
+        _LOGGER.info('Миграция с версии 2 на 3 выполнена (нулевая миграция)')
+    return True

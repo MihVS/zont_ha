@@ -87,17 +87,6 @@ def validate_mail(mail: str) -> None:
         raise InvalidMail
 
 
-async def async_migrate_entry(hass, config_entry):
-    """Миграция с версии 2 на 3."""
-    if config_entry.version == 2:
-        hass.config_entries.async_update_entry(
-            config_entry,
-            version=3
-        )
-        _LOGGER.info('Миграция с версии 2 на 3 выполнена (нулевая миграция)')
-    return True
-
-
 class ZontConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 3
     data: dict = None
