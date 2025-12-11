@@ -4,6 +4,7 @@ from datetime import timedelta
 
 import async_timeout
 
+from homeassistant.helpers import device_registry as dr
 from homeassistant.components import webhook
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -35,20 +36,37 @@ def remove_entity(hass: HomeAssistant, current_entries_id: list,
                 remove_entities.append(entity_id)
     for entity_id in remove_entities:
         entity_registry.async_remove(entity_id)
-        _LOGGER.info(f'Удалена устаревшая сущность {entity_id}')
+        _LOGGER.info(f'Outdated entity deleted {entity_id}')
 
 
 async def async_setup_entry(
         hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
+    _LOGGER.debug('async_setup_entry start')
+    config_entry.async_on_unload(
+        config_entry.add_update_listener(update_listener)
+    )
     entry_id = config_entry.entry_id
     email = config_entry.data.get('mail')
     token = config_entry.data.get('token')
     selected_devices = config_entry.data.get('devices_selected')
     zont = Zont(hass, email, token, selected_devices)
+    _LOGGER.debug(f'selected devices: {selected_devices}')
+
+    # Создать отдельную функцию
+    device_reg = dr.async_get(hass)
+    all_devices = dr.async_entries_for_config_entry(device_reg,
+                                                    config_entry.entry_id)
+    for device in all_devices:
+        _LOGGER.debug(f'device identifiers: {device.identifiers}')
+        device_id = str(list(device.identifiers)[0][1])
+        if not device_id in selected_devices:
+            device_reg.async_remove_device(device.id)
+            _LOGGER.info(f"Device is removed: {device.name} ({device_id})")
+
     await zont.init_old_data()
     coordinator = ZontCoordinator(hass, zont)
     await coordinator.async_config_entry_first_refresh()
-    _LOGGER.debug(config_entry.data)
+    _LOGGER.debug(f'config entry data: {config_entry.data}')
     name_email = ''.join(email.split('@'))
     webhook_id = ''.join(name_email.split('.'))
 
@@ -80,9 +98,9 @@ async def async_setup_entry(
     )
     current_entries_id = hass.data[DOMAIN][CURRENT_ENTITY_IDS][entry_id]
     remove_entity(hass, current_entries_id, config_entry)
-    _LOGGER.debug(f'Unique_id актуальных сущностей аккаунта {zont.mail}: '
-                  f'{current_entries_id}')
-    _LOGGER.debug(f'Количество актуальных сущностей: '
+    _LOGGER.debug(f'The unique ID of the current account entities {zont.mail}:'
+                  f' {current_entries_id}')
+    _LOGGER.debug(f'Number of relevant entities: '
                   f'{len(current_entries_id)}')
     return True
 
@@ -109,6 +127,26 @@ async def handle_webhook(
     except ValueError:
         _LOGGER.warning(f'Wrong webhook request. Webhook id: {webhook_id}. '
                         f'Body: {body}')
+
+
+async def update_listener(hass, entry):
+    """Вызывается при изменении настроек интеграции."""
+    _LOGGER.info(f'Restarting integration for entry_id: {entry.entry_id})')
+    await hass.config_entries.async_reload(entry.entry_id)
+
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
+    """Unload a config entry."""
+    _LOGGER.info(f'Unloading the zont_ha integration: {entry.entry_id}')
+    try:
+        unload_ok = await hass.config_entries.async_unload_platforms(
+            entry, PLATFORMS
+        )
+        hass.data[DOMAIN][ENTRIES].pop(entry.entry_id)
+
+        return unload_ok
+    except Exception as e:
+        _LOGGER.error(f'Error uploading the integration: {e}')
+        return False
 
 
 class ZontCoordinator(DataUpdateCoordinator):
@@ -157,13 +195,6 @@ class ZontCoordinator(DataUpdateCoordinator):
                 return self.zont
             else:
                 raise UpdateFailed(f"Ошибка соединения с API zont: {err}")
-
-
-async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
-    """Unload a config entry."""
-    for platform in PLATFORMS:
-        await hass.config_entries.async_forward_entry_unload(entry, platform)
-    return True
 
 
 async def async_migrate_entry(hass, config_entry):
