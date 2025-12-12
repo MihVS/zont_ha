@@ -6,8 +6,9 @@ from http import HTTPStatus
 import voluptuous as vol
 
 from homeassistant import config_entries
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import config_validation as cv
-from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .const import DOMAIN, URL_TOKEN, URL_GET_DEVICES
 from .core.exceptions import RequestAPIZONTError, InvalidMail
@@ -91,6 +92,12 @@ class ZontConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 3
     data: dict = None
 
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry: ConfigEntry):
+        """Create the options flow."""
+        return OptionsFlowHandler()
+
     async def async_step_user(self, user_input=None):
         _LOGGER.debug('async_step_user')
         errors: dict[str, str] = {}
@@ -159,9 +166,9 @@ class ZontConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         _LOGGER.debug(self.data)
         if user_input is not None:
             try:
-                _LOGGER.info(user_input)
                 if not errors:
-                    self.data['devices_selected'] = user_input['devices_selected']
+                    self.data['devices_selected'] = user_input.get('devices_selected')
+                    _LOGGER.warning(f'data_: {self.data}')
                 return self.async_create_entry(
                     title=self.data['name'], data=self.data
                 )
@@ -246,6 +253,89 @@ class ZontConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Required(
                         schema="token", default=self.data.get('token', None)
                     ): str
+                }
+            ),
+            errors=errors
+        )
+
+
+class OptionsFlowHandler(config_entries.OptionsFlow):
+
+    data = {}
+
+    async def async_step_init(self, user_input):
+        """Manage the options."""
+        _LOGGER.debug('async_step_init options')
+        errors: dict[str, str] = {}
+        self.data = dict(self.config_entry.data)
+        if user_input is not None:
+            try:
+                if not errors:
+                    self.data['devices_selected'] = []
+                if user_input.get('option') == 'option2':
+                    devices = await validate_auth_token(
+                        self.hass,
+                        self.data['mail'],
+                        self.data['token']
+                    )
+                    self.data['devices'] = devices
+                    _LOGGER.debug(f'devices: {self.data.get('devices')}')
+                    return await self.async_step_devices_selection()
+                self.hass.config_entries.async_update_entry(
+                    self.config_entry, data=self.data
+                )
+                return self.async_create_entry(
+                    title=self.data['name'], data=self.data
+                )
+            except RequestAPIZONTError:
+                _LOGGER.error(self.hass.data['error'])
+                errors['base'] = 'invalid_auth'
+            except Exception as e:
+                _LOGGER.error(f'Что-то пошло не так, неизвестная ошибка. {e}')
+                errors["base"] = "unknown"
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema(
+                {
+                    vol.Optional("option", default="option1"): vol.In({
+                        "option1": "Добавить все устройства.",
+                        "option2": "Выбрать нужные устройства.",
+                    })
+                }
+            ),
+            errors=errors
+        )
+
+    async def async_step_devices_selection(self, user_input=None):
+        """Devices selection"""
+        _LOGGER.debug('async_step_devices_selection options')
+        errors: dict[str, str] = {}
+        _LOGGER.debug(self.data)
+        if user_input is not None:
+            try:
+                if not errors:
+                    self.data.update(user_input)
+                    self.hass.config_entries.async_update_entry(
+                        self.config_entry, data=self.data
+                    )
+                return self.async_create_entry(
+                    title=self.data['name'], data=self.data
+                )
+            except RequestAPIZONTError:
+                _LOGGER.error(self.hass.data['error'])
+                errors['base'] = 'invalid_auth'
+            except Exception as e:
+                _LOGGER.error(f'Что-то пошло не так, неизвестная ошибка. {e}')
+                errors["base"] = "unknown"
+
+        return self.async_show_form(
+            step_id="devices_selection",
+            data_schema=vol.Schema(
+                {
+                    vol.Required("devices_selected",
+                                 default=[]): cv.multi_select(
+                        self.data['devices']
+                    )
                 }
             ),
             errors=errors

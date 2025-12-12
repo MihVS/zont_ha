@@ -41,6 +41,26 @@
         }
       }
     }
+  },
+  "options": {
+    "error": {
+      "invalid_auth": "Ошибка авторизации",
+      "invalid_mail": "Неверный формат почты",
+      "unknown": "Неизвестная ошибка"
+    },
+    "step": {
+      "init": {
+        "title": "Добавление устройств.",
+        "data": {
+          "option": " "
+        }
+      },
+      "devices_selection": {
+        "title": "Выбор устройств",
+        "data": {
+          "devices_selected": "Выберите устройства"
+        }
+      }
+    }
   }
-
 }
