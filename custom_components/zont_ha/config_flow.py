@@ -7,8 +7,8 @@ import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.helpers import config_validation as cv
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .const import DOMAIN, URL_TOKEN, URL_GET_DEVICES
 from .core.exceptions import RequestAPIZONTError, InvalidMail
@@ -265,7 +265,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_init(self, user_input):
         """Manage the options."""
-        _LOGGER.debug('async_step_init')
+        _LOGGER.debug('async_step_init options')
         errors: dict[str, str] = {}
         self.data = dict(self.config_entry.data)
         if user_input is not None:
@@ -308,7 +308,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_devices_selection(self, user_input=None):
         """Devices selection"""
-        _LOGGER.debug('async_step_devices_selection')
+        _LOGGER.debug('async_step_devices_selection options')
         errors: dict[str, str] = {}
         _LOGGER.debug(self.data)
         if user_input is not None:

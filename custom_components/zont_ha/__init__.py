@@ -4,10 +4,10 @@ from datetime import timedelta
 
 import async_timeout
 
-from homeassistant.helpers import device_registry as dr
 from homeassistant.components import webhook
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_registry import async_get
 from homeassistant.helpers.update_coordinator import (
@@ -39,20 +39,10 @@ def remove_entity(hass: HomeAssistant, current_entries_id: list,
         _LOGGER.info(f'Outdated entity deleted {entity_id}')
 
 
-async def async_setup_entry(
-        hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
-    _LOGGER.debug('async_setup_entry start')
-    config_entry.async_on_unload(
-        config_entry.add_update_listener(update_listener)
-    )
-    entry_id = config_entry.entry_id
-    email = config_entry.data.get('mail')
-    token = config_entry.data.get('token')
-    selected_devices = config_entry.data.get('devices_selected')
-    zont = Zont(hass, email, token, selected_devices)
-    _LOGGER.debug(f'selected devices: {selected_devices}')
-
-    # Создать отдельную функцию
+async def remove_devices(
+        hass: HomeAssistant, config_entry: ConfigEntry, selected_devices: list
+):
+    """Удаляет неактуальные устройства."""
     device_reg = dr.async_get(hass)
     all_devices = dr.async_entries_for_config_entry(device_reg,
                                                     config_entry.entry_id)
@@ -63,10 +53,13 @@ async def async_setup_entry(
             device_reg.async_remove_device(device.id)
             _LOGGER.info(f"Device is removed: {device.name} ({device_id})")
 
-    await zont.init_old_data()
-    coordinator = ZontCoordinator(hass, zont)
-    await coordinator.async_config_entry_first_refresh()
-    _LOGGER.debug(f'config entry data: {config_entry.data}')
+
+def register_webhook(
+        hass: HomeAssistant,
+        entry_id: str,
+        email: str,
+        selected_devices: list[str]):
+    """Регистрация webhook в Home Assistant."""
     name_email = ''.join(email.split('@'))
     webhook_id = ''.join(name_email.split('.'))
 
@@ -86,6 +79,29 @@ async def async_setup_entry(
     webhooks_after = hass.data.get('webhook', {})
     registered = list(webhooks_after.keys()) if webhooks_after else 'None'
     _LOGGER.debug(f'Webhooks after registration: {registered}')
+
+
+async def async_setup_entry(
+        hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
+    _LOGGER.debug('async_setup_entry start')
+    config_entry.async_on_unload(
+        config_entry.add_update_listener(update_listener)
+    )
+    entry_id = config_entry.entry_id
+    email = config_entry.data.get('mail')
+    token = config_entry.data.get('token')
+    selected_devices = config_entry.data.get('devices_selected')
+    zont = Zont(hass, email, token, selected_devices)
+    _LOGGER.debug(f'selected devices: {selected_devices}')
+
+    await remove_devices(hass, config_entry, selected_devices)
+
+    await zont.init_old_data()
+    coordinator = ZontCoordinator(hass, zont)
+    await coordinator.async_config_entry_first_refresh()
+    _LOGGER.debug(f'config entry data: {config_entry.data}')
+
+    register_webhook(hass, entry_id, email, selected_devices)
 
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN].setdefault(ENTRIES, {})
