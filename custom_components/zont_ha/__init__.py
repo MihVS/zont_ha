@@ -40,12 +40,18 @@ def remove_entity(hass: HomeAssistant, current_entries_id: list,
 
 
 async def remove_devices(
-        hass: HomeAssistant, config_entry: ConfigEntry, selected_devices: list
-):
+        hass: HomeAssistant,
+        config_entry: ConfigEntry,
+        selected_devices: list | None):
     """Удаляет неактуальные устройства."""
+    _LOGGER.debug(f'Try remove no selected devices. '
+                  f'Current devices: {selected_devices}')
     device_reg = dr.async_get(hass)
     all_devices = dr.async_entries_for_config_entry(device_reg,
                                                     config_entry.entry_id)
+    if not selected_devices:
+        _LOGGER.debug(f'There are no selected devices: {selected_devices}')
+        return
     for device in all_devices:
         _LOGGER.debug(f'device identifiers: {device.identifiers}')
         device_id = str(list(device.identifiers)[0][1])
