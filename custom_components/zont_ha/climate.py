@@ -15,12 +15,14 @@ from .const import (
     ENTRIES, CURRENT_ENTITY_IDS, PLUS, PRO
 )
 from .core.enums import TypeOfCircuit
-from .core.exceptions import TemperatureOutOfRangeError, SetHvacModeError
+from .core.exceptions import TemperatureOutOfRangeError
 from .core.models_zont_v1 import DeviceZontOld
-from .core.models_zont_v3 import CircuitZONT, DeviceZONT
+from .core.models_zont_v3 import CircuitZONT, DeviceZONT, HeatingModeZONT
 from .core.zont import Zont
 
 _LOGGER = logging.getLogger(__name__)
+
+_OFF_MODE_KEYWORDS = ('выкл', 'откл', 'off')
 
 
 async def async_setup_entry(
@@ -75,6 +77,9 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
         self._attr_min_temp, self._attr_max_temp = (
             self._zont.get_min_max_values_temp(self._circuit))
         self._attr_device_info = coordinator.devices_info(device.id)
+        self._last_heat_mode_id: int | None = (
+            circuit.current_mode if not circuit.is_off else None
+        )
 
     @property
     def preset_modes(self) -> list[str] | None:
@@ -151,25 +156,8 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
         heating_mode = self._zont.get_heating_mode_by_name(
             self._device, preset_mode
         )
-        model = self._device.device_info.model
         if heating_mode is not None:
-            if self._device.device_info.model in MODELS_THERMOSTAT_ZONT:
-                await self._zont.set_heating_mode_all_circuits(
-                    device=self._device,
-                    heating_mode=heating_mode
-                )
-            elif PLUS in model.lower() or PRO in model.lower():
-                await self._zont.set_heating_mode(
-                    device=self._device,
-                    circuit=self._circuit,
-                    heating_mode_id=heating_mode.id
-                )
-            else:
-                await self._zont.set_heating_mode_v1(
-                    device=self._device,
-                    circuit=self._circuit,
-                    heating_mode_id=heating_mode.id
-                )
+            await self._async_apply_heating_mode(heating_mode)
         else:
             await self._zont.set_target_temperature(
                 device=self._device,
@@ -180,17 +168,70 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
         await asyncio.sleep(TIME_OUT_REQUEST)
         await self.coordinator.async_request_refresh()
 
+    async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
+        """Set new target hvac mode."""
+        if hvac_mode == HVACMode.OFF:
+            off_mode = self._find_circuit_mode(exclude_off=False)
+            if off_mode:
+                await self._async_apply_heating_mode(off_mode)
+            else:
+                _LOGGER.warning(
+                    f'Режим выключения не найден для контура {self._circuit.name}'
+                )
+        elif hvac_mode == HVACMode.HEAT:
+            heat_mode = None
+            if self._last_heat_mode_id:
+                heat_mode = self._zont.get_heating_mode_by_id(
+                    self._device, self._last_heat_mode_id
+                )
+            if heat_mode is None:
+                heat_mode = self._find_circuit_mode(exclude_off=True)
+            if heat_mode:
+                await self._async_apply_heating_mode(heat_mode)
+            else:
+                _LOGGER.warning(
+                    f'Активный режим не найден для контура {self._circuit.name}'
+                )
+        await asyncio.sleep(TIME_OUT_REQUEST)
+        await self.coordinator.async_request_refresh()
+
+    def _find_circuit_mode(self, exclude_off: bool) -> HeatingModeZONT | None:
+        """Find first applicable circuit mode that matches (or doesn't match) off keywords."""
+        for mode in self._device.modes:
+            if self._circuit.id not in mode.can_be_applied:
+                continue
+            is_off_mode = any(kw in mode.name.lower() for kw in _OFF_MODE_KEYWORDS)
+            if exclude_off and not is_off_mode:
+                return mode
+            if not exclude_off and is_off_mode:
+                return mode
+        return None
+
+    async def _async_apply_heating_mode(self, heating_mode: HeatingModeZONT) -> None:
+        """Apply heating mode respecting device model."""
+        model = self._device.device_info.model
+        if model in MODELS_THERMOSTAT_ZONT:
+            await self._zont.set_heating_mode_all_circuits(
+                device=self._device,
+                heating_mode=heating_mode
+            )
+        elif PLUS in model.lower() or PRO in model.lower():
+            await self._zont.set_heating_mode(
+                device=self._device,
+                circuit=self._circuit,
+                heating_mode_id=heating_mode.id
+            )
+        else:
+            await self._zont.set_heating_mode_v1(
+                device=self._device,
+                circuit=self._circuit,
+                heating_mode_id=heating_mode.id
+            )
+
     def __repr__(self) -> str:
         if not self.hass:
-            return f"<Climate entity {self.name}>"
+            return f'<Climate entity {self.name}>'
         return super().__repr__()
-
-    def set_hvac_mode(self, hvac_mode):
-        """Set new target hvac mode."""
-        raise SetHvacModeError(
-            'Изменение HVAC не поддерживается ZONT. '
-            'Контур управляется котлом.'
-        )
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -201,4 +242,6 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
         self._circuit = self._zont.get_circuit(
             self._device, self._circuit.id
         )
+        if not self._circuit.is_off and self._circuit.current_mode is not None:
+            self._last_heat_mode_id = self._circuit.current_mode
         self.async_write_ha_state()
