@@ -102,10 +102,17 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
     def hvac_mode(self) -> HVACMode | None:
         """Return hvac operation ie. heat, cool mode.
 
-        Поля режимов на H-1 ненадёжны (current_mode/applied рассинхронены),
-        поэтому off определяем по уставке: HVAC_OFF_TEMP (5°) = выключено.
-        У ГВС min 25°, до 5° она не опускается -> всегда HEAT.
+        Источник правды — активный режим контура (тот же, что и
+        preset_mode), иначе hvac и preset расходятся: при переключении
+        current_mode и target_temp у ZONT обновляются неатомарно.
+        Off-режим («Выключен») -> OFF, иной режим -> HEAT.
+        Если режим не задан (ручная уставка) -> по target (<= HVAC_OFF_TEMP).
         """
+        mode = self._zont.get_heating_mode_by_id(
+            self._device, self._circuit.current_mode
+        )
+        if mode is not None:
+            return HVACMode.OFF if self._mode_is_off(mode) else HVACMode.HEAT
         target = self._circuit.target_temp
         if self._circuit.is_off or (
             target is not None and target <= HVAC_OFF_TEMP
