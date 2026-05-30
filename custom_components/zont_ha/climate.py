@@ -90,29 +90,23 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
 
     @property
     def preset_mode(self) -> str | None:
-        heating_mode_id = self._circuit.current_mode
-        heating_mode = self._zont.get_heating_mode_by_id(
-            self._device, heating_mode_id
-        )
-        if heating_mode is not None:
-            return heating_mode.name
-        return PRESET_NONE
+        # Выводим из target-состояния контура, а НЕ из current_mode:
+        # режим на H-1 device-wide и одинаков у всех контуров, из-за чего
+        # смена режима отопления «дёргала» бы и ГВС. target раздельный.
+        if self.hvac_mode == HVACMode.OFF:
+            mode = self._find_circuit_mode(exclude_off=False)
+        else:
+            mode = self._find_circuit_mode(exclude_off=True)
+        return mode.name if mode is not None else PRESET_NONE
 
     @property
     def hvac_mode(self) -> HVACMode | None:
         """Return hvac operation ie. heat, cool mode.
 
-        Источник правды — активный режим контура (тот же, что и
-        preset_mode), иначе hvac и preset расходятся: при переключении
-        current_mode и target_temp у ZONT обновляются неатомарно.
-        Off-режим («Выключен») -> OFF, иной режим -> HEAT.
-        Если режим не задан (ручная уставка) -> по target (<= HVAC_OFF_TEMP).
+        По target_temp контура (раздельный для ГВС/Отопления, в отличие от
+        device-wide current_mode): <= HVAC_OFF_TEMP (5°) -> OFF, иначе HEAT.
+        Так контуры независимы и hvac совпадает с preset_mode.
         """
-        mode = self._zont.get_heating_mode_by_id(
-            self._device, self._circuit.current_mode
-        )
-        if mode is not None:
-            return HVACMode.OFF if self._mode_is_off(mode) else HVACMode.HEAT
         target = self._circuit.target_temp
         if self._circuit.is_off or (
             target is not None and target <= HVAC_OFF_TEMP
