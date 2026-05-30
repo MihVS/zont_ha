@@ -114,6 +114,8 @@ MATCHES_HEATING = ('отопл', 'теплонос',)
 # Порог hvac OFF: режим «Выключен» ставит теплоноситель в 5°,
 # поэтому target <= HVAC_OFF_TEMP в климате трактуется как OFF.
 HVAC_OFF_TEMP = 5
+# Уставка ГВС при включении из HA (у ГВС нет режимов, управляем уставкой).
+DHW_ON_TEMP = 50
 
 BUTTON_ZONT = 'button'
 SWITCH_ZONT = 'toggle_button'

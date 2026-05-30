@@ -12,7 +12,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator, DOMAIN
 from .const import (
     TIME_OUT_REQUEST, MAX_TEMP_AIR, MIN_TEMP_AIR, MODELS_THERMOSTAT_ZONT,
-    ENTRIES, CURRENT_ENTITY_IDS, HVAC_OFF_TEMP
+    ENTRIES, CURRENT_ENTITY_IDS, HVAC_OFF_TEMP, DHW_ON_TEMP
 )
 from .core.enums import TypeOfCircuit
 from .core.exceptions import TemperatureOutOfRangeError
@@ -79,6 +79,13 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
         self._attr_min_temp, self._attr_max_temp = (
             self._zont.get_min_max_values_temp(self._circuit))
         self._attr_device_info = coordinator.devices_info(device.id)
+        self._circuit_id = circuit.id
+        self._circuit_available = True
+
+    @property
+    def available(self) -> bool:
+        # Контур ГВС пропадает из API, когда горячая вода выключена в ЛК.
+        return super().available and self._circuit_available
 
     @property
     def preset_modes(self) -> list[str] | None:
@@ -185,20 +192,27 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
         (current_mode -> None) и режим не отображается активным в ЛК.
         Активация режима и ставит температуру, и делает режим активным.
         """
-        if hvac_mode == HVACMode.OFF:
-            mode = self._find_circuit_mode(exclude_off=False)
-        elif hvac_mode == HVACMode.HEAT:
-            mode = self._find_circuit_mode(exclude_off=True)
-        else:
+        if hvac_mode not in (HVACMode.OFF, HVACMode.HEAT):
             return
 
-        if mode is not None:
-            await self._async_apply_heating_mode(mode)
-        else:
-            _LOGGER.warning(
-                f'Режим для hvac {hvac_mode} не найден '
-                f'для контура {self._circuit.name}'
+        if self._circuit.type == TypeOfCircuit.DHW:
+            # У ГВС нет своих режимов, а device-wide режим задел бы
+            # отопление. Управляем уставкой контура (per-circuit).
+            target = HVAC_OFF_TEMP if hvac_mode == HVACMode.OFF else DHW_ON_TEMP
+            await self._zont.set_target_temperature(
+                device=self._device, circuit=self._circuit, target_temp=target
             )
+        else:
+            mode = self._find_circuit_mode(
+                exclude_off=(hvac_mode == HVACMode.HEAT)
+            )
+            if mode is not None:
+                await self._async_apply_heating_mode(mode)
+            else:
+                _LOGGER.warning(
+                    f'Режим для hvac {hvac_mode} не найден '
+                    f'для контура {self._circuit.name}'
+                )
         await asyncio.sleep(TIME_OUT_REQUEST)
         await self.coordinator.async_request_refresh()
 
@@ -252,7 +266,10 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
         self._device: DeviceZONT = self.coordinator.zont.get_device(
             self._device.id
         )
-        self._circuit = self._zont.get_circuit(
-            self._device, self._circuit.id
-        )
+        circuit = self._zont.get_circuit(self._device, self._circuit_id)
+        # ГВС-контур исчезает из API при выключенной горячей воде ->
+        # помечаем сущность недоступной, а не падаем на None.
+        self._circuit_available = circuit is not None
+        if circuit is not None:
+            self._circuit = circuit
         self.async_write_ha_state()
