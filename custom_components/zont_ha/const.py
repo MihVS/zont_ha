@@ -111,10 +111,9 @@ MATCHES_FLOOR = ('пол', 'тёплый',)
 # вместо 5-80.
 MATCHES_HEATING = ('отопл', 'теплонос',)
 
-# Уставки термостата при переключении hvac (контур отопления H-1):
-# OFF -> 5°, активируется режим «Выключен»; HEAT -> 40°, режим «Комфорт».
+# Порог hvac OFF: режим «Выключен» ставит теплоноситель в 5°,
+# поэтому target <= HVAC_OFF_TEMP в климате трактуется как OFF.
 HVAC_OFF_TEMP = 5
-HVAC_HEAT_TEMP = 40
 
 BUTTON_ZONT = 'button'
 SWITCH_ZONT = 'toggle_button'

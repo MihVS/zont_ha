@@ -12,7 +12,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator, DOMAIN
 from .const import (
     TIME_OUT_REQUEST, MAX_TEMP_AIR, MIN_TEMP_AIR, MODELS_THERMOSTAT_ZONT,
-    ENTRIES, CURRENT_ENTITY_IDS, HVAC_OFF_TEMP, HVAC_HEAT_TEMP
+    ENTRIES, CURRENT_ENTITY_IDS, HVAC_OFF_TEMP
 )
 from .core.enums import TypeOfCircuit
 from .core.exceptions import TemperatureOutOfRangeError
@@ -178,26 +178,19 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         """Set new target hvac mode.
 
-        OFF  -> уставка HVAC_OFF_TEMP + режим «Выключен».
-        HEAT -> уставка HVAC_HEAT_TEMP + режим «Комфорт» (первый не-off).
-        Уставка задаётся только для контура отопления (consumer);
-        ГВС работает on_request и от режима не зависит.
+        OFF  -> активировать режим «Выключен» (он сам ставит теплоноситель 5°).
+        HEAT -> активировать режим «Комфорт» (он сам ставит 40°).
+        Уставку вручную НЕ трогаем: ручная уставка сбрасывает режим в None
+        (current_mode -> None) и режим не отображается активным в ЛК.
+        Активация режима и ставит температуру, и делает режим активным.
         """
         if hvac_mode == HVACMode.OFF:
-            target = HVAC_OFF_TEMP
             mode = self._find_circuit_mode(exclude_off=False)
         elif hvac_mode == HVACMode.HEAT:
-            target = HVAC_HEAT_TEMP
             mode = self._find_circuit_mode(exclude_off=True)
         else:
             return
 
-        if self._circuit.type == TypeOfCircuit.CONSUMER:
-            await self._zont.set_target_temperature(
-                device=self._device,
-                circuit=self._circuit,
-                target_temp=target
-            )
         if mode is not None:
             await self._async_apply_heating_mode(mode)
         else:
