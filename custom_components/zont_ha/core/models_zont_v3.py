@@ -1,6 +1,6 @@
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from .enums import (
     TypeOfCircuit, TypeOfSensor, StateOfSensor, SignalOfSensor, GuardState
@@ -198,7 +198,7 @@ class TapZONT(ControlEntityZONT):
 class OpenThermValueZONT(BaseModel):
     """Значение параметра из протокола OpenTherm."""
 
-    flag: str
+    flag: str | None = None
     name: str | None = None
     value: bool | float | int | str | None = None
     display_value: str | None = None
@@ -212,6 +212,13 @@ class AdapterZONT(ControlEntityZONT):
     status: list[OpenThermValueZONT] | None = None
     heating: list[dict] | None = None
     dhw: list[dict] | None = None
+
+    @field_validator('status', mode='before')
+    @classmethod
+    def _normalize_status(cls, value: list[dict] | None) -> list[dict] | None:
+        if value is None or not isinstance(value, list):
+            return None
+        return [item for item in value if isinstance(item, dict)]
 
 
 class ActuatorsZONT(BaseModel):

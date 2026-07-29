@@ -1,6 +1,4 @@
-from homeassistant.components.binary_sensor import (
-    BinarySensorDeviceClass, BinarySensorEntity
-)
+from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.core import callback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator
@@ -9,9 +7,9 @@ from .core.models_zont_v3 import (
 )
 
 ADAPTER_STATUS_FLAGS = (
-    ('ch', 'Отопление: запрос тепла'),
-    ('dhw', 'ГВС: запрос тепла'),
-    ('fl', 'Котёл: работа'),
+    ('ch', 'Отопление'),
+    ('dhw', 'ГВС'),
+    ('fl', 'Горелка'),
 )
 
 
@@ -33,7 +31,7 @@ class ZontAdapterStatusBinarySensor(CoordinatorEntity, BinarySensorEntity):
 
     @property
     def name(self) -> str:
-        return f'{self._device.name}_{self._name}'
+        return f'{self._device.name}_{self._adapter.name}_{self._name}'
 
     @property
     def unique_id(self) -> str:
@@ -41,13 +39,15 @@ class ZontAdapterStatusBinarySensor(CoordinatorEntity, BinarySensorEntity):
 
     @property
     def available(self) -> bool:
-        return super().available and self._adapter_available
-
-    @property
-    def device_class(self) -> BinarySensorDeviceClass | None:
-        if self._flag == 'ch':
-            return BinarySensorDeviceClass.HEAT
-        return None
+        status = self._get_status()
+        return (
+            super().available
+            and self._adapter_available
+            and not self._adapter.no_connection
+            and not self._adapter.failed
+            and status is not None
+            and isinstance(status.value, bool)
+        )
 
     @property
     def is_on(self) -> bool | None:
