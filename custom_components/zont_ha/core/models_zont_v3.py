@@ -195,8 +195,8 @@ class TapZONT(ControlEntityZONT):
     failed: bool
 
 
-class OpenThermValueZONT(BaseModel):
-    """Значение параметра из протокола OpenTherm."""
+class AdapterStatusZONT(BaseModel):
+    """Значение статуса котлового адаптера."""
 
     flag: str
     name: str | None = None
@@ -210,7 +210,7 @@ class AdapterZONT(ControlEntityZONT):
     no_connection: bool
     failed: bool
     unknown: bool | None = None
-    status: list[OpenThermValueZONT] | None = None
+    status: list[AdapterStatusZONT] | None = None
     heating: list[dict] | None = None
     dhw: list[dict] | None = None
 
@@ -218,15 +218,15 @@ class AdapterZONT(ControlEntityZONT):
     @classmethod
     def _normalize_status(
             cls, value: list[dict] | None
-    ) -> list[OpenThermValueZONT] | None:
+    ) -> list[AdapterStatusZONT] | None:
         if value is None or not isinstance(value, list):
             return None
-        status: list[OpenThermValueZONT] = []
+        status: list[AdapterStatusZONT] = []
         for item in value:
             if not isinstance(item, dict):
                 continue
             try:
-                status.append(OpenThermValueZONT.model_validate(item))
+                status.append(AdapterStatusZONT.model_validate(item))
             except ValidationError:
                 continue
         return status

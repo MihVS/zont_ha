@@ -3,7 +3,7 @@ from homeassistant.core import callback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator
 from .core.models_zont_v3 import (
-    AdapterZONT, DeviceZONT, OpenThermValueZONT
+    AdapterStatusZONT, AdapterZONT, DeviceZONT
 )
 
 ADAPTER_STATUS_FLAGS = (
@@ -57,7 +57,7 @@ class ZontAdapterStatusBinarySensor(CoordinatorEntity, BinarySensorEntity):
             return None
         return status.value
 
-    def _get_status(self) -> OpenThermValueZONT | None:
+    def _get_status(self) -> AdapterStatusZONT | None:
         if self._adapter.status is None:
             return None
         return next(
