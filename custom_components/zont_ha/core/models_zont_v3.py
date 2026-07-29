@@ -199,7 +199,6 @@ class OpenThermValueZONT(BaseModel):
     """Значение параметра из протокола OpenTherm."""
 
     flag: str
-    unknown: bool | None = None
     name: str | None = None
     value: bool | float | int | str | None = None
     display_value: str | None = None
@@ -210,24 +209,26 @@ class AdapterZONT(ControlEntityZONT):
 
     no_connection: bool
     failed: bool
+    unknown: bool | None = None
     status: list[OpenThermValueZONT] | None = None
     heating: list[dict] | None = None
     dhw: list[dict] | None = None
 
     @field_validator('status', mode='before')
     @classmethod
-    def _normalize_status(cls, value: list[dict] | None) -> list[dict] | None:
+    def _normalize_status(
+            cls, value: list[dict] | None
+    ) -> list[OpenThermValueZONT] | None:
         if value is None or not isinstance(value, list):
             return None
-        status = []
+        status: list[OpenThermValueZONT] = []
         for item in value:
             if not isinstance(item, dict):
                 continue
             try:
-                OpenThermValueZONT.model_validate(item)
+                status.append(OpenThermValueZONT.model_validate(item))
             except ValidationError:
                 continue
-            status.append(item)
         return status
 
 
