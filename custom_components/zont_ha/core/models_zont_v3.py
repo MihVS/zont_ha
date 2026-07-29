@@ -195,11 +195,21 @@ class TapZONT(ControlEntityZONT):
     failed: bool
 
 
+class OpenThermValueZONT(BaseModel):
+    """Значение параметра из протокола OpenTherm."""
+
+    flag: str
+    name: str | None = None
+    value: bool | float | int | str | None = None
+    display_value: str | None = None
+
+
 class AdapterZONT(ControlEntityZONT):
     """Адаптер."""
 
     no_connection: bool
     failed: bool
+    status: list[OpenThermValueZONT] | None = None
     heating: list[dict] | None = None
     dhw: list[dict] | None = None
 
