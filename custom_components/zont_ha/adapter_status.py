@@ -46,6 +46,7 @@ class ZontAdapterStatusBinarySensor(CoordinatorEntity, BinarySensorEntity):
             and not self._adapter.no_connection
             and not self._adapter.failed
             and status is not None
+            and status.unknown is not True
             and isinstance(status.value, bool)
         )
 
