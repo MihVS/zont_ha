@@ -11,7 +11,7 @@ class Coordinates(BaseModel):
 class AdditionalInfo(BaseModel):
     """Дополнительная информация объекта."""
 
-    object_id: str | int
+    object_id: str | int | None = None
 
 
 class DeviceEventWebhook(BaseModel):
@@ -26,7 +26,7 @@ class DeviceEventWebhook(BaseModel):
     important: bool
     source: str
     gps: Coordinates | None | str
-    additional_info: AdditionalInfo
+    additional_info: AdditionalInfo | None = None
 
 
 class EventZONT(BaseModel):
