@@ -200,6 +200,7 @@ class ZontCoordinator(DataUpdateCoordinator):
 
     async def _async_update_data(self):
         """Обновление данных API zont"""
+        _LOGGER.debug("_async_update_data called")
         try:
             async with async_timeout.timeout(TIME_OUT_UPDATE_DATA):
                 await self.zont.get_update()
