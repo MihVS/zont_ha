@@ -27,7 +27,7 @@ from ..const import (
     MIN_TEMP_AIR, MAX_TEMP_AIR, MIN_TEMP_GVS, MAX_TEMP_GVS, MIN_TEMP_FLOOR,
     MAX_TEMP_FLOOR, MATCHES_GVS, MATCHES_FLOOR,
     BINARY_SENSOR_TYPES, URL_GET_DEVICES_OLD, NO_ERROR,
-    ZONT_API_URL,
+    ZONT_API_URL, MATCHES_HEATING, MIN_TEMP_HEATING, MAX_TEMP_HEATING,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -346,6 +346,8 @@ class Zont:
             val_min, val_max = MIN_TEMP_GVS, MAX_TEMP_GVS
         elif any([x in circuit_name for x in MATCHES_FLOOR]):
             val_min, val_max = MIN_TEMP_FLOOR, MAX_TEMP_FLOOR
+        elif any([x in circuit_name for x in MATCHES_HEATING]):
+            val_min, val_max = MIN_TEMP_HEATING, MAX_TEMP_HEATING
         return val_min, val_max
 
     def get_status_control(

@@ -101,8 +101,11 @@ MIN_TEMP_GVS = 25
 MAX_TEMP_GVS = 75
 MIN_TEMP_FLOOR = 15
 MAX_TEMP_FLOOR = 45
-MATCHES_GVS = ('гвс', 'горяч', 'вода', 'бкн', 'гидро', 'подача')
+MIN_TEMP_HEATING = 5
+MAX_TEMP_HEATING = 80
+MATCHES_GVS = ('гвс', 'горяч', 'вода', 'бкн', 'гидро', 'подача',)
 MATCHES_FLOOR = ('пол', 'тёплый',)
+MATCHES_HEATING = ('теплонос',)
 
 BUTTON_ZONT = 'button'
 SWITCH_ZONT = 'toggle_button'
