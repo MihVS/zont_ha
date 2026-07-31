@@ -422,6 +422,7 @@ class Zont:
             method='POST',
             path=f'{ZONT_API_URL}devices/{device.id}/modes/'
                 f'{heating_mode.id}/actions/activate',
+            json={},
             headers=self.headers
         )
 

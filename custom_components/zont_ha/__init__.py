@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 from datetime import timedelta
@@ -144,7 +145,12 @@ async def handle_webhook(
                           f'Webhook id: {webhook_id}. '
                           f'Device id: {webhook_id}. '
                           f'Body: {pretty_json}')
-            await coordinator.async_request_refresh()
+            if coordinator.delayed_refresh_task:
+                coordinator.delayed_refresh_task.cancel()
+            _LOGGER.debug('Create task for refresh')
+            coordinator.delayed_refresh_task = hass.async_create_task(
+                coordinator.delayed_refresh()
+            )
     except ValueError:
         _LOGGER.warning(f'Wrong webhook request. Webhook id: {webhook_id}. '
                         f'Body: {body}')
@@ -183,6 +189,7 @@ class ZontCoordinator(DataUpdateCoordinator):
             update_interval=timedelta(seconds=TIME_UPDATE),
         )
         self.zont: Zont = zont
+        self.delayed_refresh_task: asyncio.Task | None = None
 
     def devices_info(self, device_id: int):
         device: DeviceZONT = self.zont.get_device(device_id)
@@ -198,9 +205,25 @@ class ZontCoordinator(DataUpdateCoordinator):
         })
         return device_info
 
+    async def delayed_refresh(self):
+        try:
+            for i in range(3):
+                _LOGGER.debug(f'Resync data. Attempt - {i}')
+                await self.async_request_refresh()
+                if i < 2:
+                    await asyncio.sleep(6)
+
+        except asyncio.CancelledError:
+            _LOGGER.debug('Delayed refresh cancelled')
+            raise
+        finally:
+            _LOGGER.debug('Delayed refresh stopped')
+            if asyncio.current_task() is self.delayed_refresh_task:
+                self.delayed_refresh_task = None
+
     async def _async_update_data(self):
         """Обновление данных API zont"""
-        _LOGGER.debug("_async_update_data called")
+        _LOGGER.debug('Start updating the data...')
         try:
             async with async_timeout.timeout(TIME_OUT_UPDATE_DATA):
                 await self.zont.get_update()
