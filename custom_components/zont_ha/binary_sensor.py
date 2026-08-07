@@ -11,8 +11,7 @@ from . import ZontCoordinator
 from .const import (
     DOMAIN, CURRENT_ENTITY_IDS, ENTRIES
 )
-from .adapter_status import ADAPTER_STATUS_FLAGS, ZontAdapterStatusBinarySensor
-from .core.models_zont_v3 import DeviceZONT, SensorZONT, StatusZONT
+from .core.models_zont_v3 import (SensorZONT, DeviceZONT, StatusZONT)
 from .core.utils import is_binary_sensor
 from .core.zont import type_binary_sensor, Zont
 
@@ -42,15 +41,6 @@ async def async_setup_entry(
                 unique_id = f'{entry_id}{device.id}{control_status.id}'
                 binary_sensors.append(ZontBinarySensorControl(
                     coordinator, device, control_status, unique_id))
-        if device.actuators:
-            for adapter in device.actuators.adapters:
-                for flag, name in ADAPTER_STATUS_FLAGS:
-                    unique_id = (
-                        f'{entry_id}_{device.id}_adapter_{adapter.id}_{flag}'
-                    )
-                    binary_sensors.append(ZontAdapterStatusBinarySensor(
-                        coordinator, device, adapter, flag, name, unique_id
-                    ))
         binary_sensors.append(ZontOnlineBinarySensor(
             coordinator, device, unique_id=f'{entry_id}{device.id}_online'
         ))
