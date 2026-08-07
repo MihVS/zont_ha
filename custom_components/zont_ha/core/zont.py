@@ -17,7 +17,7 @@ from .exceptions import StateGuardError
 from .models_zont_v1 import AccountZontOld, DeviceZontOld
 from .models_zont_v3 import (
     AccountZont, ErrorZont, SensorZONT, DeviceZONT, CircuitZONT,
-    HeatingModeZONT, GuardZoneZONT, StatusZONT,
+    AdapterZONT, HeatingModeZONT, GuardZoneZONT, StatusZONT,
     ToggleButtonsZONT, ButtonZONT
 )
 from .utils import check_send_command
@@ -355,6 +355,19 @@ class Zont:
         device = self.get_device(device_id)
         return next((status for status in device.controls.statuses if
                      (status.id == status_id)), None)
+
+    def get_adapter(
+            self, device_id: int, adapter_id: int | str
+    ) -> AdapterZONT | None:
+        """Получить адаптер цифровой шины устройства."""
+        device = self.get_device(device_id)
+        if device is None or device.actuators is None:
+            return None
+        return next(
+            (adapter for adapter in device.actuators.adapters
+             if adapter.id == adapter_id),
+            None
+        )
 
     def get_toggle_button(
             self, device_id: int, toggle_button_id: int) -> ToggleButtonsZONT:

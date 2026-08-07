@@ -1,6 +1,6 @@
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError, field_validator
 
 from .enums import (
     TypeOfCircuit, TypeOfSensor, StateOfSensor, SignalOfSensor, GuardState
@@ -195,13 +195,41 @@ class TapZONT(ControlEntityZONT):
     failed: bool
 
 
+class AdapterStatusZONT(BaseModel):
+    """Значение статуса котлового адаптера."""
+
+    flag: str
+    name: str | None = None
+    value: bool | float | int | str | None = None
+    display_value: str | None = None
+
+
 class AdapterZONT(ControlEntityZONT):
     """Адаптер."""
 
     no_connection: bool
     failed: bool
+    unknown: bool | None = None
+    status: list[AdapterStatusZONT] | None = None
     heating: list[dict] | None = None
     dhw: list[dict] | None = None
+
+    @field_validator('status', mode='before')
+    @classmethod
+    def _normalize_status(
+            cls, value: list[dict] | None
+    ) -> list[AdapterStatusZONT] | None:
+        if value is None or not isinstance(value, list):
+            return None
+        status: list[AdapterStatusZONT] = []
+        for item in value:
+            if not isinstance(item, dict):
+                continue
+            try:
+                status.append(AdapterStatusZONT.model_validate(item))
+            except ValidationError:
+                continue
+        return status
 
 
 class ActuatorsZONT(BaseModel):
