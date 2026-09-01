@@ -105,7 +105,17 @@ MIN_TEMP_HEATING = 5
 MAX_TEMP_HEATING = 80
 MATCHES_GVS = ('гвс', 'горяч', 'вода', 'бкн', 'гидро', 'подача',)
 MATCHES_FLOOR = ('пол', 'тёплый',)
-MATCHES_HEATING = ('теплонос',)
+# 'отопл' оставлен намеренно, в отличие от апстрима: у H-1 API не отдаёт
+# пределы регулировки контура, срабатывает fallback по имени, и контур,
+# названный «Отопление», без этой подстроки получает воздушные пределы
+# вместо 5-80.
+MATCHES_HEATING = ('отопл', 'теплонос',)
+
+# Порог hvac OFF: режим «Выключен» ставит теплоноситель в 5°,
+# поэтому target <= HVAC_OFF_TEMP в климате трактуется как OFF.
+HVAC_OFF_TEMP = 5
+# Уставка ГВС при включении из HA (у ГВС нет режимов, управляем уставкой).
+DHW_ON_TEMP = 50
 
 BUTTON_ZONT = 'button'
 SWITCH_ZONT = 'toggle_button'
@@ -125,7 +135,7 @@ COUNTER_CONNECT = 10
 TIME_OUT_UPDATE_DATA = 10
 TIME_OUT_REPEAT = 10
 TIME_OUT_REQUEST = 2
-TIME_UPDATE = 60
+TIME_UPDATE = 30
 
 MODELS_THERMOSTAT_ZONT = ('T100', 'T102')
 PLUS = '+'
