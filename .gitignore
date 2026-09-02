@@ -15,3 +15,4 @@ secrets.yaml
 custom_components/.DS_Store
 __pycache__
 /custom_components/zont_ha/temp_data/
+/.cache
