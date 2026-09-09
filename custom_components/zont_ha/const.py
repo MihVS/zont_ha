@@ -13,8 +13,7 @@ CURRENT_ENTITY_IDS = 'current_entity_ids'
 ZONT_API_URLS = [
     'https://my.zont.online/',
     'https://lk.zont-online.ru/',
-    'https://lk.zont-online.ru/',
-    'https://zont-online.com',
+    'https://zont-online.com/',
 ]
 
 ZONT_API_URL_ROOT = 'api/'
@@ -127,7 +126,7 @@ TIME_OUT_REPEAT = 10
 TIME_OUT_REQUEST = 2
 TIME_UPDATE = 60
 
-MODELS_THERMOSTAT_ZONT = ('T100', 'T102')
+ID_MODELS_THERMOSTAT_ZONT = ('T100', 'T102')
 PLUS = '+'
 PRO = 'pro'
 
