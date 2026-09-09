@@ -11,7 +11,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import ZontCoordinator, DOMAIN
 from .const import (
-    TIME_OUT_REQUEST, MAX_TEMP_AIR, MIN_TEMP_AIR, MODELS_THERMOSTAT_ZONT,
+    TIME_OUT_REQUEST, MAX_TEMP_AIR, MIN_TEMP_AIR, ID_MODELS_THERMOSTAT_ZONT,
     ENTRIES, CURRENT_ENTITY_IDS, PLUS, PRO
 )
 from .core.enums import TypeOfCircuit
@@ -151,14 +151,14 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
         heating_mode = self._zont.get_heating_mode_by_name(
             self._device, preset_mode
         )
-        model = self._device.device_info.model
+        id_model = self._device.device_info.id
         if heating_mode is not None:
-            if self._device.device_info.model in MODELS_THERMOSTAT_ZONT:
+            if id_model in ID_MODELS_THERMOSTAT_ZONT:
                 await self._zont.set_heating_mode_all_circuits(
                     device=self._device,
                     heating_mode=heating_mode
                 )
-            elif PLUS in model.lower() or PRO in model.lower():
+            elif PLUS in id_model.lower() or PRO in id_model.lower():
                 await self._zont.set_heating_mode(
                     device=self._device,
                     circuit=self._circuit,
