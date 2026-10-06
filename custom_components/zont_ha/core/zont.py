@@ -13,7 +13,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .enums import GuardState
 from .enums import TypeOfSensor, StateOfSensor, TypeOfCircuit
-from .exceptions import StateGuardError
+from .exceptions import InvalidAuthZont, StateGuardError
 from .models_zont_v1 import AccountZontOld, DeviceZontOld
 from .models_zont_v3 import (
     AccountZont, ErrorZont, SensorZONT, DeviceZONT, CircuitZONT,
@@ -42,6 +42,14 @@ TypeBinarySensorZont = namedtuple('TypeBinarySensorZont', [
 ])
 
 type_binary_sensor = TypeBinarySensorZont(*BINARY_SENSOR_TYPES)
+
+AUTH_ERROR_STATUSES = (HTTPStatus.UNAUTHORIZED, HTTPStatus.FORBIDDEN)
+
+
+def raise_for_auth_error(status_code: int, text: str) -> None:
+    """Токен отозван или неверен — повторы тут не помогут."""
+    if status_code in AUTH_ERROR_STATUSES:
+        raise InvalidAuthZont(f'API ZONT отклонил токен: {status_code} {text}')
 
 
 class Zont:
@@ -78,6 +86,7 @@ class Zont:
         )
         text = await response.text()
         status_code = response.status
+        raise_for_auth_error(status_code, text)
         if status_code != HTTPStatus.OK:
             _LOGGER.error(f'Не удалось получить данные из API V1. '
                           f'Status code: {status_code}. Text: {text}')
@@ -94,6 +103,7 @@ class Zont:
         )
         text = await response.text()
         status_code = response.status
+        raise_for_auth_error(status_code, text)
         if status_code != HTTPStatus.OK:
             self.error = ErrorZont.model_validate_json(text)
             _LOGGER.error(self.error.error_ui)
