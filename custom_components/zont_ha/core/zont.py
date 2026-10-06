@@ -74,6 +74,7 @@ class Zont:
         response = await self.manager.request(
             method='POST',
             path=URL_GET_DEVICES_OLD,
+            idempotent=True,  # чтение, повтор на другой адрес безопасен
             headers=self.headers
         )
         text = await response.text()
