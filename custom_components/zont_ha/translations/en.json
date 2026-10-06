@@ -1,5 +1,25 @@
 {
   "title": "MicroLine",
+  "device_automation": {
+    "trigger_type": {
+      "boiler_failure": "Авария котла",
+      "boiler_failure_cleared": "Авария котла устранена",
+      "guard_alarm": "Тревога охраны",
+      "guard_alarm_cleared": "Тревога охраны снята",
+      "guard_on": "Охрана включена",
+      "guard_off": "Охрана выключена",
+      "power_lost": "Пропало питание",
+      "power_restored": "Питание восстановлено",
+      "connection_lost": "Потеряна связь",
+      "connection_restored": "Связь восстановлена",
+      "temperature_high": "Температура выше порога",
+      "temperature_low": "Температура ниже порога",
+      "leakage": "Протечка",
+      "smoke": "Дым",
+      "user_alarm": "Пользовательская тревога",
+      "any_event": "Любое событие ZONT"
+    }
+  },
   "config": {
     "error": {
       "invalid_auth": "Ошибка авторизации",
