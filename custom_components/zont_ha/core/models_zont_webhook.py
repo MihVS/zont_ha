@@ -21,7 +21,7 @@ class DeviceEventWebhook(BaseModel):
     device_name: str
     type: str
     title: str
-    details: str
+    details: str | None = None
     time: str
     important: bool
     source: str

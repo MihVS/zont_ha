@@ -6,14 +6,17 @@ from http import HTTPStatus
 import voluptuous as vol
 
 from homeassistant import config_entries
+from homeassistant.components import webhook
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.network import NoURLAvailableError
 from .const import DOMAIN, URL_TOKEN, URL_GET_DEVICES
 from .core.exceptions import RequestAPIZONTError, InvalidMail
 from .core.models_zont_v3 import TokenZont, ErrorZont, DeviceZONT, AccountZont
 from .core.zont_request import ZontRequestManager
+from .webhook_auth import CONF_WEBHOOK_ID, CONF_WEBHOOK_SECRET, generate_secret
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -81,6 +84,14 @@ async def validate_auth_token(
     return get_available_devices(devices)
 
 
+def webhook_url(hass: HomeAssistant, webhook_id: str) -> str:
+    """Адрес, который пользователь прописывает в подписке ZONT."""
+    try:
+        return webhook.async_generate_url(hass, webhook_id)
+    except NoURLAvailableError:
+        return webhook.async_generate_path(webhook_id)
+
+
 def validate_mail(mail: str) -> None:
     """Валидация почты"""
 
@@ -93,8 +104,25 @@ def validate_mail(mail: str) -> None:
 
 
 class ZontConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    VERSION = 3
+    VERSION = 4
     data: dict = None
+
+    async def async_step_webhook_info(self, user_input=None):
+        """Показывает адрес и секретный ключ для подписки в ZONT."""
+        if user_input is not None:
+            return self.async_create_entry(
+                title=self.data['name'], data=self.data
+            )
+        self.data.setdefault(CONF_WEBHOOK_ID, webhook.async_generate_id())
+        self.data.setdefault(CONF_WEBHOOK_SECRET, generate_secret())
+        return self.async_show_form(
+            step_id='webhook_info',
+            data_schema=vol.Schema({}),
+            description_placeholders={
+                'url': webhook_url(self.hass, self.data[CONF_WEBHOOK_ID]),
+                'secret': self.data[CONF_WEBHOOK_SECRET],
+            },
+        )
 
     @staticmethod
     @callback
@@ -172,10 +200,7 @@ class ZontConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             try:
                 if not errors:
                     self.data['devices_selected'] = user_input.get('devices_selected')
-                    _LOGGER.warning(f'data_: {self.data}')
-                return self.async_create_entry(
-                    title=self.data['name'], data=self.data
-                )
+                return await self.async_step_webhook_info()
             except RequestAPIZONTError:
                 _LOGGER.error(self.hass.data['error'])
                 errors['base'] = 'invalid_auth'
@@ -207,9 +232,7 @@ class ZontConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     self.data['devices_selected'] = []
                 if user_input.get('option') == 'option2':
                     return await self.async_step_devices_selection()
-                return self.async_create_entry(
-                    title=self.data['name'], data=self.data
-                )
+                return await self.async_step_webhook_info()
             except RequestAPIZONTError:
                 _LOGGER.error(self.hass.data['error'])
                 errors['base'] = 'invalid_auth'
@@ -274,6 +297,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self.data = dict(self.config_entry.data)
         if user_input is not None:
             try:
+                if user_input.get('option') == 'option3':
+                    return await self.async_step_webhook()
                 if not errors:
                     self.data['devices_selected'] = []
                 if user_input.get('option') == 'option2':
@@ -304,10 +329,37 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     vol.Optional("option", default="option1"): vol.In({
                         "option1": "Добавить все устройства.",
                         "option2": "Выбрать нужные устройства.",
+                        "option3": "Настройки webhook.",
                     })
                 }
             ),
             errors=errors
+        )
+
+    async def async_step_webhook(self, user_input=None):
+        """Секретный ключ webhook: тот же, что в подписке ZONT.
+
+        Пустое поле — проверка выключена, как в версиях до ключа.
+        """
+        if user_input is not None:
+            secret = user_input.get(CONF_WEBHOOK_SECRET, '').strip()
+            self.data[CONF_WEBHOOK_SECRET] = secret or None
+            self.hass.config_entries.async_update_entry(
+                self.config_entry, data=self.data
+            )
+            return self.async_create_entry(
+                title=self.data['name'], data=self.data
+            )
+        current = self.data.get(CONF_WEBHOOK_SECRET) or ''
+        return self.async_show_form(
+            step_id='webhook',
+            data_schema=vol.Schema(
+                {vol.Optional(CONF_WEBHOOK_SECRET, default=current): str}
+            ),
+            description_placeholders={
+                'url': webhook_url(self.hass, self.data[CONF_WEBHOOK_ID]),
+                'suggested': generate_secret(),
+            },
         )
 
     async def async_step_devices_selection(self, user_input=None):
