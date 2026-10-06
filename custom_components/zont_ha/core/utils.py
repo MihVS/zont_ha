@@ -1,7 +1,7 @@
 import logging
 from http import HTTPStatus
 
-from aiohttp import ClientResponse
+from aiohttp import ClientResponse, ContentTypeError
 
 from .exceptions import ResponseZontError
 from .models_zont_v3 import SensorZONT, DeviceZONT
@@ -58,7 +58,11 @@ def check_send_command(func):
 
         response: ClientResponse = await func(self, *args, **kwargs)
         status = response.status
-        data = await response.json()
+        try:
+            data = await response.json()
+        except (ContentTypeError, ValueError):
+            # Прокси на 502/504 отдаёт HTML, а не JSON API ZONT.
+            raise ResponseZontError(f'Ошибка запроса к API zont: {status}')
         if status == HTTPStatus.OK:
             _LOGGER.debug(f'Успешный запрос к API zont: {status}')
             if data.get('ok'):

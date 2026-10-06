@@ -69,8 +69,7 @@ async def remove_devices(
 
 def register_webhook(
         hass: HomeAssistant,
-        config_entry: ConfigEntry,
-        selected_devices: list[str]):
+        config_entry: ConfigEntry):
     """Регистрация webhook в Home Assistant."""
     entry_id = config_entry.entry_id
     webhook_id = config_entry.data[CONF_WEBHOOK_ID]
@@ -89,7 +88,7 @@ def register_webhook(
         f'ZONT Webhook {webhook_id}',
         webhook_id,
         lambda hass, webhook_id, request: handle_webhook(
-            hass, webhook_id, request, entry_id, selected_devices, secret),
+            hass, webhook_id, request, entry_id, secret),
         allowed_methods=['POST']
     )
 
@@ -119,7 +118,7 @@ async def async_setup_entry(
     await coordinator.async_config_entry_first_refresh()
     _LOGGER.debug(f'config entry data keys: {list(config_entry.data)}')
 
-    register_webhook(hass, config_entry, selected_devices)
+    register_webhook(hass, config_entry)
 
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN].setdefault(ENTRIES, {})
@@ -138,8 +137,7 @@ async def async_setup_entry(
                   f'{len(current_entries_id)}')
     return True
 
-async def handle_webhook(
-        hass, webhook_id, request, entry_id, selected_devices, secret=None):
+async def handle_webhook(hass, webhook_id, request, entry_id, secret=None):
     """Обрабатываем входящие webhook от ZONT."""
     if not is_authorized(request.headers.get('Authorization'), secret):
         _LOGGER.warning(f'Webhook request with invalid secret key. '
@@ -149,6 +147,9 @@ async def handle_webhook(
     coordinator = hass.data[DOMAIN][ENTRIES].get(entry_id)
     if coordinator is None:
         return None
+    # Список из Zont: при «все устройства» в данных записи он пуст,
+    # а Zont заполняет его после первого опроса.
+    selected_devices = coordinator.zont.selected_devices
 
     body = await request.text()
     try:
