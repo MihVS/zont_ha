@@ -24,6 +24,7 @@ from .const import (
 from .core.models_zont_v3 import DeviceZONT
 from .core.models_zont_webhook import DeviceEventWebhook, EventZONT
 from .core.zont import Zont
+from .events import EVENT_ZONT, build_event_data
 from .webhook_auth import (
     CONF_WEBHOOK_ID, CONF_WEBHOOK_SECRET, is_authorized, legacy_webhook_id
 )
@@ -177,6 +178,13 @@ async def handle_webhook(hass, webhook_id, request, entry_id, secret=None):
         device_id = data.device_id
 
         if str(device_id) in selected_devices:
+            ha_device = dr.async_get(hass).async_get_device(
+                identifiers={(DOMAIN, device_id)}
+            )
+            hass.bus.async_fire(
+                EVENT_ZONT,
+                build_event_data(data, ha_device.id if ha_device else None),
+            )
             pretty_json = json.dumps(data_json, ensure_ascii=False, indent=2,
                                      sort_keys=True)
             _LOGGER.debug(f'📨 Received webhook request. '
