@@ -10,6 +10,7 @@ from aiohttp import web
 from homeassistant.components import webhook
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.exceptions import ConfigEntryNotReady
@@ -21,6 +22,7 @@ from .const import (
     DOMAIN, PLATFORMS, TIME_UPDATE, MANUFACTURER, COUNTER_CONNECT,
     TIME_OUT_UPDATE_DATA, ENTRIES, CURRENT_ENTITY_IDS
 )
+from .core.exceptions import InvalidAuthZont
 from .core.models_zont_v3 import DeviceZONT
 from .core.models_zont_webhook import DeviceEventWebhook, EventZONT
 from .core.zont import Zont
@@ -115,7 +117,10 @@ async def async_setup_entry(
 
     await remove_devices(hass, config_entry, selected_devices)
 
-    await zont.init_old_data()
+    try:
+        await zont.init_old_data()
+    except InvalidAuthZont as err:
+        raise ConfigEntryAuthFailed(str(err)) from err
     coordinator = ZontCoordinator(hass, zont)
     await coordinator.async_config_entry_first_refresh()
     _LOGGER.debug(f'config entry data keys: {list(config_entry.data)}')
@@ -276,6 +281,10 @@ class ZontCoordinator(DataUpdateCoordinator):
                 await self.zont.get_update()
                 self._count_connect = 0
                 return self.zont
+        except InvalidAuthZont as err:
+            # Отозванный токен повторами не починить: HA предложит
+            # пользователю ввести новый (async_step_reauth).
+            raise ConfigEntryAuthFailed(str(err)) from err
         except Exception as err:
             if self._count_connect < COUNTER_CONNECT:
                 self._count_connect += 1

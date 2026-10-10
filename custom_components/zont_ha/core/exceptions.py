@@ -6,6 +6,11 @@ class RequestAPIZONTError(Exception):
     pass
 
 
+class InvalidAuthZont(Exception):
+    """API ZONT отклонил токен (401/403): нужна переавторизация."""
+    pass
+
+
 class InvalidMail(Exception):
     """Ошибка валидации почты"""
     pass

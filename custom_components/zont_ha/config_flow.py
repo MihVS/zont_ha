@@ -130,6 +130,34 @@ class ZontConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Create the options flow."""
         return OptionsFlowHandler()
 
+    async def async_step_reauth(self, entry_data):
+        """API ZONT отклонил токен (401/403)."""
+        return await self.async_step_reauth_confirm()
+
+    async def async_step_reauth_confirm(self, user_input=None):
+        """Новый токен для того же аккаунта."""
+        entry = self._get_reauth_entry()
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            try:
+                await validate_auth_token(
+                    self.hass, entry.data['mail'], user_input['token']
+                )
+                return self.async_update_reload_and_abort(
+                    entry, data_updates={'token': user_input['token']}
+                )
+            except RequestAPIZONTError:
+                errors['base'] = 'invalid_auth'
+            except Exception as e:
+                _LOGGER.error(f'Что-то пошло не так, неизвестная ошибка. {e}')
+                errors['base'] = 'unknown'
+        return self.async_show_form(
+            step_id='reauth_confirm',
+            data_schema=vol.Schema({vol.Required('token'): str}),
+            description_placeholders={'mail': entry.data['mail']},
+            errors=errors,
+        )
+
     async def async_step_user(self, user_input=None):
         _LOGGER.debug('async_step_user')
         errors: dict[str, str] = {}

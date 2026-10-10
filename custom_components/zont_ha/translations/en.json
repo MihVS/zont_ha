@@ -26,7 +26,17 @@
       "invalid_mail": "Неверный формат почты",
       "unknown": "Неизвестная ошибка"
     },
+    "abort": {
+      "reauth_successful": "Токен обновлён"
+    },
     "step": {
+      "reauth_confirm": {
+        "title": "Новый токен ZONT",
+        "description": "API ZONT отклонил токен аккаунта {mail}: его отозвали или он устарел. Введите новый токен.",
+        "data": {
+          "token": "Токен"
+        }
+      },
       "user": {
         "title": "Конфигурация контроллера zont",
         "data": {
