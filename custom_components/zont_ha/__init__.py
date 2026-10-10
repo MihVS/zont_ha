@@ -12,6 +12,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity_registry import async_get
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator, UpdateFailed
@@ -117,7 +118,16 @@ async def async_setup_entry(
     coordinator = ZontCoordinator(hass, zont)
     await coordinator.async_config_entry_first_refresh()
     _LOGGER.debug(f'config entry data keys: {list(config_entry.data)}')
-
+    if getattr(zont, 'data', None) is None:
+        # Координатор глотает первые COUNTER_CONNECT отказов и возвращает
+        # объект без данных, поэтому first_refresh проходит даже когда API
+        # ZONT не ответил. Дальше платформы падают на zont.data.devices, а
+        # чистка реестра сносит все сущности аккаунта. Отдаём HA штатный
+        # ConfigEntryNotReady: он повторит настройку сам.
+        raise ConfigEntryNotReady(
+            'ZONT не отдал данные при первом опросе, откладываем настройку'
+        )
+    
     register_webhook(hass, config_entry)
 
     hass.data.setdefault(DOMAIN, {})
@@ -130,7 +140,15 @@ async def async_setup_entry(
         config_entry, PLATFORMS
     )
     current_entries_id = hass.data[DOMAIN][CURRENT_ENTITY_IDS][entry_id]
-    remove_entity(hass, current_entries_id, config_entry)
+    if current_entries_id:
+        remove_entity(hass, current_entries_id, config_entry)
+    else:
+        # Пустой список значит, что ни одна платформа не поднялась.
+        # Это отказ опроса, а не исчезновение устройств: чистить реестр
+        # в этом случае нельзя, иначе теряются все сущности аккаунта.
+        _LOGGER.warning(
+            'Список актуальных сущностей пуст, очистка реестра пропущена'
+        )
     _LOGGER.debug(f'The unique ID of the current account entities {zont.mail}:'
                   f' {current_entries_id}')
     _LOGGER.debug(f'Number of relevant entities: '

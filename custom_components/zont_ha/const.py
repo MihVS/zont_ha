@@ -104,7 +104,9 @@ MIN_TEMP_HEATING = 5
 MAX_TEMP_HEATING = 80
 MATCHES_GVS = ('гвс', 'горяч', 'вода', 'бкн', 'гидро', 'подача',)
 MATCHES_FLOOR = ('пол', 'тёплый',)
-MATCHES_HEATING = ('теплонос',)
+# 'отопл': у H-1 API не отдаёт пределы контура «Отопление», и без этой
+# подстроки fallback по имени даёт ему воздушные пределы вместо 5-80.
+MATCHES_HEATING = ('отопл', 'теплонос',)
 
 BUTTON_ZONT = 'button'
 SWITCH_ZONT = 'toggle_button'
