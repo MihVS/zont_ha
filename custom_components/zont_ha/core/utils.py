@@ -61,7 +61,6 @@ def check_send_command(func):
         try:
             data = await response.json()
         except (ContentTypeError, ValueError):
-            # Прокси на 502/504 отдаёт HTML, а не JSON API ZONT.
             raise ResponseZontError(f'Ошибка запроса к API zont: {status}')
         if status == HTTPStatus.OK:
             _LOGGER.debug(f'Успешный запрос к API zont: {status}')

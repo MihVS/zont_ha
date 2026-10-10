@@ -125,11 +125,6 @@ async def async_setup_entry(
     await coordinator.async_config_entry_first_refresh()
     _LOGGER.debug(f'config entry data keys: {list(config_entry.data)}')
     if getattr(zont, 'data', None) is None:
-        # Координатор глотает первые COUNTER_CONNECT отказов и возвращает
-        # объект без данных, поэтому first_refresh проходит даже когда API
-        # ZONT не ответил. Дальше платформы падают на zont.data.devices, а
-        # чистка реестра сносит все сущности аккаунта. Отдаём HA штатный
-        # ConfigEntryNotReady: он повторит настройку сам.
         raise ConfigEntryNotReady(
             'ZONT не отдал данные при первом опросе, откладываем настройку'
         )
@@ -149,9 +144,6 @@ async def async_setup_entry(
     if current_entries_id:
         remove_entity(hass, current_entries_id, config_entry)
     else:
-        # Пустой список значит, что ни одна платформа не поднялась.
-        # Это отказ опроса, а не исчезновение устройств: чистить реестр
-        # в этом случае нельзя, иначе теряются все сущности аккаунта.
         _LOGGER.warning(
             'Список актуальных сущностей пуст, очистка реестра пропущена'
         )
@@ -171,8 +163,6 @@ async def handle_webhook(hass, webhook_id, request, entry_id, secret=None):
     coordinator = hass.data[DOMAIN][ENTRIES].get(entry_id)
     if coordinator is None:
         return None
-    # Список из Zont: при «все устройства» в данных записи он пуст,
-    # а Zont заполняет его после первого опроса.
     selected_devices = coordinator.zont.selected_devices
 
     body = await request.text()
@@ -282,8 +272,6 @@ class ZontCoordinator(DataUpdateCoordinator):
                 self._count_connect = 0
                 return self.zont
         except InvalidAuthZont as err:
-            # Отозванный токен повторами не починить: HA предложит
-            # пользователю ввести новый (async_step_reauth).
             raise ConfigEntryAuthFailed(str(err)) from err
         except Exception as err:
             if self._count_connect < COUNTER_CONNECT:
@@ -307,10 +295,6 @@ async def async_migrate_entry(hass, config_entry):
         )
         _LOGGER.info('Миграция с версии 2 на 3 выполнена (нулевая миграция)')
     if config_entry.version == 3:
-        # Адрес webhook уже прописан пользователем в подписке ZONT —
-        # сохраняем прежний id, иначе события молча перестанут приходить.
-        # Секрет старые версии не проверяли: пользователь задаёт его сам
-        # в настройках интеграции.
         data = {
             **config_entry.data,
             CONF_WEBHOOK_ID: legacy_webhook_id(config_entry.data['mail']),
