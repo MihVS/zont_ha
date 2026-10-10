@@ -47,23 +47,24 @@ type_binary_sensor = TypeBinarySensorZont(*BINARY_SENSOR_TYPES)
 class Zont:
     """Класс контроллера zont"""
 
-    data: AccountZont = None
-    data_old: AccountZontOld = AccountZontOld()
-    error: ErrorZont = None
-
     def __init__(self,
                  hass: HomeAssistant,
                  mail: str,
                  token: str,
                  selected_devices: list[str] | None = None):
+        # Данные у каждого аккаунта свои: атрибуты класса делились бы
+        # между всеми записями интеграции.
+        self.data: AccountZont | None = None
+        self.data_old: AccountZontOld = AccountZontOld()
+        self.error: ErrorZont | None = None
         self.headers = {
             'X-ZONT-Token': token,
             'X-ZONT-Client': mail,
             'Content-Type': 'application/json'
         }
-        if selected_devices is None:
-            selected_devices = []
-        self.selected_devices = selected_devices
+        # Копия: список из данных записи get_update дополняет id всех
+        # устройств, а пустой список в записи означает «все устройства».
+        self.selected_devices = list(selected_devices or [])
         self.mail = mail
         self.session = async_get_clientsession(hass)
         self.manager = ZontRequestManager(self.session)

@@ -2,8 +2,10 @@ import asyncio
 import json
 import logging
 from datetime import timedelta
+from http import HTTPStatus
 
 import async_timeout
+from aiohttp import web
 
 from homeassistant.components import webhook
 from homeassistant.config_entries import ConfigEntry
@@ -22,8 +24,13 @@ from .const import (
 from .core.models_zont_v3 import DeviceZONT
 from .core.models_zont_webhook import DeviceEventWebhook, EventZONT
 from .core.zont import Zont
+from .webhook_auth import (
+    CONF_WEBHOOK_ID, CONF_WEBHOOK_SECRET, is_authorized, legacy_webhook_id
+)
 
 _LOGGER = logging.getLogger(__name__)
+
+MAX_LOGGED_BODY = 500
 
 
 def remove_entity(hass: HomeAssistant, current_entries_id: list,
@@ -63,12 +70,16 @@ async def remove_devices(
 
 def register_webhook(
         hass: HomeAssistant,
-        entry_id: str,
-        email: str,
-        selected_devices: list[str]):
+        config_entry: ConfigEntry):
     """Регистрация webhook в Home Assistant."""
-    name_email = ''.join(email.split('@'))
-    webhook_id = ''.join(name_email.split('.'))
+    entry_id = config_entry.entry_id
+    webhook_id = config_entry.data[CONF_WEBHOOK_ID]
+    secret = config_entry.data.get(CONF_WEBHOOK_SECRET)
+    if not secret:
+        _LOGGER.warning(
+            'Webhook ZONT принимает запросы без проверки секретного ключа. '
+            'Задайте ключ в настройках интеграции и в подписке ZONT.'
+        )
 
     webhook.async_unregister(hass, webhook_id)
 
@@ -78,7 +89,7 @@ def register_webhook(
         f'ZONT Webhook {webhook_id}',
         webhook_id,
         lambda hass, webhook_id, request: handle_webhook(
-            hass, webhook_id, request, entry_id, selected_devices),
+            hass, webhook_id, request, entry_id, secret),
         allowed_methods=['POST']
     )
 
@@ -106,6 +117,7 @@ async def async_setup_entry(
     await zont.init_old_data()
     coordinator = ZontCoordinator(hass, zont)
     await coordinator.async_config_entry_first_refresh()
+    _LOGGER.debug(f'config entry data keys: {list(config_entry.data)}')
     if getattr(zont, 'data', None) is None:
         # Координатор глотает первые COUNTER_CONNECT отказов и возвращает
         # объект без данных, поэтому first_refresh проходит даже когда API
@@ -115,9 +127,8 @@ async def async_setup_entry(
         raise ConfigEntryNotReady(
             'ZONT не отдал данные при первом опросе, откладываем настройку'
         )
-    _LOGGER.debug(f'config entry data: {config_entry.data}')
-
-    register_webhook(hass, entry_id, email, selected_devices)
+    
+    register_webhook(hass, config_entry)
 
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN].setdefault(ENTRIES, {})
@@ -144,10 +155,19 @@ async def async_setup_entry(
                   f'{len(current_entries_id)}')
     return True
 
-async def handle_webhook(
-        hass, webhook_id, request, entry_id, selected_devices):
+async def handle_webhook(hass, webhook_id, request, entry_id, secret=None):
     """Обрабатываем входящие webhook от ZONT."""
-    coordinator = hass.data[DOMAIN][ENTRIES][entry_id]
+    if not is_authorized(request.headers.get('Authorization'), secret):
+        _LOGGER.warning(f'Webhook request with invalid secret key. '
+                        f'Webhook id: {webhook_id}. Remote: {request.remote}')
+        return web.Response(status=HTTPStatus.UNAUTHORIZED)
+
+    coordinator = hass.data[DOMAIN][ENTRIES].get(entry_id)
+    if coordinator is None:
+        return None
+    # Список из Zont: при «все устройства» в данных записи он пуст,
+    # а Zont заполняет его после первого опроса.
+    selected_devices = coordinator.zont.selected_devices
 
     body = await request.text()
     try:
@@ -171,7 +191,7 @@ async def handle_webhook(
             )
     except ValueError:
         _LOGGER.warning(f'Wrong webhook request. Webhook id: {webhook_id}. '
-                        f'Body: {body}')
+                        f'Body: {body[:MAX_LOGGED_BODY]}')
 
 
 async def update_listener(hass, entry):
@@ -186,6 +206,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
         unload_ok = await hass.config_entries.async_unload_platforms(
             entry, PLATFORMS
         )
+        webhook.async_unregister(hass, entry.data[CONF_WEBHOOK_ID])
         hass.data[DOMAIN][ENTRIES].pop(entry.entry_id)
 
         return unload_ok
@@ -261,11 +282,25 @@ class ZontCoordinator(DataUpdateCoordinator):
 
 
 async def async_migrate_entry(hass, config_entry):
-    """Миграция с версии 2 на 3."""
+    """Миграция записей старых версий."""
     if config_entry.version == 2:
         hass.config_entries.async_update_entry(
             config_entry,
             version=3
         )
         _LOGGER.info('Миграция с версии 2 на 3 выполнена (нулевая миграция)')
+    if config_entry.version == 3:
+        # Адрес webhook уже прописан пользователем в подписке ZONT —
+        # сохраняем прежний id, иначе события молча перестанут приходить.
+        # Секрет старые версии не проверяли: пользователь задаёт его сам
+        # в настройках интеграции.
+        data = {
+            **config_entry.data,
+            CONF_WEBHOOK_ID: legacy_webhook_id(config_entry.data['mail']),
+            CONF_WEBHOOK_SECRET: None,
+        }
+        hass.config_entries.async_update_entry(
+            config_entry, data=data, version=4
+        )
+        _LOGGER.info('Миграция с версии 3 на 4 выполнена')
     return True
