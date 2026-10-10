@@ -17,10 +17,12 @@ from .const import (
 from .core.enums import TypeOfCircuit
 from .core.exceptions import TemperatureOutOfRangeError, SetHvacModeError
 from .core.models_zont_v1 import DeviceZontOld
-from .core.models_zont_v3 import CircuitZONT, DeviceZONT
+from .core.models_zont_v3 import CircuitZONT, DeviceZONT, HeatingModeZONT
 from .core.zont import Zont
 
 _LOGGER = logging.getLogger(__name__)
+
+_OFF_MODE_PREFIXES = ('выкл', 'откл')
 
 
 async def async_setup_entry(
@@ -52,7 +54,6 @@ async def async_setup_entry(
 class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
     """Базовый класс для климата zont"""
 
-    _attr_hvac_modes = [HVACMode.HEAT, HVACMode.OFF]
     _attr_max_temp = MAX_TEMP_AIR
     _attr_min_temp = MIN_TEMP_AIR
     _attr_supported_features = (
@@ -75,6 +76,31 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
         self._attr_min_temp, self._attr_max_temp = (
             self._zont.get_min_max_values_temp(self._circuit))
         self._attr_device_info = coordinator.devices_info(device.id)
+        self._circuit_id = circuit.id
+        self._circuit_available = True
+        self._last_heat_mode_id: int | None = None
+        self._remember_heat_mode()
+
+    @property
+    def available(self) -> bool:
+        # Контур ГВС пропадает из ответа API, когда горячая вода выключена.
+        return super().available and self._circuit_available
+
+    @property
+    def supported_features(self) -> ClimateEntityFeature:
+        features = self._attr_supported_features
+        if self._get_off_mode() is not None:
+            features |= (
+                ClimateEntityFeature.TURN_ON | ClimateEntityFeature.TURN_OFF
+            )
+        return features
+
+    @property
+    def hvac_modes(self) -> list[HVACMode]:
+        if (self._get_off_mode() is not None
+                or self.hvac_mode == HVACMode.OFF):
+            return [HVACMode.HEAT, HVACMode.OFF]
+        return [HVACMode.HEAT]
 
     @property
     def preset_modes(self) -> list[str] | None:
@@ -98,6 +124,12 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
     def hvac_mode(self) -> HVACMode | None:
         """Return hvac operation ie. heat, cool mode."""
         if self._circuit.is_off:
+            return HVACMode.OFF
+        # H-1 при активном режиме «Выключен» оставляет is_off = false.
+        # ГВС на H-1 работает по запросу и от режима не зависит,
+        # поэтому для него режим выключения не учитываем.
+        if (self._circuit.type != TypeOfCircuit.DHW
+                and self._mode_is_off(self._get_current_mode())):
             return HVACMode.OFF
         return HVACMode.HEAT
 
@@ -151,25 +183,8 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
         heating_mode = self._zont.get_heating_mode_by_name(
             self._device, preset_mode
         )
-        id_model = self._device.device_info.id
         if heating_mode is not None:
-            if id_model in ID_MODELS_THERMOSTAT_ZONT:
-                await self._zont.set_heating_mode_all_circuits(
-                    device=self._device,
-                    heating_mode=heating_mode
-                )
-            elif PLUS in id_model.lower() or PRO in id_model.lower():
-                await self._zont.set_heating_mode(
-                    device=self._device,
-                    circuit=self._circuit,
-                    heating_mode_id=heating_mode.id
-                )
-            else:
-                await self._zont.set_heating_mode_v1(
-                    device=self._device,
-                    circuit=self._circuit,
-                    heating_mode_id=heating_mode.id
-                )
+            await self._async_apply_heating_mode(heating_mode)
         else:
             await self._zont.set_target_temperature(
                 device=self._device,
@@ -180,17 +195,104 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
         await asyncio.sleep(TIME_OUT_REQUEST)
         await self.coordinator.async_request_refresh()
 
+    async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
+        """Включение и выключение контура через его режимы.
+
+        OFF - режим выключения контура, HEAT - последний рабочий режим,
+        а если он неизвестен (например, после перезапуска HA) - первый
+        подходящий. Уставку не трогаем: она переводит контур в ручной
+        режим и сбрасывает current_mode.
+        """
+        if hvac_mode == self.hvac_mode:
+            return
+        heating_mode = None
+        if hvac_mode == HVACMode.OFF:
+            heating_mode = self._get_off_mode()
+        elif hvac_mode == HVACMode.HEAT:
+            heating_mode = self._get_heat_mode()
+        if heating_mode is None:
+            raise SetHvacModeError(
+                f'Для контура "{self._circuit.name}" нет режима, '
+                f'подходящего для {hvac_mode}.'
+            )
+        await self._async_apply_heating_mode(heating_mode)
+        await asyncio.sleep(TIME_OUT_REQUEST)
+        await self.coordinator.async_request_refresh()
+
+    async def _async_apply_heating_mode(
+            self, heating_mode: HeatingModeZONT
+    ) -> None:
+        """Активация режима командой, подходящей модели прибора."""
+        id_model = self._device.device_info.id
+        if id_model in ID_MODELS_THERMOSTAT_ZONT:
+            await self._zont.set_heating_mode_all_circuits(
+                device=self._device,
+                heating_mode=heating_mode
+            )
+        elif PLUS in id_model.lower() or PRO in id_model.lower():
+            await self._zont.set_heating_mode(
+                device=self._device,
+                circuit=self._circuit,
+                heating_mode_id=heating_mode.id
+            )
+        else:
+            await self._zont.set_heating_mode_v1(
+                device=self._device,
+                circuit=self._circuit,
+                heating_mode_id=heating_mode.id
+            )
+
+    @staticmethod
+    def _mode_is_off(heating_mode: HeatingModeZONT | None) -> bool:
+        """Режим выключения: «Выключен», «Отключено», «Off»."""
+        if heating_mode is None:
+            return False
+        words = heating_mode.name.lower().replace('-', ' ').split()
+        return any(
+            word.startswith(_OFF_MODE_PREFIXES) or word == 'off'
+            for word in words
+        )
+
+    def _get_current_mode(self) -> HeatingModeZONT | None:
+        return self._zont.get_heating_mode_by_id(
+            self._device, self._circuit.current_mode
+        )
+
+    def _get_circuit_modes(self, off: bool) -> list[HeatingModeZONT]:
+        """Режимы контура: выключающие (off=True) или рабочие.
+
+        Для ГВС вкл/выкл режимами не делаем: на H-1 режим применяется
+        ко всему прибору, и выключение ГВС выключило бы отопление.
+        """
+        if self._circuit.type == TypeOfCircuit.DHW:
+            return []
+        return [
+            heating_mode for heating_mode in self._device.modes
+            if self._circuit.id in heating_mode.can_be_applied
+            and self._mode_is_off(heating_mode) == off
+        ]
+
+    def _get_off_mode(self) -> HeatingModeZONT | None:
+        return next(iter(self._get_circuit_modes(off=True)), None)
+
+    def _get_heat_mode(self) -> HeatingModeZONT | None:
+        heat_modes = self._get_circuit_modes(off=False)
+        return next(
+            (heating_mode for heating_mode in heat_modes
+             if heating_mode.id == self._last_heat_mode_id),
+            next(iter(heat_modes), None)
+        )
+
+    def _remember_heat_mode(self) -> None:
+        """Запомнить рабочий режим, чтобы вернуть его при включении."""
+        heating_mode = self._get_current_mode()
+        if heating_mode is not None and not self._mode_is_off(heating_mode):
+            self._last_heat_mode_id = heating_mode.id
+
     def __repr__(self) -> str:
         if not self.hass:
             return f"<Climate entity {self.name}>"
         return super().__repr__()
-
-    def set_hvac_mode(self, hvac_mode):
-        """Set new target hvac mode."""
-        raise SetHvacModeError(
-            'Изменение HVAC не поддерживается ZONT. '
-            'Контур управляется котлом.'
-        )
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -198,7 +300,11 @@ class ZontClimateEntity(CoordinatorEntity, ClimateEntity):
         self._device: DeviceZONT = self.coordinator.zont.get_device(
             self._device.id
         )
-        self._circuit = self._zont.get_circuit(
-            self._device, self._circuit.id
-        )
+        circuit = self._zont.get_circuit(self._device, self._circuit_id)
+        # Контур ГВС пропадает из API при выключенной горячей воде:
+        # помечаем сущность недоступной, а не падаем на None.
+        self._circuit_available = circuit is not None
+        if circuit is not None:
+            self._circuit = circuit
+            self._remember_heat_mode()
         self.async_write_ha_state()
