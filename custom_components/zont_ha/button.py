@@ -1,8 +1,9 @@
 import asyncio
 import logging
 
-from homeassistant.components.button import ButtonEntity
+from homeassistant.components.button import ButtonDeviceClass, ButtonEntity
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -36,6 +37,11 @@ async def async_setup_entry(
                 buttons.append(ZontControlButton(
                     coordinator, device, button, unique_id
                 ))
+        device_old = zont.get_device_old(device.id)
+        if device_old is not None and device_old.z3k_config is not None:
+            buttons.append(ZontRestartController(
+                coordinator, device, f'{entry_id}{device.id}_restart_controller'
+            ))
         for button in buttons:
             hass.data[DOMAIN][CURRENT_ENTITY_IDS][entry_id].append(
                 button.unique_id)
@@ -124,3 +130,30 @@ class ZontControlButton(ButtonZont):
         )
         await asyncio.sleep(TIME_OUT_REQUEST)
         await self.coordinator.async_request_refresh()
+
+
+class ZontRestartController(ButtonZont):
+    """Сервисная кнопка перезапуска контроллера Z3K."""
+
+    _attr_device_class = ButtonDeviceClass.RESTART
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_entity_registry_enabled_default = False
+
+    @property
+    def name(self) -> str:
+        return f'{self._device.name}_Перезагрузка контроллера'
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        device = self.coordinator.zont.get_device(self._device.id)
+        if device is None:
+            return {}
+        return {
+            'controller_id': device.id,
+            'circuits': [c.model_dump(mode='json') for c in device.circuits],
+            'actuators': device.actuators.model_dump(mode='json')
+            if device.actuators else None,
+        }
+
+    async def async_press(self) -> None:
+        await self._zont.restart_controller(device=self._device)
