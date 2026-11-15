@@ -3,7 +3,7 @@ import logging
 from collections import namedtuple
 from http import HTTPStatus
 
-from aiohttp import ClientResponse
+from aiohttp import ClientResponse, ClientTimeout
 
 from homeassistant.components.alarm_control_panel.const import (
     AlarmControlPanelState
@@ -13,7 +13,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .enums import GuardState
 from .enums import TypeOfSensor, StateOfSensor, TypeOfCircuit
-from .exceptions import InvalidAuthZont, StateGuardError
+from .exceptions import InvalidAuthZont, ResponseZontError, StateGuardError
 from .models_zont_v1 import AccountZontOld, DeviceZontOld
 from .models_zont_v3 import (
     AccountZont, ErrorZont, SensorZONT, DeviceZONT, CircuitZONT,
@@ -370,6 +370,44 @@ class Zont:
         return next(
             (toggle_button for toggle_button in device.controls.toggle_buttons
              if (toggle_button.id == toggle_button_id)), None)
+
+    async def restart_controller(self, device: DeviceZONT) -> None:
+        """Перезапустить контроллер Z3K без отложенной доставки команды."""
+        current_device = self.get_device(device.id)
+        if current_device is None or not current_device.online:
+            raise ResponseZontError('Контроллер ZONT не на связи')
+        device_old = self.get_device_old(device.id)
+        if device_old is None or device_old.z3k_config is None:
+            raise ResponseZontError('Перезапуск поддерживается только для Z3K')
+
+        response = await self.manager.request(
+            method='POST',
+            path=URL_SEND_COMMAND_ZONT_OLD,
+            headers=self.headers,
+            timeout=ClientTimeout(total=30),
+            idempotent=False,
+            json={
+                'device_id': current_device.id,
+                'command_name': 'RestartDevice',
+                'object_id': 0,
+                'request_time': 1000,
+                'command_args': None,
+                'is_guaranteed': False,
+            },
+        )
+        try:
+            result = await response.json(content_type=None)
+        except ValueError as err:
+            raise ResponseZontError(
+                f'Некорректный ответ на перезапуск ZONT: {response.status}'
+            ) from err
+        if (response.status != HTTPStatus.OK
+                or not isinstance(result, dict)
+                or result.get('ok') is not True):
+            raise ResponseZontError(
+                f'API ZONT отклонил перезапуск: {response.status}'
+            )
+        _LOGGER.info('Запрошен перезапуск контроллера %s', current_device.name)
 
     @check_send_command
     async def set_target_temperature(
